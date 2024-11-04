@@ -71,21 +71,19 @@ export default function LoginPage()
                         </div>
                     )
                     : (
-                        <div className="flex flex-col items-center space-y-6">
+                        <form className="flex flex-col items-center space-y-6" onSubmit={handleLogin}>
                             <div className="flex flex-col space-y-2 w-[300px]">
                                 <label className="input input-bordered bg-white flex items-center gap-2 shadow-sm">                        
-                                    <input name="email" type="text" className="grow text-sm text-neutral-700 selection:bg-neutral-200" placeholder="Email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}/>
+                                    <input name="email" type="text" className="grow text-sm text-neutral-700 selection:bg-neutral-200" placeholder="Email" />
                                 </label>
                                 <label className="input input-bordered bg-white flex items-center gap-2 shadow-sm">
-                                    <input name="password" type="password" placeholder="Password" className="grow text-sm text-neutral-700 selection:bg-neutral-200" onChange={(e) => setPassword(e.target.value)} value={password}/>
+                                    <input name="password" type="password" placeholder="Password" className="grow text-sm text-neutral-700 selection:bg-neutral-200" />
                                 </label>
                             </div>
-                            <button className="btn btn-sm shadow-sm px-8 h-[40px] rounded-full bg-blue-700 border-none text-white hover:bg-blue-300" onClick={handleLogin}>
+                            <button className="btn btn-sm shadow-sm px-8 h-[40px] rounded-full bg-blue-700 border-none text-white hover:bg-blue-300" type="submit">
                                 Log In
                             </button>
-                        </div>
+                        </form>
                     )
             }
         </div>
