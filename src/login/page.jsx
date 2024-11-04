@@ -65,7 +65,7 @@ export default function LoginPage()
                             <h1 className="input input-bordered bg-white flex items-center gap-2 shadow-sm">
                                 logged in
                             </h1>
-                            <button onSubmit={handleLogout}>
+                            <button onClick={handleLogout}>
                                 log out
                             </button>
                         </div>
