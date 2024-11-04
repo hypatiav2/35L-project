@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import LoginPage from './login/page';
+import GoTester from './GoTester.js'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
