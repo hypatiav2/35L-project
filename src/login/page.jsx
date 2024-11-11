@@ -6,10 +6,31 @@ const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-function login(formData)
-{
-    console.log("MEOW!")
-}
+// fetch data from protected route
+const fetchProtectedData = async (jwtToken) => {
+    try {
+        if (!jwtToken) {
+            throw new Error('No token provided. User may not be authenticated.');
+        }
+        // make request to our dummy protected route
+        const response = await fetch('http://localhost:8080/protected', {
+            method: 'GET',
+            headers: {
+            'Authorization': `Bearer ${jwtToken}`,
+            'Content-Type': 'application/json',
+        },});
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        // return the response json
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching protected data:', error);
+        return null;
+    }
+};
+
 export default function LoginPage()
 {
     const [session, setSession] = useState(null)
@@ -46,6 +67,18 @@ export default function LoginPage()
             setMessage(error.message)
         } else {
             setMessage('Login successful!')
+            // Try out a protected request to backend! (logging results to console)
+            const jwtToken = data.session.access_token;
+            try {
+                const data = await fetchProtectedData(jwtToken); // call our route to backend
+                if (data) {
+                    console.log('We got data yay!', data);
+                } else {
+                    console.error('No data returned. Possible authentication failure?');
+                }
+            } catch (error) {
+                console.error('Error fetching protected data:', error);
+            }
         }
     }
 
@@ -63,7 +96,7 @@ export default function LoginPage()
                     (
                         <div className="flex flex-col space-y-2 w-[300px]">
                             <h1 className="input input-bordered bg-white flex items-center gap-2 shadow-sm">
-                                logged in
+                                logged in                          
                             </h1>
                             <button onClick={handleLogout}>
                                 log out
