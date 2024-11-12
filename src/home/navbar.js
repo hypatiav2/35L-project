@@ -1,5 +1,12 @@
 import React from 'react';
 import './navbar.css';
+import { useNavigate } from 'react-router-dom';
+
+function NavComponent({ link, children})
+{
+    const navigate = useNavigate();
+    return <li><button onClick={() => navigate(link)}>{children}</button></li>
+}
 
 export default function Navbar() {
     return (
@@ -9,7 +16,8 @@ export default function Navbar() {
                 {/* <li><a href="#home">Home</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact</a></li> */}
-                <li><a href="/home">Profile</a></li>
+                <NavComponent link='/home'>Home</NavComponent>
+                <NavComponent link='/profile'>Profile</NavComponent>
             </ul>
         </nav>
     );
