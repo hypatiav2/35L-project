@@ -1,16 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
-import LoginPage from './login/page';
 import GoTester from './GoTester.js'
+import AppWrapper from './App';
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
     <React.StrictMode>
-        <LoginPage />
+        <AppWrapper />
     </React.StrictMode>
 );
 

@@ -1,6 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { useAuth } from '../AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
@@ -33,6 +35,8 @@ const fetchProtectedData = async (jwtToken) => {
 
 export default function LoginPage()
 {
+    const { login } = useAuth();
+    const navigate = useNavigate();
     const [session, setSession] = useState(null)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -79,6 +83,9 @@ export default function LoginPage()
             } catch (error) {
                 console.error('Error fetching protected data:', error);
             }
+
+            login();
+            navigate('/home');
         }
     }
 
