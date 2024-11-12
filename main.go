@@ -62,7 +62,7 @@ func verifyJWT(next http.Handler) http.Handler {
 
 func publicRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"message": "You have access to the protected route!"}`)
+	fmt.Fprintf(w, `{"message": "You have access to the public route!"}`)
 }
 
 func protectedRoute(w http.ResponseWriter, r *http.Request) {

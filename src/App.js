@@ -1,6 +1,5 @@
-import logo from './logo.svg';
 import './App.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import LoginPage from './login/page';
 import HomePage from './home/page';
 import ProfilePage from './profilepage/page';
@@ -9,16 +8,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'r
 import { AuthProvider, useAuth } from './AuthContext';
 
 function App() {
-    const [ message, setMessage ] = useState('');
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        fetch('http://localhost:8080')
-            .then(response => response.text())
-            .then(data => setMessage(data))
-            .catch(error => console.error('Error fetching message:', error));
-    }, []);
 
     // Redirect on load
     useEffect(() => {
