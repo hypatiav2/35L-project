@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const WelcomePage = () => {
@@ -7,6 +7,15 @@ const WelcomePage = () => {
     const handleLoginClick = () => {
         navigate('/login');
     };
+
+    const [showSignUpForm, setShowSignUpForm] = useState(false);
+
+    const handleSignUpClick = () => {
+        setShowSignUpForm(true);
+    };
+
+
+
 
     return (
 
@@ -19,22 +28,32 @@ const WelcomePage = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
       <div style={styles.mainContent}>
-        <div style={styles.textSection}>
-          <h1 style={styles.heading}>Bdate</h1>
-          <p style={styles.paragraph}>
-            This is a great website for dating
-          </p>
-          <button style={styles.signUpButton}>Sign Up</button>
-        </div>
+        {showSignUpForm ? (
+          <SignUpForm />
+        ) : (
+          <div style={styles.textSection}>
+            <h1 style={styles.heading}>Bdate</h1>
+            <p style={styles.paragraph}>
+              Great website for dating
+            </p>
+            <button style={styles.signUpButton} onClick={handleSignUpClick}>Sign Up</button>
+          </div>
+        )}
         <div style={styles.imagePlaceholder}></div>
       </div>
-    </div>
+      </div>
   );
 };
 
-// CSS styles for the components
+const SignUpForm = () => {
+    return (
+      <div> 
+            Hello you are filling out the sign up form
+      </div>
+    );
+};
+
 const styles = {
   container: {
     fontFamily: 'Arial, sans-serif',
