@@ -17,26 +17,13 @@ function App() {
         if (isAuthenticated) {
             navigate('/home');
         } else {
-            navigate('/login');
+            navigate('/welcome');
         }
     }, [ isAuthenticated ]);
 
     return (
         <Routes>
-            <Route path="*" element={<WelcomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            
-        </Routes>
-    )
-}
-
-/*
-
-    return (
-        <Routes>
-            <Route path="/welcome" element={<WelcomePage />} />
-
-            
+            <Route path="/welcome" element={<WelcomePage />} />            
             <Route path="/login" element={<LoginPage />} />
             <Route
                 path="/home"
@@ -51,7 +38,6 @@ function App() {
         </Routes>
     );
 }
-*/
 
 export default function AppWrapper() {
     return (

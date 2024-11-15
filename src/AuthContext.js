@@ -72,6 +72,7 @@ export function AuthProvider({ children }) {
 
     async function logout() {
         setIsAuthenticated(false);
+        await supabase.auth.signOut();
     };
 
     function getSupabaseClient() 
