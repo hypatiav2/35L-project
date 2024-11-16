@@ -27,7 +27,7 @@ func main() {
 	})
 	handler := corsHandler.Handler(r)
 
-	// Yippee! Starting our sserver using handler for mux and CORS
+	// Yippee! Starting our server using handler for mux and CORS
 	fmt.Println("Server starting on port 8080")
 	http.ListenAndServe(":8080", handler)
 }
