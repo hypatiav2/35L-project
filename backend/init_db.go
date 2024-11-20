@@ -9,6 +9,9 @@ import (
 	_ "modernc.org/sqlite" // Import the pure Go SQLite driver
 )
 
+/*
+Script to initialize our sqlite database. Find a better way of initializing through main later?
+*/
 func main() {
 	// Path to the SQLite database file
 	dbPath := "./bdate.db"

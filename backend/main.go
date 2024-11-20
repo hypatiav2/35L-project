@@ -1,8 +1,9 @@
 package main
 
-import (      // Import for database connection
-	"go-react-backend/routes"   // Import for routes
+import ( // Import for database connection
+	"database/sql"
 	"fmt"
+	"go-react-backend/routes" // Import for routes
 	"log"
 	"net/http"
 	"os"
@@ -17,8 +18,14 @@ func main() {
 	// Create a multiplexer for routing HTTP requests (using gorilla/mux)
 	r := mux.NewRouter()
 
+	db, err := sql.Open("sqlite", "./bdate.db")
+	if err != nil {
+		log.Fatalf("Failed to connect to SQLite: %v", err)
+	}
+	defer db.Close()
+
 	// Register routes (handled in routes/routes.go)
-	routes.RegisterRoutes(r)
+	routes.RegisterRoutes(r, db)
 
 	// Configure CORS (allowing the React frontend to communicate with the backend)
 	corsHandler := cors.New(cors.Options{

@@ -11,20 +11,18 @@ import (
 	_ "modernc.org/sqlite" // SQLite driver
 )
 
-// GetProfilesHandler handles the /api/profiles route
-func GetProfilesHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("GetProfilesHandler called ") // Log query error
-	// Open DB connection
-	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
+func GetAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("--GetAvailabilityHandler called--") // logging all queries
 
-	// Fetch profiles from the database
-	profiles, err := models.GetProfiles(db)
+	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
+	userID := "1" // test user
+
+	availability, err := models.GetAvailability(userID, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Respond with profiles as JSON
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(profiles)
+	json.NewEncoder(w).Encode(availability)
 }
