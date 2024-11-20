@@ -17,7 +17,7 @@ function App() {
         if (isAuthenticated) {
             navigate('/viewprofiles');
         } else {
-            navigate('/viewprofiles');
+            navigate('/login');
         }
     }, [ isAuthenticated ]);
 
@@ -35,9 +35,7 @@ function App() {
             <Route
                 path="/viewprofiles"
                 element={
-                    <ProtectedRoute>
                         <ViewProfilesPage />
-                    </ProtectedRoute>
                 }
             />
             <Route path='/profile' element={<ProfilePage/>} />
