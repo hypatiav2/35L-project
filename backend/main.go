@@ -1,53 +1,71 @@
 package main
 
-import (
-	"context"
+import ( // Import for database connection
+	"database/sql"
 	"fmt"
+	"go-react-backend/routes" // Import for routes
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/rs/cors"
-
-	"go-react-backend/routes"
+	"os/signal"
+	"syscall"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 func main() {
-	// Load .env variables globally
+	// Create a multiplexer for routing HTTP requests (using gorilla/mux)
+	r := mux.NewRouter()
+
+	// load environment vars
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Connect to our db (use pooling)
-	connPool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL")) // NEED DB_URL from .env
+	// connection pool to db
+	db, err := sql.Open("sqlite", "./bdate.db")
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	} else {
-		fmt.Println("Successfuly connected to database.")
+		log.Fatalf("Failed to connect to SQLite: %v", err)
 	}
-	defer connPool.Close()
+	defer db.Close()
 
-	// Create multiplexer for routing HTTP requests (using gorilla/mux)
-	r := mux.NewRouter()
+	// Register routes, pass our connection
+	routes.RegisterRoutes(r, db)
 
-	// Register routes, our connPool will be accessible in our request contexts
-	routes.RegisterRoutes(r, connPool)
-
-	// Cors handler:
+	// Configure CORS (allowing the React frontend to communicate with the backend)
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"}, // For now hardcoding in client server
+		AllowedOrigins:   []string{"http://localhost:3000"}, // Update with your frontend URL if needed
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	})
 	handler := corsHandler.Handler(r)
 
-	// Yippee! Starting our server using handler for mux and CORS
-	fmt.Println("Server starting on port 8080")
-	http.ListenAndServe(":8080", handler)
+	// Starting the HTTP server
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: handler,
+	}
+
+	// Graceful shutdown setup
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		fmt.Println("Server starting on port 8080")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP server failed: %v", err)
+		}
+	}()
+
+	// Wait for a termination signal and gracefully shut down
+	<-stop
+	fmt.Println("\nShutting down server...")
+	if err := server.Close(); err != nil {
+		log.Fatalf("Server shutdown failed: %v", err)
+	}
+	fmt.Println("Server stopped")
 }

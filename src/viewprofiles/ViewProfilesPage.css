@@ -1,0 +1,11 @@
+.viewprofiles-container {
+    margin: 20px;
+    text-align: center;
+  }
+  
+  .profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  

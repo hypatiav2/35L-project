@@ -6,4 +6,4 @@ const UserIDKey = Key("userID")
 
 type contextKey string
 
-const ConnPoolKey contextKey = "connPool"
+const DbContextKey contextKey = "db"

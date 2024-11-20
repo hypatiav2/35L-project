@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import LoginPage from './login/page';
 import HomePage from './home/page';
 import ProfilePage from './profilepage/page';
-import WelcomePage from './welcome/page'
+import ViewProfilesPage from './viewprofiles/ViewProfilesPage';
 import ProtectedRoute from './ProtectedRoute';
 import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
@@ -15,7 +15,7 @@ function App() {
     // Redirect on load
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/home');
+            navigate('/viewprofiles');
         } else {
             navigate('/welcome');
         }
@@ -31,6 +31,12 @@ function App() {
                     <ProtectedRoute>
                         <HomePage />
                     </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/viewprofiles"
+                element={
+                        <ViewProfilesPage />
                 }
             />
             <Route path='/profile' element={<ProfilePage/>} />
