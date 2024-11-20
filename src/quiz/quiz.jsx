@@ -1,6 +1,4 @@
-import './App.css';
-
-export default function App() {
+export default function QuizPage() {
   const contents=[
     ["How much do you talk?", "1 - Mute", "5 - Fluent in Yapanese"],
     ["How much do you like your alone time?", "1 - Always with people", "5 - Always alone"],
