@@ -4,13 +4,27 @@ import (
 	"database/sql"
 	"io/ioutil"
 	"log"
+	"os"
 
 	_ "modernc.org/sqlite" // Import the pure Go SQLite driver
 )
 
 func main() {
-	// Open the database connection
-	db, err := sql.Open("sqlite", "./bdate.db") // Use "sqlite" for modernc.org/sqlite
+	// Path to the SQLite database file
+	dbPath := "./bdate.db"
+
+	// Check if the database file already exists
+	if _, err := os.Stat(dbPath); err == nil {
+		// If file exists, delete it (overwrite it)
+		err := os.Remove(dbPath)
+		if err != nil {
+			log.Fatalf("Failed to delete existing database file: %v", err)
+		}
+		log.Println("Existing database file deleted. Creating a new one...")
+	}
+
+	// Open the database connection (creates a new file if it doesn't exist)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		log.Fatalf("Failed to connect to SQLite: %v", err)
 	}

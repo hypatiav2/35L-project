@@ -1,8 +1,7 @@
 package main
 
-import (
-	"backend/db"       // Import for database connection
-	"backend/routes"   // Import for routes
+import (      // Import for database connection
+	"go-react-backend/routes"   // Import for routes
 	"fmt"
 	"log"
 	"net/http"
@@ -15,13 +14,6 @@ import (
 )
 
 func main() {
-	// Database Initialization
-	err := db.InitializeDB("./backend/db/bdate.db", "./backend/db/schema.sql")
-	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	}
-	defer db.CloseDB() // Ensure the database is closed when the app exits
-
 	// Create a multiplexer for routing HTTP requests (using gorilla/mux)
 	r := mux.NewRouter()
 
