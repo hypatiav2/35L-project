@@ -1,33 +1,40 @@
 package main
 
 import (
-    "database/sql"
-    "io/ioutil"
-    "log"
+	"database/sql"
+	"io/ioutil"
+	"log"
 
-    _ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite" // Import the pure Go SQLite driver
 )
 
 func main() {
-    db, err := sql.Open("sqlite3", "./bdate.db")
-    if err != nil {
-        log.Fatalf("Failed to connect to SQLite: %v", err)
-    }
-    defer db.Close()
+	// Open the database connection
+	db, err := sql.Open("sqlite", "./bdate.db") // Use "sqlite" for modernc.org/sqlite
+	if err != nil {
+		log.Fatalf("Failed to connect to SQLite: %v", err)
+	}
+	defer db.Close()
 
-    // Execute schema
-    schema, _ := ioutil.ReadFile("schema.sql")
-    _, err = db.Exec(string(schema))
-    if err != nil {
-        log.Fatalf("Failed to execute schema: %v", err)
-    }
+	// Execute the schema
+	schema, err := ioutil.ReadFile("db/schema.sql")
+	if err != nil {
+		log.Fatalf("Failed to read schema file: %v", err)
+	}
+	_, err = db.Exec(string(schema))
+	if err != nil {
+		log.Fatalf("Failed to execute schema: %v", err)
+	}
 
-    // Execute seed data
-    seed, _ := ioutil.ReadFile("seed.sql")
-    _, err = db.Exec(string(seed))
-    if err != nil {
-        log.Fatalf("Failed to execute seed data: %v", err)
-    }
+	// Execute seed data
+	seed, err := ioutil.ReadFile("db/seed.sql")
+	if err != nil {
+		log.Fatalf("Failed to read seed file: %v", err)
+	}
+	_, err = db.Exec(string(seed))
+	if err != nil {
+		log.Fatalf("Failed to execute seed data: %v", err)
+	}
 
-    log.Println("Database and seed data initialized successfully!")
+	log.Println("Database and seed data initialized successfully!")
 }

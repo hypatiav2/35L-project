@@ -1,32 +1,56 @@
-package database
+package db
 
 import (
-	"database/sql"
-	"log"
-	"sync"
+    "database/sql"
+    "fmt"
+    "io/ioutil"
+    "log"
+    "sync"
 
-	_ "github.com/mattn/go-sqlite3"
+    _ "modernc.org/sqlite" // Use the pure Go SQLite driver
 )
 
 var (
-	db   *sql.DB
-	once sync.Once
+    instance *sql.DB
+    once     sync.Once
 )
 
-func GetDB() *sql.DB {
-	once.Do(func() {
-		var err error
-		db, err = sql.Open("sqlite3", "./bdate.db")
-		if err != nil {
-			log.Fatalf("Failed to connect to database: %v", err)
-		}
-	})
+// InitializeDB connects to the database and executes the schema.
+func InitializeDB(dbPath string, schemaPath string) error {
+    var err error
+    once.Do(func() {
+        instance, err = sql.Open("sqlite", dbPath) // "sqlite" for modernc.org/sqlite
+        if err != nil {
+            return
+        }
 
-	return db
+        // Read and execute the schema file
+        schema, readErr := ioutil.ReadFile(schemaPath)
+        if readErr != nil {
+            err = fmt.Errorf("failed to read schema file: %v", readErr)
+            return
+        }
+
+        _, execErr := instance.Exec(string(schema))
+        if execErr != nil {
+            err = fmt.Errorf("failed to execute schema: %v", execErr)
+            return
+        }
+        log.Println("Database initialized successfully")
+    })
+
+    return err
 }
 
+// GetDB returns the database instance.
+func GetDB() *sql.DB {
+    return instance
+}
+
+// CloseDB closes the database connection.
 func CloseDB() {
-	if db != nil {
-		db.Close()
-	}
+    if instance != nil {
+        instance.Close()
+        log.Println("Database connection closed")
+    }
 }
