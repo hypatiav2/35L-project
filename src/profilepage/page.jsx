@@ -4,7 +4,7 @@ import { useAuth } from '../AuthContext';
 import { useState } from 'react';
 
 export default function ProfilePage() {
-    const { logout } = useAuth();   
+    const { logout } = useAuth();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');

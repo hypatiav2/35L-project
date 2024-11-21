@@ -1,6 +1,8 @@
-import './App.css';
+import React from 'react';
+import Navbar from '../home/navbar';
+import { useState } from 'react';
 
-export default function App() {
+export default function QuizPage() {
   const contents=[
     ["How much do you talk?", "1 - Mute", "5 - Fluent in Yapanese"],
     ["How much do you like your alone time?", "1 - Always with people", "5 - Always alone"],
@@ -13,65 +15,81 @@ export default function App() {
     ["How fast is your response time?", "1 - Several days", "5 - Immediately"],
     ["What do you enjoy doing?", "1 - Watching a movie in bed", "5 - Adventuring in the Alps"]
   ]
-  var scores;
+  
+  const [scores, setScores] = useState(Array(contents.length).fill(null))
 
-  function getCheckedValue(radioName) {
-    var radios = document.getElementsByName(radioName);
-    for (var y = 0; y < radios.length; y++)
-        if (radios[y].checked) return radios[y].value;
-    return 0;
-  }
+  const handleScoreChange = (index, value) => {
+    const updatedScores = [...scores];
+    updatedScores[index] = value;
+    setScores(updatedScores);
+  };
 
-  function submit() {
-    for(var i = 0; i < contents.length; i++) {
-      var val = getCheckedValue(contents[i][0]);
-      if(val === 0) return;
-      scores[i] = val;
-    }
-    document.getElementById("myresults").innerHTML = "Your score is " + scores;
-  }
+  const handleSubmit = (e) => {
+      e.preventDefault();
+
+      const s = [...scores];
+
+      for(var i = 0; i < contents.length; i++) {
+        if(s[i] === null) {
+          console.error("not all questions were answered")
+          return;
+        }
+      }
+      
+      console.log('Form Submitted:', scores);
+      // Example: submitToBackend(formData);
+  };
   
   return (
-    <div className="quiz">
-      <h1>compatibility quiz</h1>
-      <div className="quiz_body">
-        <Question contents={contents[0]}/>
-        <Question contents={contents[1]}/>
-        <Question contents={contents[2]}/>
-        <Question contents={contents[3]}/>
-        <Question contents={contents[4]}/>
-        <Question contents={contents[5]}/>
-        <Question contents={contents[6]}/>
-        <Question contents={contents[7]}/>
-        <Question contents={contents[8]}/>
-        <Question contents={contents[9]}/>
-        <button class="button" onclick="submit()">Submit</button>
-        <span id="result">My results will appear here</span>
+    <div>
+      <Navbar />
+      <div className="min-h-screen bg-gray-100 py-8 px-4">
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-700 max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">Compatibility Quiz</h1>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Question name={0} contents={contents[0]} onChange={handleScoreChange}/>
+          <Question name={1} contents={contents[1]} onChange={handleScoreChange}/>
+          <Question name={2} contents={contents[2]} onChange={handleScoreChange}/>
+          <Question name={3} contents={contents[3]} onChange={handleScoreChange}/>
+          <Question name={4} contents={contents[4]} onChange={handleScoreChange}/>
+          <Question name={5} contents={contents[5]} onChange={handleScoreChange}/>
+          <Question name={6} contents={contents[6]} onChange={handleScoreChange}/>
+          <Question name={7} contents={contents[7]} onChange={handleScoreChange}/>
+          <Question name={8} contents={contents[8]} onChange={handleScoreChange}/>
+          <Question name={9} contents={contents[9]} onChange={handleScoreChange}/>
+          <div className="flex justify-center">
+              <button
+                  type="submit"
+                  className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                  Submit
+              </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-function Question({ contents }) {
+function Question({ name, contents, onChange }) {
   return (
-    <div className="questions">
-      <h2>{contents[0]}</h2>
+    <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <h2 className="text-gray-600 font-medium mb-2">{contents[0]}</h2>
       <ul class="choices">
-        <Option name={contents[0]} value={1} message={contents[1]}/>
-        <Option name={contents[0]} value={2} message="2"/>
-        <Option name={contents[0]} value={3} message="3"/>
-        <Option name={contents[0]} value={4} message="4"/>
-        <Option name={contents[0]} value={5} message={contents[2]}/>
+        <Option name={name} value={1} message={contents[1]} onChange={onChange}/>
+        <Option name={name} value={2} message="2" onChange={onChange}/>
+        <Option name={name} value={3} message="3" onChange={onChange}/>
+        <Option name={name} value={4} message="4" onChange={onChange}/>
+        <Option name={name} value={5} message={contents[2]} onChange={onChange}/>
       </ul>
     </div>
   );
 };
 
-function Option({ name, value, message }) {
+function Option({ name, value, message, onChange }) {
   return (
     <li>
       <label>
-        <input type="radio" name={name} value={value}></input>{message}
+        <input type="radio" name={name} value={value} onChange={() => onChange(name, value)}></input>{message}
       </label>
     </li>
   )
