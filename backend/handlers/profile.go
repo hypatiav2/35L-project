@@ -11,7 +11,7 @@ import (
 	_ "modernc.org/sqlite" // SQLite driver
 )
 
-// GetProfilesHandler handles the /api/profiles route
+// GetProfilesHandler handles the /api/v1/profiles route
 func GetProfilesHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--GetProfilesHandler--") // Log query error
 	// Open DB connection

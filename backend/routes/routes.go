@@ -12,7 +12,10 @@ func RegisterRoutes(r *mux.Router, db *sql.DB) {
 	r.Use(middleware.DbMiddleware(db))
 	r.Use(middleware.AuthMiddleware)
 	// Register API routes
-	r.HandleFunc("/api/profiles", handlers.GetProfilesHandler).Methods("GET")
+	r.HandleFunc("/profiles", handlers.GetProfilesHandler).Methods("GET")
 
-	r.HandleFunc("/api/availability", handlers.GetAvailabilityHandler).Methods("GET")
+	r.HandleFunc("/availability", handlers.GetAvailabilityHandler).Methods("GET")
+	r.HandleFunc("/availability", handlers.PostAvailabilityHandler).Methods("POST")
+	r.HandleFunc("/availability", handlers.PutAvailabilityHandler).Methods("PUT")
+	r.HandleFunc("/availability", handlers.DeleteAvailabilityHandler).Methods("DELETE")
 }

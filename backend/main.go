@@ -32,8 +32,9 @@ func main() {
 	}
 	defer db.Close()
 
-	// Register routes, pass our connection
-	routes.RegisterRoutes(r, db)
+	// Register routes (under subrouter v1)
+	apiRouter := r.PathPrefix("/api/v1").Subrouter()
+	routes.RegisterRoutes(apiRouter, db)
 
 	// Configure CORS (allowing the React frontend to communicate with the backend)
 	corsHandler := cors.New(cors.Options{
