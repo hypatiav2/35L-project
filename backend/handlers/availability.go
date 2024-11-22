@@ -29,10 +29,11 @@ Return:
 */
 func GetAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--GetAvailabilityHandler--") // logging all queries
-
+	// db and userID from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
-	userID := "1" // test user
+	userID := r.Context().Value(contextkeys.UserIDKey).(string)
 
+	// query availability
 	availability, err := models.GetAvailability(userID, db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -66,7 +67,7 @@ func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload, must be well formatted JSON", http.StatusBadRequest)
 		return
 	}
-	availability.UserID = "1" // TEMP. Later pull from request context
+	availability.UserID = r.Context().Value(contextkeys.UserIDKey).(string)
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 
 	err := ValidateTimeslot(availability)
@@ -127,8 +128,6 @@ Return:
 func PutAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	var availability models.Availability
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
-	userID := "1" // grab from context later
-
 	// Parse the JSON request body
 	if err := json.NewDecoder(r.Body).Decode(&availability); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -142,9 +141,7 @@ func PutAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Can only update current user
-	if availability.UserID != userID {
-		http.Error(w, "Cannot only update timeslot for the current user", http.StatusBadRequest)
-	}
+	availability.UserID = r.Context().Value(contextkeys.UserIDKey).(string)
 
 	// Update the availability in the database
 	if err := models.PutAvailability(availability, db); err != nil {
@@ -174,8 +171,8 @@ Return:
 */
 func DeleteAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
-		ID     int `json:"id"` // Availability ID to delete
-		UserID int `json:"user_id"`
+		ID     int    `json:"id"` // Availability ID to delete
+		UserID string `json:"user_id"`
 	}
 	var req payload
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -187,7 +184,7 @@ func DeleteAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
-	req.UserID = 1 // r.Context().Value(contextkeys.UserIDKey).(string)
+	req.UserID = r.Context().Value(contextkeys.UserIDKey).(string)
 
 	// Call the DeleteAvailability function to delete the entry
 	err := models.DeleteAvailability(req.ID, req.UserID, db)

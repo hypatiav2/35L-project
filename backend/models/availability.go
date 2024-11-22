@@ -106,7 +106,7 @@ func PutAvailability(availability Availability, db *sql.DB) error {
 }
 
 // DeleteAvailability deletes an availability entry from the database.
-func DeleteAvailability(id int, userID int, db *sql.DB) error {
+func DeleteAvailability(id int, userID string, db *sql.DB) error {
 	// SQL query to delete the availability entry
 	query := `
 		DELETE FROM availability

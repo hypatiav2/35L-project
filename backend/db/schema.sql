@@ -1,6 +1,6 @@
 -- schema.sql
 CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     bio TEXT,
@@ -9,7 +9,7 @@ CREATE TABLE users (
 
 CREATE TABLE availability (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
     day_of_week TEXT NOT NULL,
     start_time TEXT,
     end_time TEXT,
