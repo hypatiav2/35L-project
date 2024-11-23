@@ -155,3 +155,9 @@ func GetOverlapping(availability Availability, db *sql.DB) (*Availability, error
 
 	return &overlap, nil // overlap found
 }
+
+// Given a user, return a list of users who have overlapping availability
+func GetAllAvailable(userID string, db *sql.DB) ([]User, error) {
+	// NOT DONE
+	return nil, nil
+}

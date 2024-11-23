@@ -4,6 +4,7 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     bio TEXT,
+    vector JSON,
     profile_picture BLOB  -- New column for storing profile pictures
 );
 
@@ -13,13 +14,6 @@ CREATE TABLE availability (
     day_of_week TEXT NOT NULL,
     start_time TEXT,
     end_time TEXT,
-    FOREIGN KEY(user_id) REFERENCES users(id)
-);
-
-CREATE TABLE quiz_results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    score INTEGER,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 

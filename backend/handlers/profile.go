@@ -70,7 +70,7 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-PUT/api/v1/profiles: updates the CURRENT user
+PATCH/api/v1/profiles: updates the CURRENT user
 
 Request Body:
 
@@ -85,8 +85,8 @@ Return:
 	400 BAD REQUEST: json formatted wrong
 	500 INTERNAL ERROR: unable to insert
 */
-func PutUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--PutUserHandler--") // Log all requests
+func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("--PatchUserHandler--") // Log all requests
 	// Extract db and userID from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 	userID := r.Context().Value(contextkeys.UserIDKey).(string)
@@ -101,7 +101,7 @@ func PutUserHandler(w http.ResponseWriter, r *http.Request) {
 	user.ID = userID
 
 	// Call the PutUser function to update the user in the database
-	if err := models.PutUser(user, db); err != nil {
+	if err := models.PatchUser(user, db); err != nil {
 		http.Error(w, fmt.Sprintf("Error updating user: %v", err), http.StatusInternalServerError)
 		return
 	}

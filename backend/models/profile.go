@@ -77,7 +77,7 @@ func PostUser(user User, db *sql.DB) error {
 }
 
 // update user information
-func PutUser(user User, db *sql.DB) error {
+func PatchUser(user User, db *sql.DB) error {
 	// SQL query to update the user
 	query := `
 		UPDATE users

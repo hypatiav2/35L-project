@@ -16,7 +16,7 @@ type WebhookPayload struct {
 }
 
 /*
-Insert, update, or delete user from users table.
+Insert, update, or delete a user from users table.
 
 Request Body:
 
@@ -48,7 +48,7 @@ func UserSyncWebhookHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "UPDATE":
-		err := models.PutUser(user, db)
+		err := models.PatchUser(user, db)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Failed to update user: %s", err), http.StatusInternalServerError)
 			return

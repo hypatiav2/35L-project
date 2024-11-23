@@ -4,8 +4,8 @@
 
 1. [Frontend](#frontend)
 2. [Backend](#backend)
-   - [main.go](#main.go)
-   - [Routes](#routes)
+   - [Testing](#testing)
+   - [Route Endpoints](#route-endpoints)
    - [Controllers](#controllers)
    - [Repositories](#repositories)
 3. [Supabase](#database-(supabase))
@@ -14,19 +14,19 @@
 
 ## Frontend
 
-TBD AARUSH
+TBD
 
 ## Backend
 
 > ToDo:  
-> 1. Fix init_db
-> 2. Update user tables when users are added/removed in supabase  
+> 1. Make init_db not another main function
+> 2. 
 > 3. Implement profile/availability endpoints (POST, DELETE, PUT)
 > 4. tie our user table to real user data, access with real user id
 
 ### Testing
 
-To test the functionality of routes, we can use **postman**. We need a valid JWT token to pass along with all our requests, since our backend verifies authentication. Tokens expire after some time.  
+To test routes, we can use **postman** or **curl**. We need a valid JWT token to pass along with all our requests, since our backend verifies authentication. Tokens expire after some time.  
 
 We can call supabase directly to get a valid token, simulating logging into our frontend.  
 
@@ -48,16 +48,30 @@ The response should include the JWT token we need. When we call routes to our ba
 ### Route Endpoints
 
 **profiles**
-GET /api/v1/profiles: Retrieves JSON list of availabilities
-POST /api/v1/profiles: Inserts new non-overlapping timeslot for the current user. 
-PUT /api/v1/profiles: 
-DELETE /api/v1/profiles: 
+GET/api/v1/profiles: Retrieve JSON list of users
+POST/api/v1/profiles: add a new user.
+PATCH/api/v1/profiles: update the CURRENT user. 
+DELETE/api/v1/profiles: delete any user. 
 
 **availability**
-GET /api/v1/availability: 
-POST /api/v1/availability: 
-PUT /api/v1/availability: 
-DELETE /api/v1/availability: 
+GET/api/v1/availability: get all timeslots for the current user.
+POST/api/v1/availability: add one new timeslot to `availability` for the current user.
+PUT/api/v1/availability: update a timeslot in `availability` for the current user.
+DELETE/api/v1/availability: delete a timeslot by ID from `availability`, if it belongs to the current user.
+
+**scheduler**
+GET/api/v1/scheduler: get list of users with overlapping availability with current user. List ranked by similarity.
+POST/api/v1/scheduler: add similarity vector?
+PATCH/api/v1/scheduler: update similarity vector?
+DELETE/api/v1/scheduler: delete similarity vector?
+
+**webhooks** 
+POST/api/v1/webhooks/users: insert new user. Automatically called by supabase. 
+PATCH/api/v1/webhooks/users: Same as above.
+DELETE/api/v1/webhooks/users: Same as above.
+
+* Still need to implement webhook on Supabase. Also will not work when running server locally.  
+
 
 ### main.go
 
@@ -84,15 +98,12 @@ Entry point to our go backend.
 Logic for accessing the **profile** table in our Supabase PostgreSQL database. Create handler functions that will be registered to our routes in `routes/routers.go`.  
 
 TBD BY MERYL
-1. `ProfileController`: TEMP. Defines a dummy tester function that calls `repositories.GetProfileByUserID`. This should retrieve data from our `public.profiles` table in our db and return the formatted data.  
-2. Our `PublicRoute` and `ProtectedRoute` test routes are still here.  
 
 **availability.go**  
 
 Logic for accessing the **availability** table in our db.  
 
-1. `GetAvailability` Retrieves all availability entries for a given user, returned as a list of time slots.  
-2. `InsertAvailability`  TBD 
+IDK
 
 **quiz.go**
 
