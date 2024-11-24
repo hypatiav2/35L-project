@@ -59,11 +59,8 @@ POST/api/v1/availability: add one new timeslot to `availability` for the current
 PUT/api/v1/availability: update a timeslot in `availability` for the current user.
 DELETE/api/v1/availability: delete a timeslot by ID from `availability`, if it belongs to the current user.
 
-**scheduler**
-GET/api/v1/scheduler: get list of users with overlapping availability with current user. List ranked by similarity.
-POST/api/v1/scheduler: add similarity vector?
-PATCH/api/v1/scheduler: update similarity vector?
-DELETE/api/v1/scheduler: delete similarity vector?
+**search**
+GET/api/v1/search: get list of users with overlapping availability with current user. List ranked by similarity.
 
 **webhooks** 
 POST/api/v1/webhooks/users: insert new user. Automatically called by supabase. 

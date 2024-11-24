@@ -12,9 +12,22 @@ import (
 	_ "modernc.org/sqlite" // SQLite driver
 )
 
-// GetUsersHandler handles the /api/v1/profiles route
-func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--GetUsersHandler--") // Log query error
+/*
+GET/api/v1/users: adds a new user.
+
+Return:
+
+	200 OK: []User
+		"id": <unique_id> STRING
+		"name": <name> STRING
+		"email": <unique_email> STRING
+		"bio": <bio> STRING
+		"vector": <vector> STRING
+		"profile_picture": <empty for now> STRING
+	500 INTERNAL ERROR: unable to retrieve users
+*/
+func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("--GetAllUsersHandler--") // Log query error
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 
 	// Fetch users from the database
@@ -24,13 +37,30 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with profiles as JSON
+	// Respond with user as JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
 
+func GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("--GetCurrentUserHandler--") // Log query error
+	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
+	userId := r.Context().Value(contextkeys.UserIDKey).(string)
+
+	// Fetch users from the database
+	user, err := models.GetUserByID(userId, db)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with user as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
 /*
-POST/api/v1/profiles: adds a new user.
+POST/api/v1/users: adds a new user.
 
 Request Body:
 
@@ -38,7 +68,6 @@ Request Body:
 	"name": <name> STRING
 	"email": <unique_email> STRING
 	"bio": <bio> STRING
-	"profile_picture": <empty for now> STRING
 
 Return:
 
@@ -70,7 +99,7 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-PATCH/api/v1/profiles: updates the CURRENT user
+PATCH/api/v1/users: updates the CURRENT user
 
 Request Body:
 
@@ -112,7 +141,7 @@ func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-DELETE/api/v1/profiles: delete any user
+DELETE/api/v1/users: delete any user
 
 Request Body:
 

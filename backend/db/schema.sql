@@ -19,20 +19,18 @@ CREATE TABLE availability (
 
 CREATE TABLE matches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user1_id INTEGER NOT NULL,
-    user2_id INTEGER NOT NULL,
-    score INTEGER,
+    user1_id TEXT NOT NULL,
+    user2_id TEXT NOT NULL,
+    similarity_score INTEGER,
+    match_status TEXT DEFAULT 'pending', -- 'pending', 'accepted', 'rejected'
     FOREIGN KEY(user1_id) REFERENCES users(id),
     FOREIGN KEY(user2_id) REFERENCES users(id)
 );
 
 CREATE TABLE scheduled_dates (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user1_id INTEGER NOT NULL,
-    user2_id INTEGER NOT NULL,
-    date TEXT,
-    start_time TEXT,
-    end_time TEXT,
-    FOREIGN KEY(user1_id) REFERENCES users(id),
-    FOREIGN KEY(user2_id) REFERENCES users(id)
+    match_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    is_confirmed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY(match_id) REFERENCES matches(id)
 );

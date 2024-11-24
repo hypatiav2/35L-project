@@ -132,7 +132,7 @@ func DeleteAvailability(id int, userID string, db *sql.DB) error {
 	return nil
 }
 
-// check for overlapping time slots
+// check for overlapping availability entries for a particular user
 func GetOverlapping(availability Availability, db *sql.DB) (*Availability, error) {
 	query := `
 		SELECT id, user_id, day_of_week, start_time, end_time
@@ -156,8 +156,9 @@ func GetOverlapping(availability Availability, db *sql.DB) (*Availability, error
 	return &overlap, nil // overlap found
 }
 
-// Given a user, return a list of users who have overlapping availability
+// Given a user, return a list of all users who have overlapping availability
 func GetAllAvailable(userID string, db *sql.DB) ([]User, error) {
-	// NOT DONE
+
+	// IMPLEMENT THIS
 	return nil, nil
 }
