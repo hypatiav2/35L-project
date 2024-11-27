@@ -1,6 +1,7 @@
-package middlewares
+package middleware
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,7 +9,8 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/joho/godotenv"
+
+	"go-react-backend/contextkeys"
 )
 
 // middleware that returns http.Handler with JWT verified, or throws an error
@@ -31,10 +33,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		// grab jwtKey from .env (need to store SUPABASE_JWT_SECRET in .env)
-		err := godotenv.Load("../.env")
-		if err != nil {
-			log.Fatalf("Error loading .env file: %v", err)
-		}
 		jwtKey := []byte(os.Getenv("SUPABASE_JWT_SECRET"))
 		if len(jwtKey) == 0 {
 			log.Println("JWT secret is missing or empty")
@@ -56,7 +54,22 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// lets put jwt claims into request context here
+		// Extract JWT claims
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+			return
+		}
+
+		// and find the userID
+		userID, ok := claims["sub"].(string)
+		if !ok || userID == "" {
+			http.Error(w, "User ID missing in token claims", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextkeys.UserIDKey, userID)
+		r = r.WithContext(ctx)
 
 		// If token is valid, call the next handler (we verified JWT!)
 		next.ServeHTTP(w, r)
