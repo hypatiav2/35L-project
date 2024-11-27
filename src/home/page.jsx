@@ -6,16 +6,17 @@ import DropdownComponent from './DateSearchDropdown';
 
 function DateOption({ name, date, time }) {
     return (
-        <div class="bg-gray-100 border border-gray-300 rounded-lg p-4">
-            <div class="aspect-square bg-gray-300 rounded-md"></div>
-            <h2 class="mt-4 text-lg font-semibold text-gray-700 text-center">{name}</h2>
-            <p class="text-sm text-gray-500 text-center">{date} {time}</p>
-            <button class="mt-4 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded w-full">
+        <div className="bg-gray-100 border border-gray-300 rounded-lg p-8 max-w-lg mx-auto">
+            <div className="aspect-square bg-gray-300 rounded-md mb-6" style={{ height: '300px', width: '300px' }}></div>
+            <h2 className="mt-4 text-lg font-semibold text-gray-700 text-center">{name}</h2>
+            <p className="text-sm text-gray-500 text-center">{date} {time}</p>
+            <button className="mt-6 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-6 py-3 rounded w-full">
                 Contact {name}
             </button>
         </div>
     );
 }
+
 
 function FindDatePage({ dates }) {
     const [filteredDates, setFilteredDates] = useState(dates);
