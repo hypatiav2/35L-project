@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import LoginPage from './login/page';
 import HomePage from './home/page';
 import ProfilePage from './profilepage/page';
-import WelcomePage from './welcome/page';
 import ViewProfilesPage from './viewprofiles/ViewProfilesPage';
 import WelcomePage from './welcome/page';
 import QuizPage from './quiz/page';
