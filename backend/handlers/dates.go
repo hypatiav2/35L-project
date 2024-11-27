@@ -14,33 +14,29 @@ import (
 )
 
 /*
-GET /api/v1/dates/{matchId}:
+GET /api/v1/dates/{matchId}: Retrieves the dates corresponding to a specific matchId.
 
-	Retrieves the dates corresponding to a specific matchId.
-	If the matchId is not provided, returns all matchIds and their corresponding dates for the current user.
+- If the matchId is not provided, returns all matchIds and their corresponding dates for the current user.
+- matchId must be an integer > 0, provided in the request params (url)
 
-Responses:
+Returns:
 
-	    200 OK: Returns a list of matches with their respective dates.
-			{
-				"match_id": <match_id> INT,
-				"dates": [
-					{
-						"id": <int>,
-						"match_id": <int>,
-						"date_start": "<date_start> ISO 8601 format",
-						"date_end": "<date_end> ISO 8601 format",
-						"is_confirmed": <boolean>
-					},
-					...
-				]
-			}
-
-	    500 INTERNAL SERVER ERROR:
-	        Returns an error message if an internal error occurs.
-
-	    400 BAD REQUEST:
-	        Returns an error message if the request is invalid (e.g., invalid matchId format).
+	200 OK: Returns a list of matches with their respective dates.
+	    {
+	        "match_id": <match_id> INT,
+	        "dates": [
+	            {
+	                "id": <int>,
+	                "match_id": <int>,
+	                "date_start": "<date_start> ISO 8601 format",
+	                "date_end": "<date_end> ISO 8601 format",
+	                "is_confirmed": <boolean>
+	            },
+	            ...
+	        ]
+	    }
+	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
+	400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
 */
 func GetDatesHandler(w http.ResponseWriter, r *http.Request) {
 	// userId and db from context
@@ -109,30 +105,28 @@ func GetDatesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-POST /api/v1/dates:
-    Inserts a new date associated with a particular matchId.
+POST /api/v1/dates: Inserts a new date associated with a particular matchId.
 
 Request Body:
-    {
-        "match_id": <id of the match this date will correspond to> INT,
-        "date_start": "<when the date will start> ISO 8601 format",
-        "date_end": "<when the date will end> ISO 8601 format",
-        "is_confirmed": <whether the date is confirmed; defaults to FALSE if not provided> BOOL
-    }
+
+	{
+	    "match_id": <id of the match this date will correspond to> INT,
+	    "date_start": "<when the date will start> ISO 8601 format",
+	    "date_end": "<when the date will end> ISO 8601 format",
+	    "is_confirmed": <whether the date is confirmed; defaults to FALSE if not provided> BOOL
+	}
 
 Responses:
-    200 OK: Returns the inserted date object upon successful creation.
-		{
-			"match_id": <match_id> INT,
-			"date_start": "<date_start> ISO 8601 format",
-			"date_end": "<date_end> ISO 8601 format",
-			"is_confirmed": <boolean>
-		}
 
-    400 BAD REQUEST:
-		Returns an error message if the request body is malformed or required fields are missing.
+	    200 OK: Returns the inserted date object upon successful creation.
+			{
+				"match_id": <match_id> INT,
+				"date_start": "<date_start> ISO 8601 format",
+				"date_end": "<date_end> ISO 8601 format",
+				"is_confirmed": <boolean>
+			}
+	    400 BAD REQUEST: Returns an error message if the request body is malformed or required fields are missing.
 */
-
 func PostDateHandler(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 
@@ -164,9 +158,7 @@ func PostDateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-DELETE /api/v1/dates/{dateId}:
-
-	Deletes a date based on the request parameter dateId.
+DELETE /api/v1/dates/{dateId}: Deletes a date based on the request parameter dateId.
 
 Request URL Parameter:
 
