@@ -6,7 +6,7 @@ function ViewProfilesPage() {
   const [profiles, setProfiles] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/profiles')
+    fetch('http://localhost:8080/api/v1/users')
       .then(response => response.json())
       .then(data => setProfiles(data))
       .catch(err => console.error('Error fetching profiles:', err));
@@ -20,7 +20,7 @@ function ViewProfilesPage() {
           profiles.map(profile => (
             <ProfileCard key={profile.id} profile={profile} />
           ))
-        ) : (
+        ) : ( 
           <p>No profiles available.</p>
         )}
       </div>

@@ -13,18 +13,24 @@ import (
 )
 
 /*
-GET/api/v1/users: adds a new user.
+GET /api/v1/users: Retrieves a list of all users.
 
 Return:
 
-	200 OK: []User
-		"id": <unique_id> STRING
-		"name": <name> STRING
-		"email": <unique_email> STRING
-		"bio": <bio> STRING
-		"vector": <vector> STRING
-		"profile_picture": <empty for now> STRING
-	500 INTERNAL ERROR: unable to retrieve users
+	200 OK: Returns a JSON array of users
+	[
+		{
+			"id": <unique id for the user> STRING
+			"name": <user's name> STRING
+			"email": <user's UNIQUE email> STRING
+			"bio": <user's bio> STRING
+			"vector": <user's similarity vector> STRING
+			"profile_picture": <base64-encoded image string, currently empty> STRING
+		},
+		...
+	]
+
+	500 INTERNAL ERROR: Returns an error message if the server is unable to retrieve users from the database.
 */
 func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--GetAllUsersHandler--") // Log query error
@@ -60,20 +66,22 @@ func GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-POST/api/v1/users: adds a new user.
+POST /api/v1/users: Adds a new user to the db.
 
 Request Body:
 
-	"id": <unique_id> STRING
-	"name": <name> STRING
-	"email": <unique_email> STRING
-	"bio": <bio> STRING
+	{
+		"id": <unique identifier for the user> STRING,
+		"name": <user's name> STRING,
+		"email": <UNIQUE email for the user> STRING,
+		"bio": <short biography of the user> STRING
+	}
 
 Return:
 
-	200 OK: return inserted user on success
-	400 BAD REQUEST: json formatted wrong
-	500 INTERNAL ERROR: unable to insert
+	200 OK: Returns the newly created user object on success, with all fields populated.
+	400 BAD REQUEST: Returns an error message if the request body is not correctly formatted (e.g., missing or invalid fields).
+	500 INTERNAL ERROR: Returns an error message if the server fails to insert the new user into the database.
 */
 func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--PostUserHandler--") // Log all requests
@@ -99,20 +107,22 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-PATCH/api/v1/users: updates the CURRENT user
+PATCH /api/v1/users: Updates the profile of the current user.
 
-Request Body:
+Request Body: (If a field is not provided, it will not be changed)
 
-	"name": <new_name> STRING
-	"email": <unique_email> STRING
-	"bio": <bio> STRING
-	"profile_picture": <empty for now> STRING
+	{
+		"name": <new name for the user> STRING,
+		"email": <UNIQUE email for the user> STRING,
+		"bio": <short bio for the user> STRING,
+		"profile_picture": <empty for now> STRING
+	}
 
 Return:
 
-	200 OK: return updated user on success
-	400 BAD REQUEST: json formatted wrong
-	500 INTERNAL ERROR: unable to insert
+	200 OK: Returns the updated user object on success.
+	400 BAD REQUEST: Returns an error message if the request body is not formatted correctly (e.g., missing or invalid fields).
+	500 INTERNAL ERROR: Returns an error message if the server fails to update the user in the database.
 */
 func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--PatchUserHandler--") // Log all requests
@@ -126,10 +136,10 @@ func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	// Set the user ID from the URL (to ensure we're updating the correct user)
+	// userID must be the current user
 	user.ID = userID
 
-	// Call the PutUser function to update the user in the database
+	// Call patchUser to update the user in the database
 	if err := models.PatchUser(user, db); err != nil {
 		http.Error(w, fmt.Sprintf("Error updating user: %v", err), http.StatusInternalServerError)
 		return
@@ -141,11 +151,13 @@ func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-DELETE/api/v1/users: delete any user
+DELETE /api/v1/users: delete any user
 
 Request Body:
 
-	"id": <unique_id> STRING
+	{
+		"id": <unique_id> STRING
+	}
 
 Return:
 
