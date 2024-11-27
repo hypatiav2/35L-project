@@ -34,9 +34,9 @@ const WelcomePage = () => {
         {showSignUpForm ? (
           <SignUpForm />
         ) : (
-          <div className="flex-1 pr-8">
-            <h1 className="text-4xl font-bold mb-4">Bdate</h1>
-            <p className="text-lg text-gray-600 mb-8">Great website for dating</p>
+          <div className="flex-1 pr-8 ml-28 justify-center items-center">
+            <h1 className="text-4xl font-bold mb-4">b-date</h1>
+            <p className="text-lg text-gray-600 mb-8">Dining hall-themed website for UCLA students</p>
             <button
               className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
               onClick={handleSignUpClick}
@@ -46,7 +46,7 @@ const WelcomePage = () => {
           </div>
         )}
 
-        <div className="w-1/2 h-2/3 flex justify-center items-center bg-gray-200 h-72 w-full">
+        <div className="w-1/2 flex justify-center items-center bg-gray-200 h-96">
           <div className="text-gray-500">Image Placeholder</div>
         </div>
       </div>
