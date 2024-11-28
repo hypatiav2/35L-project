@@ -26,7 +26,7 @@ Returns:
 	map[string]float64
 		map between each userID and their similarity to the current user
 */
-func ComputeSimilarity(currentUserID string, users []string, db *sql.DB) (map[string]float64, error) {
+func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Match, error) {
 
 	// STEP 1. get vectors for users and current user: GetVectors
 
@@ -35,17 +35,17 @@ func ComputeSimilarity(currentUserID string, users []string, db *sql.DB) (map[st
 		return nil, fmt.Errorf("failed to retrieve vectors: %w", err)
 	}
 
-	currentUserVector, exists := vectors[currentUserID]
+	currentUserVector, exists := vectors[userID]
 	if !exists {
-		return nil, fmt.Errorf("current user vector not found for user ID: %s", currentUserID)
+		return nil, fmt.Errorf("current user vector not found for user ID: %s", userID)
 	}
-	delete(vectors, currentUserID) // Remove the current user from the comparison list
+	delete(vectors, userID) // Remove the current user from the comparison list
 
 	// STEP 2. calculate similarity for each user: CosineSimilarity
 
 	similarityScores := make(map[string]float64)
-	for userID, vector := range vectors {
-		similarityScores[userID] = CosineSimilarity(currentUserVector, vector)
+	for user2ID, vector := range vectors {
+		similarityScores[user2ID] = CosineSimilarity(currentUserVector, vector)
 	}
 
 	// for key, value := range vectors {
@@ -54,30 +54,25 @@ func ComputeSimilarity(currentUserID string, users []string, db *sql.DB) (map[st
 
 	// STEP 3. return a list of sorted matches
 
-	sortedScores := SortSimilarities(similarityScores)
-	return sortedScores, nil
-}
+	// sortedScores := SortSimilarities(similarityScores)
 
-func SortSimilarities(similarityScores map[string]float64) map[string]float64 {
-	// Create a slice of keys and sort by scores
-	type kv struct {
-		Key   string
-		Value float64
+	var sortedMatches []Match
+	for user2ID, score := range similarityScores {
+		// Create a Match for each user, where User1ID is the current user and User2ID is the other user
+		match := Match{
+			User1ID:    userID,
+			User2ID:    user2ID,
+			Similarity: score,
+		}
+		sortedMatches = append(sortedMatches, match)
 	}
-	var sortedList []kv
-	for k, v := range similarityScores {
-		sortedList = append(sortedList, kv{k, v})
-	}
-	sort.Slice(sortedList, func(i, j int) bool {
-		return sortedList[i].Value > sortedList[j].Value // Descending order
+
+	// Sort the slice based on similarity score in descending order
+	sort.Slice(sortedMatches, func(i, j int) bool {
+		return sortedMatches[i].Similarity > sortedMatches[j].Similarity
 	})
 
-	// Create a sorted map
-	sortedScores := make(map[string]float64)
-	for _, item := range sortedList {
-		sortedScores[item.Key] = item.Value
-	}
-	return sortedScores
+	return sortedMatches, nil
 }
 
 // calculates cosine similarity between two vectors (finds compatibility between two users)
