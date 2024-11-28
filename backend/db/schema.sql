@@ -4,7 +4,7 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     bio TEXT,
-    vector JSON,
+    vector JSON DEFAULT '[3,3,3,3,3,3,3,3,3,3]',
     profile_picture BLOB  -- New column for storing profile pictures
 );
 

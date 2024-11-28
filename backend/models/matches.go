@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -17,6 +18,8 @@ type Match struct {
 func ComputeMatches(userID string, db *sql.DB) ([]Match, error) {
 
 	// Step 1: Fetch the user's availability and vector
+	availability := models.GetAvailability(userID, db)
+	vector := models.GetUserVector(userID, db)
 
 	// Step 2: Find users with overlapping availabilities
 

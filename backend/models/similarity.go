@@ -11,6 +11,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"errors"
 )
 
 /*
@@ -53,11 +54,11 @@ func ComputeSimilarity(currentUserID string, users []string, db *sql.DB) (map[st
 
 	// STEP 3. return a list of sorted matches
 
-	sortedScores := sortSimilarities(similarityScores)
+	sortedScores := SortSimilarities(similarityScores)
 	return sortedScores, nil
 }
 
-func sortSimilarities(similarityScores map[string]float64) map[string]float64 {
+func SortSimilarities(similarityScores map[string]float64) map[string]float64 {
 	// Create a slice of keys and sort by scores
 	type kv struct {
 		Key   string
@@ -77,61 +78,6 @@ func sortSimilarities(similarityScores map[string]float64) map[string]float64 {
 		sortedScores[item.Key] = item.Value
 	}
 	return sortedScores
-}
-
-/*
-Get the vectors for a list of users, given their userIDs.
-
-// TODO: SPLIT LIST INTO SMALLER CHUNKS WHEN BIG LISTS
-
-Params:
-
-	userIDs []string
-
-Returns:
-
-	map[string][]int
-		Map from userID to corresponding vector
-*/
-func GetVectors(userIDs []string, db *sql.DB) (map[string][]int, error) {
-	// Build a dynamic query with placeholders
-	placeholders := make([]string, len(userIDs))
-	args := make([]interface{}, len(userIDs))
-	for i, id := range userIDs {
-		placeholders[i] = "?"
-		args[i] = id
-	}
-	query := fmt.Sprintf(
-		"SELECT id, similarity_vector FROM users WHERE id IN (%s)",
-		strings.Join(placeholders, ","),
-	)
-
-	// Execute the query
-	rows, err := db.Query(query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to query user vectors: %w", err)
-	}
-	defer rows.Close()
-
-	// Parse the results
-	vectors := make(map[string][]int)
-	for rows.Next() {
-		var userID string
-		var vectorJSON string
-		if err := rows.Scan(&userID, &vectorJSON); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
-		}
-
-		// Decode the JSON vector field
-		var vector []int
-		if err := json.Unmarshal([]byte(vectorJSON), &vector); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal vector: %w", err)
-		}
-
-		vectors[userID] = vector
-	}
-
-	return vectors, nil
 }
 
 // calculates cosine similarity between two vectors (finds compatibility between two users)
