@@ -20,11 +20,13 @@ GET/api/v1/availability: get all timeslots for the current user.
 Return:
 
 	200 OK: list of availabilities returned in JSON format
-		"id": <unique ID for each timeslot> INT
-		"user_id": <corresponding user> STRING
-		"start_time": <HH:MM> STRING
-		"end_time": <HH:MM> STRING
-		"day_of_week": <Monday - Sunday> STRING
+		{
+			"id": <unique ID for each timeslot> INT
+			"user_id": <corresponding user> STRING
+			"start_time": <HH:MM> STRING
+			"end_time": <HH:MM> STRING
+			"day_of_week": <Monday - Sunday> STRING
+		}
 	500 Internal Error: not able to get availability
 */
 func GetAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,20 +47,31 @@ func GetAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-POST/api/v1/availability: adds one new timeslot to `availability` for the current user.
+POST /api/v1/availability: Adds a new time slot to `availability` for the current user.
 
-Request Body:
-
-	JSON formatted availability, that corresponds to Availability Go struct
+Request Body: A JSON object representing the new availability (Overlapping availabilities will NOT be inserted)
+	{
+		"start_time": <Start time of the time slot in ISO 8601 format, e.g., "2024-11-28T10:00:00Z">,
+		"end_time": <End time of the time slot in ISO 8601 format, e.g., "2024-11-28T11:00:00Z">,
+		"day_of_week": <Day of the week, e.g., "Monday">
+	}
 
 Return:
-
-	200 OK: success message on insertion
-	409 CONFLICT: Return JSON:
-			"error":   "overlap_detected",
-			"message": "Time slot overlaps with an existing entry",
-			"conflict": Conflicting Availability Struct,
+	200 OK: Returns a success message
+	409 CONFLICT: Returns a JSON response indicating a time slot conflict with an existing entry:
+	{
+		"error": "overlap_detected",
+		"message": "Time slot overlaps with an existing entry",
+		"conflict": {
+			"id": <ID of the conflicting availability entry>,
+			"user_id": <User ID of the conflicting entry>,
+			"start_time": <Start time of the conflicting entry>,
+			"end_time": <End time of the conflicting entry>,
+			"day_of_week": <Day of the week for the conflicting entry>
+		}
+	}
 */
+
 func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--PostAvailabilityHandler--") // logging all queries
 	// extract ID, database, and request body
@@ -110,20 +123,21 @@ func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-PUT/api/v1/availability: updates a timeslot in `availability` for the current user.
+PUT /api/v1/availability: Updates an existing time slot in `availability` for the current user.
 
-Request Body:
+Request Body: A JSON object representing the updated availability entry
 
-	"id": <unique timeslot to update> INT
-	"user_id": <current user> STRING
-	"start_time": <New HH:MM> STRING
-	"end_time": <New HH:MM> STRING
-	"day_of_week": <New Monday - Sunday> STRING
+	{
+		"id": <ID of the time slot to update, must be unique and exist in the database>,
+		"start_time": <New start time of the time slot in ISO 8601 format, e.g., "2024-11-28T10:00:00Z">,
+		"end_time": <New end time of the time slot in ISO 8601 format, e.g., "2024-11-28T11:00:00Z">,
+		"day_of_week": <New day of the week, e.g., "Monday">
+	}
 
 Return:
 
-	200 OK: success message on update
-	400 BAD REQUEST: replies with an error message
+	200 OK: Returns a success message indicating that the time slot was successfully updated.
+	400 BAD REQUEST: Returns an error message indicating that the request is invalid or the update could not be processed.
 */
 func PutAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	var availability models.Availability
@@ -157,17 +171,19 @@ func PutAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-DELETE/api/v1/availability: deletes a timeslot by ID from `availability`, if it belongs to the current user.
+DELETE /api/v1/availability: Deletes a time slot from `availability` by ID, if it belongs to the current user.
 
-Request Body:
+Request Body: A JSON object containing the ID of the time slot to delete:
 
-	"id": <unique timeslot to update> INT
+	{
+		"id": <ID of the time slot to delete, must be unique and associated with the current user>
+	}
 
 Return:
 
-	200 OK: success message on deletion
-	400 BAD REQUEST: error if invalid format
-	500 INTERNAL ERROR: error if unable to delete
+	200 OK: Returns a success message confirming that the time slot was deleted.
+	400 BAD REQUEST: Returns an error message if the provided ID is in an invalid format or missing.
+	500 INTERNAL ERROR: Returns an error message if the deletion operation fails due to server or database issues.
 */
 func DeleteAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	type payload struct {

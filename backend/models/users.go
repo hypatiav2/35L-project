@@ -109,15 +109,38 @@ func PostUser(user User, db *sql.DB) error {
 
 // update user information
 func PatchUser(user User, db *sql.DB) error {
-	// SQL query to update the user
-	query := `
-		UPDATE users
-		SET name = ?, email = ?, bio = ? 
-		WHERE id = ?
-	`
+	// building the query
+	query := "UPDATE users SET"
+	var args []interface{}
 
-	// Execute query
-	result, err := db.Exec(query, user.Name, user.Email, user.Bio, user.ID)
+	// Conditionally add fields to the query if they are non-empty
+	if user.Name != "" {
+		query += " name = ?,"
+		args = append(args, user.Name)
+	}
+	if user.Email != "" {
+		query += " email = ?,"
+		args = append(args, user.Email)
+	}
+	if user.Bio != "" {
+		query += " bio = ?,"
+		args = append(args, user.Bio)
+	}
+
+	// If no fields were provided, error
+	if len(args) == 0 {
+		return errors.New("no valid fields to update")
+	}
+
+	// Remove last comma
+	query = query[:len(query)-1]
+
+	// Add the WHERE clause to specify which user to update
+	query += " WHERE id = ?"
+	args = append(args, user.ID)
+
+	// Execute the query
+	result, err := db.Exec(query, args...)
 	if err != nil {
 		return fmt.Errorf("failed to update user: %w", err)
 	}

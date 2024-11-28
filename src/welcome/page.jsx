@@ -2,117 +2,59 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const WelcomePage = () => {
-    
-    const navigate = useNavigate();
-    const handleLoginClick = () => {
-        navigate('/login');
-    };
+  const navigate = useNavigate();
+  const [showSignUpForm, setShowSignUpForm] = useState(false);
 
-    const [showSignUpForm, setShowSignUpForm] = useState(false);
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
 
-    const handleSignUpClick = () => {
-        setShowSignUpForm(true);
-    };
+  const handleSignUpClick = () => {
+    setShowSignUpForm(true);
+  };
 
-
-
-
-    return (
-
-    <div style={styles.container}>
+  return (
+    <div className="flex flex-col h-screen font-sans">
       {/* Navigation Bar */}
-      <nav style={styles.navbar}>
-        <div style={styles.logo}>Logo</div>
-        <div style={styles.loginButton} onClick={handleLoginClick}>
+      <nav className="flex justify-between px-8 py-4 border-b border-gray-300">
+        <div className="text-xl font-bold">Logo</div>
+        <div
+          className="text-blue-600 cursor-pointer hover:underline"
+          onClick={handleLoginClick}
+        >
           Log In
         </div>
       </nav>
 
-      <div style={styles.mainContent}>
+      <div className="flex flex-grow px-8 py-8 items-center">
         {showSignUpForm ? (
           <SignUpForm />
         ) : (
-          <div style={styles.textSection}>
-            <h1 style={styles.heading}>Bdate</h1>
-            <p style={styles.paragraph}>
-              Great website for dating
-            </p>
-            <button style={styles.signUpButton} onClick={handleSignUpClick}>Sign Up</button>
+          <div className="flex-1 pr-8">
+            <h1 className="text-4xl font-bold mb-4">Bdate</h1>
+            <p className="text-lg text-gray-600 mb-8">Great website for dating</p>
+            <button
+              className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
+              onClick={handleSignUpClick}
+            >
+              Sign Up
+            </button>
           </div>
         )}
-        <div style={styles.imagePlaceholder}></div>
+        <div className="flex-1 flex justify-center items-center bg-gray-200 h-72 w-full">
+          <div className="text-gray-500">Image Placeholder</div>
+        </div>
       </div>
-      </div>
+    </div>
   );
 };
 
 const SignUpForm = () => {
-    return (
-      <div> 
-            Hello you are filling out the sign up form
-      </div>
-    );
-};
-
-const styles = {
-  container: {
-    fontFamily: 'Arial, sans-serif',
-    height: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  navbar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '1rem 2rem',
-    borderBottom: '1px solid #e0e0e0',
-  },
-  logo: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-  },
-  loginButton: {
-    fontSize: '1rem',
-    color: '#007bff',
-    cursor: 'pointer',
-  },
-  mainContent: {
-    display: 'flex',
-    flexGrow: 1,
-    padding: '2rem',
-    alignItems: 'center',
-  },
-  textSection: {
-    flex: 1,
-    paddingRight: '2rem',
-  },
-  heading: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    marginBottom: '1rem',
-  },
-  paragraph: {
-    fontSize: '1rem',
-    color: '#555',
-    marginBottom: '2rem',
-  },
-  signUpButton: {
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    padding: '0.75rem 1.5rem',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    borderRadius: '4px',
-  },
-  imagePlaceholder: {
-    width: '50%',
-    height: '300px',
-    backgroundColor: '#e0e0e0',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  return (
+    <div className="text-lg text-center">
+      Hello, you are filling out the sign-up form.
+    </div>
+  );
 };
 
 export default WelcomePage;

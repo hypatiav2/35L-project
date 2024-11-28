@@ -33,6 +33,20 @@ func GetVectorHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // update similarity vector for the current user
+/*
+PUT /api/v1/vector: Inserts or updates the similarity vector for the current user. (NOT IMPLEMENTED YET)
+
+Request Body:
+
+	{
+	    "similarity_vector": <idk yet>
+	}
+
+Returns:
+
+	200 OK:
+	idk:
+*/
 func PutVectorHandler(w http.ResponseWriter, r *http.Request) {
 	
 	log.Println("--PutVectorHandler--") // logging all queries
