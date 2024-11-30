@@ -35,6 +35,7 @@ function App() {
                     </ProtectedRoute>
                 }
             />
+            <Route path='/viewprofiles' element={<ViewProfilesPage />} />
             <Route path='/profile' element={<ProfilePage />} />
             <Route path='/quiz' element={<QuizPage />} />
             <Route path="*" element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />} />
