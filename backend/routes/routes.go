@@ -29,7 +29,6 @@ func RegisterRoutes(r *mux.Router, db *sql.DB) {
 	// query similarity vector for the current user
 	r.HandleFunc("/vector", handlers.GetVectorHandler).Methods("GET")
 	r.HandleFunc("/vector", handlers.PutVectorHandler).Methods("PUT")
-	r.HandleFunc("/vector", handlers.DeleteVectorHandler).Methods("DELETE")
 
 	// query for matches
 	r.HandleFunc("/matches", handlers.GetMatchesHandler).Methods("GET")
