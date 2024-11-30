@@ -16,7 +16,7 @@ type WebhookPayload struct {
 }
 
 /*
-Insert, update, or delete a user from users table.
+POST PUT DELETE /api/v1/webhooks/users: Insert, update, or delete a user from the users table.
 
 Request Body:
 
@@ -28,6 +28,34 @@ Return:
 
 	200 OK on success
 	500 INTERNAL ERROR on failure
+*/
+/*
+POST/PUT/DELETE /api/v1/webhooks/users: Syncs user data in the system based on webhook events.
+
+Request Body: JSON formatted WebhookPayload with the following structure
+	{
+		"event": <event type: "INSERT", "UPDATE", or "DELETE">
+		"record": <JSON representation of the user data>
+	}
+
+EXAMPLE:
+	{
+		"event": "INSERT",
+		"record": {
+			"id": "123423rgoisdnczxfmd",
+			"name": "Timothy",
+			"email": "bruin@ucla.edu",
+			"bio": "loves to climb",
+			"vector": null,
+			"profile_picture": "https://example.com/images/johndoe.jpg"
+		}
+	}
+
+Return:
+
+	200 OK: Webhook processed successfully (user inserted, updated, or deleted)
+	500 INTERNAL ERROR: If an error occurs while processing the request or interacting with the database
+	400 BAD REQUEST: If the event type is unsupported or if the payload is malformed
 */
 func UserSyncWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract webhook payload from request body

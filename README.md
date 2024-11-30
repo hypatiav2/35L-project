@@ -47,20 +47,27 @@ The response should include the JWT token we need. When we call routes to our ba
 
 ### Route Endpoints
 
-**profiles**
-GET/api/v1/profiles: Retrieve JSON list of users
-POST/api/v1/profiles: add a new user.
-PATCH/api/v1/profiles: update the CURRENT user. 
-DELETE/api/v1/profiles: delete any user. 
+**users**
+GET /api/v1/users: Retrieve JSON list of users.
+GET /api/v1/users/me: Retrieve current user.
+POST /api/v1/profiles: add a new user.
+PATCH /api/v1/profiles: update the CURRENT user. 
+DELETE /api/v1/profiles: delete any user. 
 
 **availability**
-GET/api/v1/availability: get all timeslots for the current user.
-POST/api/v1/availability: add one new timeslot to `availability` for the current user.
-PUT/api/v1/availability: update a timeslot in `availability` for the current user.
-DELETE/api/v1/availability: delete a timeslot by ID from `availability`, if it belongs to the current user.
+GET /api/v1/availability: get all timeslots for the current user.
+POST /api/v1/availability: add one new timeslot to `availability` for the current user.
+PUT /api/v1/availability: update a timeslot in `availability` for the current user.
+DELETE /api/v1/availability: delete a timeslot by ID from `availability`, if it belongs to the current user.
 
-**search**
-GET/api/v1/search: get list of users with overlapping availability with current user. List ranked by similarity.
+**vector**
+GET /api/v1/vector: get similarity vector for current user.
+PUT /api/v1/vector: create new similarity vector or update existing vactor for current user.
+DELETE /api/v1/vector: set similarity vector to null for current user.
+
+
+**matches**
+GET /api/v1/matches: Get "count" number of top matches with current user, with "offset" offset from closest match.
 
 **webhooks** 
 POST/api/v1/webhooks/users: insert new user. Automatically called by supabase. 
