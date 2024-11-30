@@ -1,10 +1,8 @@
 # Documentation For Using Our Endpoints
 
-Queries to our API should request `http://localhost:8080/api/v1/`
-
 When testing the endpoint (not through the frontend), we need to manually supply a JWT to authenticate our requests.  
 
-> Call the endpoint `https://<OUR_SUPABASE_URL_THING>/auth/v1/token?grant_type=password`  
+> First call the endpoint `https://<OUR_SUPABASE_URL_THING>/auth/v1/token?grant_type=password`  
 > 
 > REQUEST HEADER:
 > "Content-Type": application/json  
@@ -15,11 +13,17 @@ When testing the endpoint (not through the frontend), we need to manually supply
 > {  
 >      "email": "admin@gmail.com",
 >      "password": "123456"  
-> } 
+> }
+
+The JWT is the value of "access_token". For all the following API queries, the format should be:
+> Endpoint: `http://localhost:8080/api/v1/{remaining API route}`
+> REQUEST HEADER:
+> "Bearer": {insert JWT}
+
 
 ## Availability
 
-**`GET/api/v1/availability`**: get all timeslots for the current user.
+**`GET /api/v1/availability`**: get all timeslots for the current user.
 
 Return:
 

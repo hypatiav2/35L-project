@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -19,14 +20,35 @@ type Match struct {
 func ComputeMatches(userID string, db *sql.DB) ([]Match, error) {
 
 	// Step 1: Fetch the user's availability and vector
+	availability, err := models.GetAvailability(userID, db)
+	if err != nil {
+		fmt.Printf("Error fetching availiability: %v\n", err) // Log query error
+		return nil, err
+	}
+
+	vector, err := models.GetUserVector(userID, db)
+	if err != nil {
+		fmt.Printf("Error fetching vector: %v\n", err) // Log query error
+		return nil, err
+	}
 
 	// Step 2: Find users with overlapping availabilities
+	matches, err := models.GetAllAvailable(userID, db)
+	if err != nil {
+		fmt.Printf("Error finding users with overlapping availabilities: %v\n", err) // Log query error
+		return nil, err
+	}
 
 	// Step 3: Compute similarities
+	rankedMatches, err := models.ComputeSimilarity(matches, userID, db)
+	if err != nil {
+		fmt.Printf("Error computing similarities: %v\n", err) // Log query error
+		return nil, err
+	}
 
 	// Return list of match objects
 
-	return nil, nil
+	return rankedMatches, nil
 }
 
 // Update matches table, which stores the top BATCH_SIZE most similar matches for any given user

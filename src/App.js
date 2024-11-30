@@ -17,9 +17,7 @@ function App() {
 
     // Redirect on load
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/viewprofiles');
-        } else {
+        if (!isAuthenticated) {
             navigate('/welcome');
         }
     }, [ isAuthenticated ]);
@@ -36,6 +34,7 @@ function App() {
                     </ProtectedRoute>
                 }
             />
+            <Route path='/viewprofiles' element={<ViewProfilesPage />} />
             <Route path='/profile' element={<ProfilePage />} />
             <Route path='/quiz' element={<QuizPage />} />
             <Route path='/schedule' element={<SchedulePage />} />
