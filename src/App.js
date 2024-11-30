@@ -16,9 +16,7 @@ function App() {
 
     // Redirect on load
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/viewprofiles');
-        } else {
+        if (!isAuthenticated) {
             navigate('/welcome');
         }
     }, [ isAuthenticated ]);
