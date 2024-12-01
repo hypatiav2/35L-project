@@ -85,6 +85,15 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      profilePicture: file, // Store the selected file
+    }));
+  };
+
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
     setShowQuizForm(true);
@@ -154,6 +163,29 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
                 required
             />
+        </div>
+
+
+
+
+
+        {/* Profile Picture Upload */}
+        <div>
+          <label className="block text-sm font-medium text-black-600 mb-2">
+            Upload Profile Picture
+          </label>
+          <input
+            type="file"
+            name="profilePicture"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          />
+          {formData.profilePicture && (
+            <p className="text-sm text-gray-600 mt-2">
+              Selected: {formData.profilePicture.name}
+            </p>
+          )}
         </div>
 
         {/* Submit Button */}
