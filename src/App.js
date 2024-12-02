@@ -9,10 +9,12 @@ import QuizPage from './quiz/page';
 import ProtectedRoute from './ProtectedRoute';
 import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
+import SchedulePage from './schedule/page';
 
 function App() {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
+
 
     return (
         <Routes>
@@ -29,6 +31,7 @@ function App() {
             <Route path='/viewprofiles' element={<ViewProfilesPage />} />
             <Route path='/profile' element={<ProfilePage />} />
             <Route path='/quiz' element={<QuizPage />} />
+            <Route path='/schedule' element={<SchedulePage />} />
             <Route path="*" element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />} />
         </Routes>
     );
