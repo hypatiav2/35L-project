@@ -26,15 +26,6 @@ export default function QuizPage() {
 
   const handleSubmit = (e) => {
       e.preventDefault();
-
-      const s = [...scores];
-
-      for(var i = 0; i < contents.length; i++) {
-        if(s[i] === null) {
-          console.error("not all questions were answered")
-          return;
-        }
-      }
       
       console.log('Form Submitted:', scores);
       // Example: submitToBackend(formData);
@@ -89,7 +80,7 @@ function Option({ name, value, message, onChange }) {
   return (
     <li>
       <label>
-        <input type="radio" name={name} value={value} onChange={() => onChange(name, value)}></input>{message}
+        <input type="radio" name={name} value={value} required onChange={() => onChange(name, value)}></input>{message}
       </label>
     </li>
   )
