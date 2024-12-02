@@ -1,8 +1,10 @@
 import React from 'react';
 import Navbar from '../home/navbar';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function QuizPage() {
+  const navigate = useNavigate();
   const contents=[
     ["How much do you talk?", "1 - Mute", "5 - Fluent in Yapanese"],
     ["How much do you like your alone time?", "1 - Always with people", "5 - Always alone"],
@@ -29,6 +31,8 @@ export default function QuizPage() {
       
       console.log('Form Submitted:', scores);
       // Example: submitToBackend(formData);
+
+      navigate('/home')
   };
   
   return (
