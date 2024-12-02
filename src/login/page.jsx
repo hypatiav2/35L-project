@@ -12,20 +12,20 @@ export default function LoginPage()
     const navigate = useNavigate();
 
     // // Check for an active session on page load
-    // useEffect(() => {
-    //     const supabase = getSupabaseClient();
-    //     // Listen for auth state changes
-    //     const { data: authListener } = supabase.auth.onAuthStateChange(
-    //         (event, session) => {
-    //             setSession(session)
-    //         }
-    //     )
+    useEffect(() => {
+        const supabase = getSupabaseClient();
+        // Listen for auth state changes
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                setSession(session)
+            }
+        )
 
-    //     // Cleanup the listener on component unmount
-    //     return () => {
-    //         authListener.subscription.unsubscribe()
-    //     }
-    // }, [])
+        // Cleanup the listener on component unmount
+        return () => {
+            authListener.subscription.unsubscribe()
+        }
+    }, [])
 
     useEffect(() =>
     {
