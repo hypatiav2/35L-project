@@ -15,12 +15,6 @@ function App() {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    // Redirect on load
-    useEffect(() => {
-        if (!isAuthenticated) {
-            navigate('/welcome');
-        }
-    }, [ isAuthenticated ]);
 
     return (
         <Routes>

@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 )
 
@@ -19,30 +18,17 @@ type Match struct {
 // Compute all matches for a user, based on their availability and with an associated similarity score
 func ComputeMatches(userID string, db *sql.DB) ([]Match, error) {
 
-	// Step 1: Fetch the user's availability and vector
-	availability, err := models.GetAvailability(userID, db)
+	// Step 1: Find users with overlapping availabilities
+	matches, err := GetAllAvailable(userID, db)
 	if err != nil {
-		fmt.Printf("Error fetching availiability: %v\n", err) // Log query error
+		fmt.Printf("Error finding users with overlapping availabilities: %v\n", err)
 		return nil, err
 	}
 
-	vector, err := models.GetUserVector(userID, db)
+	// Step 2: Compute similarities
+	rankedMatches, err := ComputeSimilarity(matches, userID, db)
 	if err != nil {
-		fmt.Printf("Error fetching vector: %v\n", err) // Log query error
-		return nil, err
-	}
-
-	// Step 2: Find users with overlapping availabilities
-	matches, err := models.GetAllAvailable(userID, db)
-	if err != nil {
-		fmt.Printf("Error finding users with overlapping availabilities: %v\n", err) // Log query error
-		return nil, err
-	}
-
-	// Step 3: Compute similarities
-	rankedMatches, err := models.ComputeSimilarity(matches, userID, db)
-	if err != nil {
-		fmt.Printf("Error computing similarities: %v\n", err) // Log query error
+		fmt.Printf("Error computing similarities: %v\n", err)
 		return nil, err
 	}
 
@@ -54,7 +40,7 @@ func ComputeMatches(userID string, db *sql.DB) ([]Match, error) {
 // Update matches table, which stores the top BATCH_SIZE most similar matches for any given user
 func UpdateMatches(userID string, db *sql.DB) error {
 
-	// Clear old matches (if any) ClearMatches
+	// Clear old matches (if any)
 	ClearMatches(userID, db)
 
 	// Call ComputeMatches
@@ -63,13 +49,19 @@ func UpdateMatches(userID string, db *sql.DB) error {
 		return err
 	}
 
+	// Prepare query
+	query := "INSERT INTO matches (user1_id, user2_id, similarity_score, match_status) VALUES (?, ?, ?, ?)"
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement: %w", err)
+	}
+	defer stmt.Close()
+
 	// Take the top 50 matches and insert into matches table
 	for i := 0; i < BATCH_SIZE; i++ {
 		currentMatch := computedMatches[i]
 
-		query := "INSERT INTO matches (user1_id, user2_id, similarity_score, match_status) VALUES (?, ?, ?)"
-
-		_, err = db.Exec(query, currentMatch.User1ID, currentMatch.User2ID, currentMatch.Similarity, currentMatch.Status)
+		_, err = stmt.Exec(currentMatch.User1ID, currentMatch.User2ID, currentMatch.Similarity, currentMatch.Status)
 		if err != nil {
 			return err
 		}
@@ -117,11 +109,9 @@ func GetMatches(userID string, db *sql.DB) ([]Match, error) {
 
 // Clear all the matches for userID in the matches table
 func ClearMatches(userID string, db *sql.DB) error {
-
-	// SHOULD DELETE IF userID matches user1id OR user2id
-
 	query := "DELETE FROM matches WHERE user1_id = ? OR user2_id = ?"
-	_, err := db.Exec(query, userID)
+
+	_, err := db.Exec(query, userID, userID)
 	if err != nil {
 		fmt.Printf("failed to delete matches: %v", err)
 		return err

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/base64"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -85,14 +86,23 @@ Return:
 */
 func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--PostUserHandler--") // Log all requests
-	// Extract db from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 
-	// decode the user from the request body
+	// Decode the user from the request body
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
+	}
+
+	// Decode profile picture from base64 (if provided)
+	if user.ProfilePicture != "" {
+		decodedPicture, err := base64.StdEncoding.DecodeString(user.ProfilePicture)
+		if err != nil {
+			http.Error(w, "Invalid profile picture encoding", http.StatusBadRequest)
+			return
+		}
+		user.ProfilePicture = string(decodedPicture)
 	}
 
 	// Call the PostUser function to insert the user into the database
@@ -105,6 +115,7 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
+
 
 /*
 PATCH /api/v1/users: Updates the profile of the current user.

@@ -1,13 +1,13 @@
 package handlers
 
-import {
+import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"go-react-backend/contextkeys"
 	"go-react-backend/models"
+	"log"
 	"net/http"
-}
+)
 
 /*
 GET /api/v1/matches: find the top matches for a user.
@@ -44,7 +44,7 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(contextkeys.UserIDKey).(string)
 
 	type Data struct {
-		Count int `json:"count"`
+		Count  int `json:"count"`
 		Offset int `json:"offset"`
 	}
 
@@ -54,30 +54,27 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var matches []Match
-	var err Error
+	var matches []models.Match
+	var err error
 
-	// If offset + count < 50 matches, our matches table will contain the matches
-	// call models.GetMatches to get matches from our table
-
-	if data.offset + data.count <= 50 {
+	if data.Offset+data.Count <= 50 {
+		// If offset + count < 50 matches, call models.GetMatches to get matches from our table
 		matches, err = models.GetMatches(userID, db)
 		if err != nil {
 			http.Error(w, "Error getting matches", http.StatusInternalServerError)
 			return
 		}
 	}
-
-	// If offset + count > 50, or if querying GetMatches didn't return enough matches, call models.ComputeMatches
-	// return appropriate matches
-
-	else {
+	if data.Offset+data.Count > 50 || len(matches) <= data.Offset+data.Count {
+		// If offset + count > 50, or if querying GetMatches didn't return enough matches, call models.ComputeMatches return appropriate matches
 		matches, err = models.ComputeMatches(userID, db)
 		if err != nil {
 			http.Error(w, "Error computing matches", http.StatusInternalServerError)
 			return
 		}
 	}
+
+	// Now need to return the right subset of the matches
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(matches)

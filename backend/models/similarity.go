@@ -6,12 +6,9 @@ package models
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"math"
 	"sort"
-	"strings"
-	"errors"
 )
 
 /*
@@ -35,26 +32,27 @@ func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Match, erro
 		return nil, fmt.Errorf("failed to retrieve vectors: %w", err)
 	}
 
-	currentUserVector, exists := vectors[userID]
-	if !exists {
+	currentUserVector, err := GetUserVector(userID, db)
+	if err != nil {
 		return nil, fmt.Errorf("current user vector not found for user ID: %s", userID)
 	}
-	delete(vectors, userID) // Remove the current user from the comparison list
+
+	delete(vectors, userID) // If users also includes the current user
 
 	// STEP 2. calculate similarity for each user: CosineSimilarity
 
 	similarityScores := make(map[string]float64)
 	for user2ID, vector := range vectors {
-		similarityScores[user2ID] = CosineSimilarity(currentUserVector, vector)
+		score := CosineSimilarity(currentUserVector, vector)
+		if score == -1 {
+			// check for mismatched vectors
+			return nil, fmt.Errorf("found a vector of the wrong length: %d", len(vector))
+		} else {
+			similarityScores[user2ID] = score
+		}
 	}
 
-	// for key, value := range vectors {
-	// 	vectors[key] = CosineSimilarity(value)
-	// }
-
 	// STEP 3. return a list of sorted matches
-
-	// sortedScores := SortSimilarities(similarityScores)
 
 	var sortedMatches []Match
 	for user2ID, score := range similarityScores {
@@ -67,7 +65,7 @@ func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Match, erro
 		sortedMatches = append(sortedMatches, match)
 	}
 
-	// Sort the slice based on similarity score in descending order
+	// Sort the vector based on similarity score in descending order
 	sort.Slice(sortedMatches, func(i, j int) bool {
 		return sortedMatches[i].Similarity > sortedMatches[j].Similarity
 	})
