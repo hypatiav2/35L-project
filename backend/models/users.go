@@ -85,15 +85,14 @@ func GetUserByID(userID string, db *sql.DB) (User, error) {
 	return u, nil
 }
 
-// post user to user table DOESNT POST VECTOR AND PROFILE PICTURE
 func PostUser(user User, db *sql.DB) error {
 	fmt.Printf("Posting user to the database...\n") // Log to indicate function is called
 	stmt, err := db.Prepare(`
-		INSERT INTO users (id, name, email, bio)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO users (id, name, email, bio, profile_picture)
+		VALUES (?, ?, ?, ?, ?)
 	`)
 	if err != nil {
-		fmt.Printf("Error posting user.")
+		fmt.Printf("Error preparing statement: %v\n", err)
 		return err
 	}
 	defer stmt.Close()
@@ -103,9 +102,11 @@ func PostUser(user User, db *sql.DB) error {
 		user.Name,
 		user.Email,
 		user.Bio,
+		user.ProfilePicture, // Add profile picture
 	)
 	return err
 }
+
 
 // update user information
 func PatchUser(user User, db *sql.DB) error {

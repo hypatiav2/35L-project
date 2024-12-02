@@ -54,17 +54,6 @@ export function AuthProvider({ children }) {
             console.log('Login successful!')
             // Try out a protected request to backend! (logging results to console)
             const jwtToken = data.session.access_token;
-            try {
-                const data = await fetchProtectedData(jwtToken); // call our route to backend
-                if (data) {
-                    console.log('We got data yay!', data);
-                } else {
-                    console.error('No data returned. Possible authentication failure?');
-                }
-            } catch (error) {
-                console.error('Error fetching protected data:', error);
-            }
-
             setIsAuthenticated(true);
             return true;
         }

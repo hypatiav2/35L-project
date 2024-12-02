@@ -191,12 +191,14 @@ Return:
 **`POST /api/v1/users`**: Adds a new user to the db.
 
 Request Body:
-	{
-		"id": <unique identifier for the user> STRING,
-		"name": <user's name> STRING,
-		"email": <UNIQUE email for the user> STRING,
-		"bio": <short biography of the user> STRING
-	}
+{
+    "id": "<unique identifier for the user> STRING",
+    "name": "<user's name> STRING",
+    "email": "<unique email for the user> STRING",
+    "bio": "<short biography of the user> STRING",
+    "profile_picture": "<base64-encoded profile picture> STRING (optional)"
+}
+
 
 Return:
 
