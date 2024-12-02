@@ -158,7 +158,39 @@ func GetOverlapping(availability Availability, db *sql.DB) (*Availability, error
 
 // Given a user, return a list of all users who have overlapping availability
 func GetAllAvailable(userID string, db *sql.DB) ([]string, error) {
+	var availableUsers []string
 
-	// IMPLEMENT THIS
-	return nil, nil
+	// Query availability table for entries that overlap
+
+	overlapQuery := `
+		SELECT DISTINCT a.user_id
+		FROM availability a
+		JOIN availability b
+		ON a.day_of_week = b.day_of_week
+		AND a.start_time < b.end_time
+		AND a.end_time > b.start_time
+		WHERE b.user_id = ? AND a.user_id != b.user_id
+	`
+
+	// query the db
+	overlapRows, err := db.Query(overlapQuery, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get overlapping availability: %v", err)
+	}
+	defer overlapRows.Close()
+
+	// append overlapping entries
+	for overlapRows.Next() {
+		var otherUserID string
+		if err := overlapRows.Scan(&otherUserID); err != nil {
+			return nil, fmt.Errorf("failed to scan overlapping user ID: %v", err)
+		}
+		availableUsers = append(availableUsers, otherUserID)
+	}
+
+	if err := overlapRows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate over overlapping users: %v", err)
+	}
+
+	return availableUsers, nil
 }

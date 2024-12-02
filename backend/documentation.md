@@ -18,7 +18,7 @@ When testing the endpoint (not through the frontend), we need to manually supply
 The JWT is the value of "access_token". For all the following API queries, the format should be:
 > Endpoint: `http://localhost:8080/api/v1/{remaining API route}`
 > REQUEST HEADER:
-> "Bearer": {insert JWT}
+> "Authorization": "Bearer <JWT_HERE>"
 
 
 ## Availability
@@ -191,12 +191,14 @@ Return:
 **`POST /api/v1/users`**: Adds a new user to the db.
 
 Request Body:
-	{
-		"id": <unique identifier for the user> STRING,
-		"name": <user's name> STRING,
-		"email": <UNIQUE email for the user> STRING,
-		"bio": <short biography of the user> STRING
-	}
+{
+    "id": "<unique identifier for the user> STRING",
+    "name": "<user's name> STRING",
+    "email": "<unique email for the user> STRING",
+    "bio": "<short biography of the user> STRING",
+    "profile_picture": "<base64-encoded profile picture> STRING (optional)"
+}
+
 
 Return:
 
@@ -235,17 +237,29 @@ Return:
 
 ## Vector
 
+**`GET /api/v1/vector`**: gets the similarity vector for the current user.
+
+Returns:
+
+	200 OK: Successful fetch
+		{
+			"similarity_vector": <json array of ints that is the similarity vector>
+		}
+	500 INTERNAL ERROR: Could not fetch user vector
+
 
 **`PUT /api/v1/vector`**: Inserts or updates the similarity vector for the current user. (NOT IMPLEMENTED YET)
 
 Request Body:
-    {
-        "similarity_vector": <idk yet>
-    }
+	{
+	    "similarity_vector": <[json array of ints]>
+	}
 
 Returns:
-    200 OK: 
-    idk:
+
+	200 OK: Successful update
+	400 BAD REQUEST: response body was not formatted correctly
+	500 INTERNAL ERROR: Could not update
 
 
 ## User_Sync

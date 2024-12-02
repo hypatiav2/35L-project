@@ -2,12 +2,13 @@ package models
 
 import (
 	"database/sql"
-	"errors"
+	"encoding/json"
 	"fmt"
+	"strings"
 )
 
-// Return similarity vector for given user
-func GetUserVector(userID string, db *sql.DB) (string, error) {
+// Return the similarity vector for a given user
+func GetUserVector(userID string, db *sql.DB) ([]int, error) {
 	var vectorJSON string
 
 	// Query the vector as a JSON string
@@ -18,17 +19,28 @@ func GetUserVector(userID string, db *sql.DB) (string, error) {
 		} else {
 			fmt.Printf("Error querying user vector: %v\n", err)
 		}
-		return "", err
+		return nil, err
 	}
 
-	// Return the JSON string
-	return vectorJSON, nil
+	// turn the string into an array
+	var vector []int
+	err = json.Unmarshal([]byte(vectorJSON), &vector)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal vector JSON: %w", err)
+	}
+
+	// Return the array
+	return vector, nil
 }
 
 // update similarity vector for the current user
-func UpdateUserVector(vectorJSON string, userID string, db *sql.DB) error {
+func UpdateUserVector(vector []int, userID string, db *sql.DB) error {
+	vectorJSON, err := json.Marshal(vector)
+	if err != nil {
+		return fmt.Errorf("failed to convert vector to JSON: %w", err)
+	}
 
-	_, err := db.Exec("UPDATE users SET vector = ? WHERE id = ?", vectorJSON, userID)
+	_, err = db.Exec("UPDATE users SET vector = ? WHERE id = ?", vectorJSON, userID)
 	if err != nil {
 		fmt.Printf("Error updating user vector.")
 		return err
@@ -53,13 +65,15 @@ Returns:
 		Map from userID to corresponding vector
 */
 func GetVectors(userIDs []string, db *sql.DB) (map[string][]int, error) {
-	// Build a dynamic query with placeholders
-	placeholders := make([]string, len(userIDs))
-	args := make([]interface{}, len(userIDs))
+
+	placeholders := make([]string, len(userIDs)) // query placeholder values
+	args := make([]interface{}, len(userIDs))    // query actual values
 	for i, id := range userIDs {
 		placeholders[i] = "?"
 		args[i] = id
 	}
+
+	// create a dynamic query with enough args for userIDs
 	query := fmt.Sprintf(
 		"SELECT id, vector FROM users WHERE id IN (%s)",
 		strings.Join(placeholders, ","),
@@ -73,7 +87,7 @@ func GetVectors(userIDs []string, db *sql.DB) (map[string][]int, error) {
 	defer rows.Close()
 
 	// Parse the results
-	vectors := make(map[string][]int)
+	users := make(map[string][]int)
 	for rows.Next() {
 		var userID string
 		var vectorJSON string
@@ -87,8 +101,8 @@ func GetVectors(userIDs []string, db *sql.DB) (map[string][]int, error) {
 			return nil, fmt.Errorf("failed to unmarshal vector: %w", err)
 		}
 
-		vectors[userID] = vector
+		users[userID] = vector
 	}
 
-	return vectors, nil
+	return users, nil
 }

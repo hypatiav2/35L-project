@@ -9,20 +9,68 @@ export default function ProfilePage() {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [bio, setBio] = useState('');
+    const [profilePicture, setProfilePicture] = useState(null);
+    const { isAuthenticated, getSupabaseClient } = useAuth();
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!isAuthenticated) {
+            alert('You must be logged in to update your profile.');
+            return;
+        }
+
+        const supabase = getSupabaseClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        const jwtToken = session?.access_token;
+
+        if (!jwtToken) {
+            alert('Unable to retrieve authentication token. Please log in again.');
+            return;
+        }
+
+        // Read the profile picture file as a base64 string
+        let profilePictureBase64 = '';
+        if (profilePicture) {
+            const reader = new FileReader();
+            reader.readAsDataURL(profilePicture);
+            profilePictureBase64 = await new Promise((resolve) => {
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+            });
+        }
+
         const formData = {
-            name: name,
-            email: email,
-            phone: phone,
-            bio: bio,
+            name,
+            email,
+            phone,
+            bio,
+            profile_picture: profilePictureBase64,
         };
 
-        console.log('Form Submitted:', formData);
-        // Example: submitToBackend(formData);
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/users', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwtToken}`, // Use the JWT token
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                const userData = await response.json();
+                console.log('User created:', userData);
+                alert('Profile created successfully!');
+            } else {
+                const errorData = await response.json();
+                console.error('Error creating profile:', errorData);
+                alert('Error creating profile. Check the console for details.');
+            }
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            alert('Unexpected error occurred. Check the console for details.');
+        }
     };
 
     return (
@@ -70,6 +118,16 @@ export default function ProfilePage() {
                                 onChange={(e) => setBio(e.target.value)}
                                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 rows="4"
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label htmlFor="profile-picture" className="text-gray-600 font-medium mb-2">Profile Picture:</label>
+                            <input
+                                type="file"
+                                id="profile-picture"
+                                accept="image/*"
+                                onChange={(e) => setProfilePicture(e.target.files[0])}
+                                className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
                         <div className="flex justify-center">
