@@ -2,6 +2,8 @@ import React from 'react';
 import Navbar from './navbar';
 import { useState, useEffect } from 'react';
 import DropdownComponent from './DateSearchDropdown';
+import { useAuth } from '../AuthContext';
+import { dbGetRequest } from '../api/db';
 
 function DateOption({ name, startTime, endTime, matchID, scheduleDate }) {
     function formatDateAbbreviated(isoDateString) {
@@ -37,6 +39,7 @@ function FindDatePage({ dates }) {
     const handleApplyClick = () => {
         if (!dates) return;
         let filtered = dates;
+        console.log(filtered)
 
         if (selectedFilters.length > 0) {
             filtered = dates.filter((user) => {
@@ -56,6 +59,7 @@ function FindDatePage({ dates }) {
                 });
             });
         }
+        console.log(filtered)
 
         setFilteredDates(filtered);
     };
@@ -95,9 +99,9 @@ function FindDatePage({ dates }) {
             <div className="w-full overflow-x-auto">
                 <div className="flex space-x-2">
                     {filteredDates.length > 0 ? (
-                        filteredDates.map((user, index) => (
+                        filteredDates.map((date, index) => (
                             <div key={index} className="flex-shrink-0">
-                                <DateOption matchID={user.match_id} name={user.name} startTime={user.date_start} endTime={ user.date_end } />
+                                <DateOption matchID={date.match_id} name={date.name} startTime={date.date_start} endTime={ date.date_end } />
                             </div>
                         ))
                     ) : (
@@ -109,9 +113,7 @@ function FindDatePage({ dates }) {
     );
 }
 
-function PendingDatePage({ dates }) {
-    const confirmedDates = dates.filter((date) => date.is_confirmed);
-
+function PendingDatePage({ confirmedDates }) {
     return (
         <div className="p-6 space-y-4">
             <h1 className="text-2xl font-bold text-center text-blue-600">Confirmed Dates</h1>
@@ -146,124 +148,19 @@ function PendingDatePage({ dates }) {
 
 export default function HomePage() {
     const [view, setView] = useState('find');
-    const [dates, setDates] = useState([]);
-
+    const [ dates, setDates ] = useState([]);
+    const [ confirmedDates, setConfirmedDates ] = useState([]);
+    const { isAuthenticated, getSupabaseClient } = useAuth();
+    
     useEffect(() => {
-        fetch('http://localhost:8080/api/v1/dates')
-            .then((response) => response.json())
-            .then((data) => setDates(data))
-            .catch((err) => {
-                console.error('Error fetching profiles:', err);
-                const testDates = [
-                    {
-                        id: 1,
-                        match_id: 101,
-                        date_start: "2024-12-01T09:00:00Z",
-                        date_end: "2024-12-01T10:00:00Z",
-                        is_confirmed: true,
-                    },
-                    {
-                        id: 2,
-                        match_id: 102,
-                        date_start: "2024-12-02T11:00:00Z",
-                        date_end: "2024-12-02T12:00:00Z",
-                        is_confirmed: false,
-                    },
-                    {
-                        id: 3,
-                        match_id: 103,
-                        date_start: "2024-12-03T13:00:00Z",
-                        date_end: "2024-12-03T14:00:00Z",
-                        is_confirmed: true,
-                    },
-                    {
-                        id: 4,
-                        match_id: 104,
-                        date_start: "2024-12-04T15:30:00Z",
-                        date_end: "2024-12-04T16:30:00Z",
-                        is_confirmed: false,
-                    },
-                    {
-                        id: 5,
-                        match_id: 105,
-                        date_start: "2024-12-05T17:00:00Z",
-                        date_end: "2024-12-05T18:00:00Z",
-                        is_confirmed: true,
-                    },
-                    {
-                        id: 6,
-                        match_id: 106,
-                        date_start: "2024-12-06T09:30:00Z",
-                        date_end: "2024-12-06T10:30:00Z",
-                        is_confirmed: false,
-                    },
-                    {
-                        id: 7,
-                        match_id: 107,
-                        date_start: "2024-12-07T11:00:00Z",
-                        date_end: "2024-12-07T12:00:00Z",
-                        is_confirmed: true,
-                    },
-                    {
-                        id: 8,
-                        match_id: 108,
-                        date_start: "2024-12-08T13:30:00Z",
-                        date_end: "2024-12-08T14:30:00Z",
-                        is_confirmed: false,
-                    },
-                    {
-                        id: 9,
-                        match_id: 109,
-                        date_start: "2024-12-09T15:00:00Z",
-                        date_end: "2024-12-09T16:00:00Z",
-                        is_confirmed: true,
-                    },
-                    {
-                        id: 10,
-                        match_id: 110,
-                        date_start: "2024-12-10T17:30:00Z",
-                        date_end: "2024-12-10T18:30:00Z",
-                        is_confirmed: false,
-                    },
-                    {
-                        id: 11,
-                        match_id: 111,
-                        date_start: "2024-12-11T09:00:00Z",
-                        date_end: "2024-12-11T10:00:00Z",
-                        is_confirmed: true,
-                    },
-                    {
-                        id: 12,
-                        match_id: 112,
-                        date_start: "2024-12-12T11:30:00Z",
-                        date_end: "2024-12-12T12:30:00Z",
-                        is_confirmed: false,
-                    },
-                    {
-                        id: 13,
-                        match_id: 113,
-                        date_start: "2024-12-13T13:00:00Z",
-                        date_end: "2024-12-13T14:00:00Z",
-                        is_confirmed: true,
-                    },
-                    {
-                        id: 14,
-                        match_id: 114,
-                        date_start: "2024-12-14T15:30:00Z",
-                        date_end: "2024-12-14T16:30:00Z",
-                        is_confirmed: false,
-                    },
-                    {
-                        id: 15,
-                        match_id: 115,
-                        date_start: "2024-12-15T17:00:00Z",
-                        date_end: "2024-12-15T18:00:00Z",
-                        is_confirmed: true,
-                    },
-                ];
-                setDates(testDates);
-            });
-    }, []);
+        function setDateData(data)
+        {
+            setDates(data);
+            setConfirmedDates(dates.filter((date) => date.is_confirmed));
+            console.log(data);
+        }
+        dbGetRequest('/api/v1/dates', setDateData, isAuthenticated, getSupabaseClient);
+    }, [ isAuthenticated, getSupabaseClient ]);
 
     return (
         <div>
@@ -290,7 +187,7 @@ export default function HomePage() {
                             onClick={() => setView('pending')}
                         >
                             Pending Dates{' '}
-                            <span className="text-sm text-gray-500">({dates.length})</span>
+                            <span className="text-sm text-gray-500">({confirmedDates.length})</span>
                         </button>
                     </div>
                 </div>
@@ -299,7 +196,7 @@ export default function HomePage() {
                     {view === 'find' ? (
                         <FindDatePage dates={dates} />
                     ) : (
-                        <PendingDatePage dates={dates} />
+                        <PendingDatePage confirmedDates={confirmedDates} />
                     )}
                 </div>
             </div>

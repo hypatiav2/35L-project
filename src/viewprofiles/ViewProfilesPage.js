@@ -9,7 +9,7 @@ function ViewProfilesPage() {
     const { isAuthenticated, getSupabaseClient } = useAuth();
 
     useEffect(() => {
-        dbGetRequest('http://localhost:8080/api/v1/users', setProfiles, isAuthenticated, getSupabaseClient);
+        dbGetRequest('/api/v1/users', setProfiles, isAuthenticated, getSupabaseClient);
     }, [ isAuthenticated, getSupabaseClient ]);
 
     return (
