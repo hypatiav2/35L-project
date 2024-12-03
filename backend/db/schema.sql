@@ -21,6 +21,9 @@ CREATE TABLE matches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user1_id TEXT NOT NULL,
     user2_id TEXT NOT NULL,
+    day_of_week TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
     similarity_score REAL,
     FOREIGN KEY(user1_id) REFERENCES users(id),
     FOREIGN KEY(user2_id) REFERENCES users(id)

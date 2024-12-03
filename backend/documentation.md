@@ -90,48 +90,84 @@ Return:
 
 ## Dates
 
-**`GET /api/v1/dates/{matchId}`**: Retrieves the dates corresponding to a specific matchId.
+**`GET /api/v1/dates/status?`**: Retrieves the dates for the current user. Optionally only get dates with a certain status by specifying the request url.
 
-- If the matchId is not provided, returns all matchIds and their corresponding dates for the current user.
-- matchId must be an integer > 0, provided in the request params (url)
+Request Params:
+
+	"status" = "pending", "confirmed", "rejected"
+
+Example:
+
+	GET `/api/v1/dates/pending` would return only pending dates.
 
 Returns:
-    200 OK: Returns a list of matches with their respective dates.
-        {
-            "match_id": <match_id> INT,
-            "dates": [
-                {
-                    "id": <int>,
-                    "match_id": <int>,
-                    "date_start": "<date_start> ISO 8601 format",
-                    "date_end": "<date_end> ISO 8601 format",
-                    "is_confirmed": <boolean>
-                },
-                ...
-            ]
-        }
-    500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
-    400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
+
+	200 OK: Returns a list of matches with their respective dates.
+	    {
+	        "match_id": <match_id> INT,
+	        "dates": [
+	            {
+	                "id": <int>,
+	                "user1_id": <current user id > STRING,
+					"user2_id": <other user id > STRING,
+	                "date_start": "<date_start> ISO 8601 format",
+	                "date_end": "<date_end> ISO 8601 format",
+	                "status": <boolean>
+	            },
+	            ...
+	        ]
+	    }
+	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
+	400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
 
 **`POST /api/v1/dates`**: Inserts a new date associated with a particular matchId.
 
 Request Body:
-    {
-        "match_id": <id of the match this date will correspond to> INT,
-        "date_start": "<when the date will start> ISO 8601 format",
-        "date_end": "<when the date will end> ISO 8601 format",
-        "is_confirmed": <whether the date is confirmed; defaults to FALSE if not provided> BOOL
-    }
+	{
+		"user2_id": <the other user ID> string
+	    "date_start": "<when the date will start> ISO 8601 format",
+	    "date_end": "<when the date will end> ISO 8601 format",
+	}
 
 Responses:
-    200 OK: Returns the inserted date object upon successful creation.
+
+	    200 OK: Returns the inserted date object upon successful creation.
+			{
+				"id": <unique id> INT
+				"user1_id": <current user id > STRING,
+				"user2_id": <other user id > STRING,
+				"date_start": "<date_start> ISO 8601 format",
+				"date_end": "<date_end> ISO 8601 format",
+				"status": <"pending", "confirmed", "rejected">
+			}
+	    400 BAD REQUEST: Returns an error message if the request body is malformed or required fields are missing.
+
+
+**`PATCH /api/v1/dates`**: Update a date's status.
+
+Request Body:
+	{
+		"id" = valid date ID
+		"status" = "pending", "confirmed", "rejected"
+	}
+
+Example:
+	PATCH `/api/v1/dates/1/confirmed` would confirm date with ID 1
+
+Returns:
+
+	200 OK: Return the updated date
 		{
-			"match_id": <match_id> INT,
+			"id": <unique id> INT
+			"user1_id": <current user id > STRING,
+			"user2_id": <other user id > STRING,
 			"date_start": "<date_start> ISO 8601 format",
 			"date_end": "<date_end> ISO 8601 format",
-			"is_confirmed": <boolean>
+			"status": <"pending", "confirmed", "rejected">
 		}
-    400 BAD REQUEST: Returns an error message if the request body is malformed or required fields are missing.
+	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
+	400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
+
 
 **`DELETE /api/v1/dates/{dateId}`**: Deletes a date based on the request parameter dateId.
 
@@ -147,7 +183,8 @@ Returns:
 
 **`GET /api/v1/matches`**: find the top matches for a user.
 
-Returns a list of Match objects: each match corresponds to a overlapping availability between the current user and another user.
+Returns a list of Matches: each match corresponds to another user.
+Each match has a sublist of availability timeslots, where both the current user and that user are available.
 The list is sorted by the similarity score between [current user] and [other user].
 
 Request Params:
@@ -163,13 +200,22 @@ Returns:
 
 	200 OK: Returns a list of matches
 	[
-		{
-
-			"user1_id": <current user> STRING
-			"user2_id": <matched user> STRING
-			"similarity_score": <similarity between user 1 and 2> FLOAT,
-	    	"match_status": <if the match has been accepted> TEXT or NULL ('pending', 'accepted', 'rejected', null)
-		}
+		{ // FIRST MATCH ENTRY
+			"user1_id": "afd37871-3445-4162-9de0-8e3bfd144b98",
+			"user2_id": "9e2d0dec-fec2-4cab-b742-bad2ea343490",
+			"similarity_score": 1,
+			"availabilities": [
+				{ // LIST OF AVAILABILITIES
+					"id": 0,
+					"user_id": "9e2d0dec-fec2-4cab-b742-bad2ea343490",
+					"start_time": "11:30",
+					"end_time": "12:00",
+					"day_of_week": "Monday"
+				},
+				...
+			]
+		},
+		... // MORE MATCH ENTRIES
 	]
 
 

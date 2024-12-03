@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go-react-backend/contextkeys"
 	"go-react-backend/models"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -13,7 +14,8 @@ import (
 /*
 GET /api/v1/matches: find the top matches for a user.
 
-Returns a list of Match objects: each match corresponds to a overlapping availability between the current user and another user.
+Returns a list of Matches: each match corresponds to another user.
+Each match has a sublist of availability timeslots, where both the current user and that user are available.
 The list is sorted by the similarity score between [current user] and [other user].
 
 Request Params:
@@ -29,13 +31,22 @@ Returns:
 
 	200 OK: Returns a list of matches
 	[
-		{
-
-			"user1_id": <current user> STRING
-			"user2_id": <matched user> STRING
-			"similarity_score": <similarity between user 1 and 2> FLOAT,
-	    	"match_status": <if the match has been accepted> TEXT or NULL ('pending', 'accepted', 'rejected', null)
-		}
+		{ // FIRST MATCH ENTRY
+			"user1_id": "afd37871-3445-4162-9de0-8e3bfd144b98",
+			"user2_id": "9e2d0dec-fec2-4cab-b742-bad2ea343490",
+			"similarity_score": 1,
+			"availabilities": [
+				{ // LIST OF AVAILABILITIES
+					"id": 0,
+					"user_id": "9e2d0dec-fec2-4cab-b742-bad2ea343490",
+					"start_time": "11:30",
+					"end_time": "12:00",
+					"day_of_week": "Monday"
+				},
+				...
+			]
+		},
+		... // MORE MATCH ENTRIES
 	]
 */
 func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +82,7 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var matches []models.Match
+	var matches []models.UserMatches
 	var err error
 
 	if offset+count <= 50 {
@@ -90,7 +101,7 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if offset+count > 50 {
+	if offset+count > 50 || len(matches) < 50 {
 		// If offset + count > 50 or if querying GetMatches didn't return enough matches: compute matches manually
 		matches, err = models.ComputeMatches(userID, db)
 		if err != nil {
@@ -98,6 +109,7 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	log.Println(matches)
 
 	// Get an appropriate subset of matches
 	matchesSlice, err := PaginateMatches(matches, count, offset)
@@ -105,13 +117,14 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error getting a subset of matches: invalid offset.", http.StatusBadRequest)
 		return
 	}
+	log.Println(matchesSlice)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(matchesSlice)
 }
 
 // HELPER FUNC: returns a subset of matches based on the count and offset.
-func PaginateMatches(matches []models.Match, count, offset int) ([]models.Match, error) {
+func PaginateMatches(matches []models.UserMatches, count, offset int) ([]models.UserMatches, error) {
 	// Validate offset
 	if offset < 0 || offset > len(matches) {
 		return nil, fmt.Errorf("invalid offset: %d", offset)

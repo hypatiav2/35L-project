@@ -166,20 +166,20 @@ func GetAllAvailable(userID string, db *sql.DB) (map[string][]Availability, erro
 			a.user_id,
 			a.day_of_week,
 			CASE 
-				WHEN a.start_time > b.start_time THEN a.start_time 
+				WHEN JULIANDAY(a.start_time) > JULIANDAY(b.start_time) THEN a.start_time 
 				ELSE b.start_time 
 			END AS overlap_start,
 			CASE 
-				WHEN a.end_time < b.end_time THEN a.end_time 
+				WHEN JULIANDAY(a.end_time) < JULIANDAY(b.end_time) THEN a.end_time 
 				ELSE b.end_time 
-			END AS overlap_en
+			END AS overlap_end
 		FROM availability a
 		JOIN availability b
 			ON a.day_of_week = b.day_of_week
-			AND a.start_time < b.end_time
-			AND a.end_time > b.start_time
+			AND JULIANDAY(a.start_time) < JULIANDAY(b.end_time)
+			AND JULIANDAY(a.end_time) > JULIANDAY(b.start_time)
 		WHERE b.user_id = ? 
-		AND a.user_id != b.user_id;	
+		AND a.user_id != b.user_id;
 	`
 
 	// query the db
@@ -196,7 +196,6 @@ func GetAllAvailable(userID string, db *sql.DB) (map[string][]Availability, erro
 		if err := overlapRows.Scan(&availability.UserID, &availability.DayOfWeek, &availability.StartTime, &availability.EndTime); err != nil {
 			return nil, fmt.Errorf("failed to scan overlapping user ID: %v", err)
 		}
-
 		overlappingAvailabilities[availability.UserID] = append(overlappingAvailabilities[availability.UserID], availability) // Insert userId into map if its unique (struct{}{} is an empty value)
 	}
 
