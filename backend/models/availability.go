@@ -132,7 +132,7 @@ func DeleteAvailability(id int, userID string, db *sql.DB) error {
 	return nil
 }
 
-// check for overlapping availability entries for a particular user
+// Get any overlapping availability entries that both correspond to the same user
 func GetOverlapping(availability Availability, db *sql.DB) (*Availability, error) {
 	query := `
 		SELECT id, user_id, day_of_week, start_time, end_time
@@ -156,20 +156,30 @@ func GetOverlapping(availability Availability, db *sql.DB) (*Availability, error
 	return &overlap, nil // overlap found
 }
 
-// Given a user, return a list of all users who have overlapping availability
-func GetAllAvailable(userID string, db *sql.DB) ([]string, error) {
-	var availableUsers []string
+// Given a user, return a map of users who have overlapping availability with the provided user, and the corresponding Availabilities that are overlapping
+func GetAllAvailable(userID string, db *sql.DB) (map[string][]Availability, error) {
+	overlappingAvailabilities := make(map[string][]Availability)
 
 	// Query availability table for entries that overlap
-
 	overlapQuery := `
-		SELECT DISTINCT a.user_id
+		SELECT 
+			a.user_id,
+			a.day_of_week,
+			CASE 
+				WHEN JULIANDAY(a.start_time) > JULIANDAY(b.start_time) THEN a.start_time 
+				ELSE b.start_time 
+			END AS overlap_start,
+			CASE 
+				WHEN JULIANDAY(a.end_time) < JULIANDAY(b.end_time) THEN a.end_time 
+				ELSE b.end_time 
+			END AS overlap_end
 		FROM availability a
 		JOIN availability b
-		ON a.day_of_week = b.day_of_week
-		AND a.start_time < b.end_time
-		AND a.end_time > b.start_time
-		WHERE b.user_id = ? AND a.user_id != b.user_id
+			ON a.day_of_week = b.day_of_week
+			AND JULIANDAY(a.start_time) < JULIANDAY(b.end_time)
+			AND JULIANDAY(a.end_time) > JULIANDAY(b.start_time)
+		WHERE b.user_id = ? 
+		AND a.user_id != b.user_id;
 	`
 
 	// query the db
@@ -181,16 +191,17 @@ func GetAllAvailable(userID string, db *sql.DB) ([]string, error) {
 
 	// append overlapping entries
 	for overlapRows.Next() {
-		var otherUserID string
-		if err := overlapRows.Scan(&otherUserID); err != nil {
+		var availability Availability
+
+		if err := overlapRows.Scan(&availability.UserID, &availability.DayOfWeek, &availability.StartTime, &availability.EndTime); err != nil {
 			return nil, fmt.Errorf("failed to scan overlapping user ID: %v", err)
 		}
-		availableUsers = append(availableUsers, otherUserID)
+		overlappingAvailabilities[availability.UserID] = append(overlappingAvailabilities[availability.UserID], availability) // Insert userId into map if its unique (struct{}{} is an empty value)
 	}
 
 	if err := overlapRows.Err(); err != nil {
 		return nil, fmt.Errorf("failed to iterate over overlapping users: %v", err)
 	}
 
-	return availableUsers, nil
+	return overlappingAvailabilities, nil
 }

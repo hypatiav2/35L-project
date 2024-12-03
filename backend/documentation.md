@@ -31,19 +31,20 @@ Return:
 		{
 			"id": <unique ID for each timeslot> INT
 			"user_id": <corresponding user> STRING
-			"start_time": <HH:MM> STRING
-			"end_time": <HH:MM> STRING
+			"start_time": <HH:MM:SS> STRING
+			"end_time": <HH:MM:SS> STRING
 			"day_of_week": <Monday - Sunday> STRING
 		}	    
 	500 Internal Error: not able to get availability
+
 
 **`POST /api/v1/availability`**: Adds a new time slot to `availability` for the current user.
 
 Request Body: A JSON object representing the new availability (Overlapping availabilities will NOT be inserted)
 	{
-		"start_time": <Start time of the time slot in ISO 8601 format, e.g., "2024-11-28T10:00:00Z">,
-		"end_time": <End time of the time slot in ISO 8601 format, e.g., "2024-11-28T11:00:00Z">,
-		"day_of_week": <Day of the week, e.g., "Monday">
+		"start_time": <Start time of the time slot in HH:MM:SS format, e.g., "10:00:00">,
+		"end_time": <End time of the time slot in HH:MM:SS format, e.g., "11:00:00">,
+		"day_of_week": <Full day of the week, capitalized. e.g., "Monday">
 	}
 
 Return:
@@ -66,8 +67,8 @@ Return:
 Request Body: A JSON object representing the updated availability entry
 	{
 		"id": <ID of the time slot to update, must be unique and exist in the database>,
-		"start_time": <New start time of the time slot in ISO 8601 format, e.g., "2024-11-28T10:00:00Z">,
-		"end_time": <New end time of the time slot in ISO 8601 format, e.g., "2024-11-28T11:00:00Z">,
+		"start_time": <New start time of the time slot in HH:MM:SS format, e.g., "10:00:00">,
+		"end_time": <New end time of the time slot in HH:MM:SS format, e.g., "11:00:00">,
 		"day_of_week": <New day of the week, e.g., "Monday">
 	}
 
@@ -90,48 +91,84 @@ Return:
 
 ## Dates
 
-**`GET /api/v1/dates/{matchId}`**: Retrieves the dates corresponding to a specific matchId.
+**`GET /api/v1/dates/status?`**: Retrieves the dates for the current user. Optionally only get dates with a certain status by specifying the request url.
 
-- If the matchId is not provided, returns all matchIds and their corresponding dates for the current user.
-- matchId must be an integer > 0, provided in the request params (url)
+Request Params:
+
+	"status" = "pending", "confirmed", "rejected"
+
+Example:
+
+	GET `/api/v1/dates/pending` would return only pending dates.
 
 Returns:
-    200 OK: Returns a list of matches with their respective dates.
-        {
-            "match_id": <match_id> INT,
-            "dates": [
-                {
-                    "id": <int>,
-                    "match_id": <int>,
-                    "date_start": "<date_start> ISO 8601 format",
-                    "date_end": "<date_end> ISO 8601 format",
-                    "is_confirmed": <boolean>
-                },
-                ...
-            ]
-        }
-    500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
-    400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
+
+	200 OK: Returns a list of matches with their respective dates.
+	    {
+	        "match_id": <match_id> INT,
+	        "dates": [
+	            {
+	                "id": <int>,
+	                "user1_id": <current user id > STRING,
+					"user2_id": <other user id > STRING,
+	                "date_start": "<date_start> ISO 8601 format, (YYYY-MM-DDTHH:MM:SS)",
+	                "date_end": "<date_end> ISO 8601 format, (YYYY-MM-DDTHH:MM:SS)",
+	                "status": <boolean>
+	            },
+	            ...
+	        ]
+	    }
+	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
+	400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
 
 **`POST /api/v1/dates`**: Inserts a new date associated with a particular matchId.
 
 Request Body:
-    {
-        "match_id": <id of the match this date will correspond to> INT,
-        "date_start": "<when the date will start> ISO 8601 format",
-        "date_end": "<when the date will end> ISO 8601 format",
-        "is_confirmed": <whether the date is confirmed; defaults to FALSE if not provided> BOOL
-    }
+	{
+		"user2_id": <the other user ID> string
+	    "date_start": "<when the date will start> ISO 8601 format",
+	    "date_end": "<when the date will end> ISO 8601 format",
+	}
 
 Responses:
-    200 OK: Returns the inserted date object upon successful creation.
+
+	    200 OK: Returns the inserted date object upon successful creation.
+			{
+				"id": <unique id> INT
+				"user1_id": <current user id > STRING,
+				"user2_id": <other user id > STRING,
+				"date_start": "<date_start> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
+				"date_end": "<date_end> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
+				"status": <"pending", "confirmed", "rejected">
+			}
+	    400 BAD REQUEST: Returns an error message if the request body is malformed or required fields are missing.
+
+
+**`PATCH /api/v1/dates`**: Update a date's status.
+
+Request Body:
+	{
+		"id" = valid date ID
+		"status" = "pending", "confirmed", "rejected"
+	}
+
+Example:
+	PATCH `/api/v1/dates/1/confirmed` would confirm date with ID 1
+
+Returns:
+
+	200 OK: Return the updated date
 		{
-			"match_id": <match_id> INT,
-			"date_start": "<date_start> ISO 8601 format",
-			"date_end": "<date_end> ISO 8601 format",
-			"is_confirmed": <boolean>
+			"id": <unique id> INT
+			"user1_id": <current user id > STRING,
+			"user2_id": <other user id > STRING,
+			"date_start": "<date_start> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
+			"date_end": "<date_end> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
+			"status": <"pending", "confirmed", "rejected">
 		}
-    400 BAD REQUEST: Returns an error message if the request body is malformed or required fields are missing.
+	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
+	400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
+
 
 **`DELETE /api/v1/dates/{dateId}`**: Deletes a date based on the request parameter dateId.
 
@@ -145,27 +182,43 @@ Returns:
 
 ## Matches
 
-**`GET /api/v1/matches`**: find the top matches for a user. (NOT FULLY IMPLEMENTED YET)
+**`GET /api/v1/matches`**: find the top matches for a user.
 
-- Finds other users who have overlapping availability with the current user
-- returns as a list "matches", with the other user's id and a similarity score between the two users
+Returns a list of Matches: each match corresponds to another user.
+Each match has a sublist of availability timeslots, where both the current user and that user are available.
+The list is sorted by the similarity score between [current user] and [other user].
 
-Request Body:
-	{
-		"count": <the number of matches to return, default 10> INT
-		"offset": <The starting point for the results, default 0> INT
-	}
-	
-> Example: with count = 20 and offset = 10, this GET will return the 10th to 30th most similar users to the current user, who have overlapping availability.
+Request Params:
+
+	count: number of matches to return
+	offset: offset from beginning of matches list to return from
+
+> Example:
+> count = 20 and offset = 10,
+> `GET /api/v1/matches?count=20&offset=10` returns the 10th to 30th overlapping availability to the current user, sorted by similarity.
 
 Returns:
-	200 OK: Returns a list of matches
-		{
-			"user1_id": <current user> STRING
-			"user2_id": <matched user> STRING
-			"similarity_score": <similarity between user 1 and 2> FLOAT,
-	    	"match_status": <if the match has been accepted> TEXT or NULL ('pending', 'accepted', 'rejected', null)
-		}
+
+	200 OK: Returns a list of matches, each match has a list of availabilities.
+	[
+		{ 
+			"user1_id": current user id,
+			"user2_id": match user's id,
+			"similarity_score": 0.0 to 1.0,
+			"availabilities": [
+				{ 
+					"id": 0,
+					"user_id": match user's id,
+					"start_time": "HH:MM:SS",
+					"end_time": "HH:MM:SS",
+					"day_of_week": "Monday"
+				},
+				... // MORE AVAILABILITIES
+			]
+		},
+		... // MORE MATCH ENTRIES
+	]
+
 
 ## Users
 
