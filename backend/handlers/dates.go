@@ -30,18 +30,12 @@ Returns:
 
 	200 OK: Returns a list of matches with their respective dates.
 	    {
-	        "match_id": <match_id> INT,
-	        "dates": [
-	            {
-	                "id": <int>,
-	                "user1_id": <current user id > STRING,
-					"user2_id": <other user id > STRING,
-	                "date_start": "<date_start> ISO 8601 format",
-	                "date_end": "<date_end> ISO 8601 format",
-	                "status": <boolean>
-	            },
-	            ...
-	        ]
+			"id": <unique date id> INT,
+			"user1_id": <current user id > STRING,
+			"user2_id": <other user id > STRING,
+			"date_start": "<date_start> ISO 8601 format",
+			"date_end": "<date_end> ISO 8601 format",
+			"status": <"pending", "confimed", "rejected">
 	    }
 	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
 	400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).

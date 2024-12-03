@@ -15,7 +15,7 @@ export async function dbGetRequest(endpoint, setData, isAuthenticated, getSupaba
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,
