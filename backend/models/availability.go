@@ -162,7 +162,7 @@ func GetAllAvailable(userID string, db *sql.DB) (map[string][]Availability, erro
 
 	// Query availability table for entries that overlap
 	overlapQuery := `
-		SELECT DISTINCT 
+		SELECT 
 			a.user_id,
 			a.day_of_week,
 			CASE 

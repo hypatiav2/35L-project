@@ -31,19 +31,20 @@ Return:
 		{
 			"id": <unique ID for each timeslot> INT
 			"user_id": <corresponding user> STRING
-			"start_time": <HH:MM> STRING
-			"end_time": <HH:MM> STRING
+			"start_time": <HH:MM:SS> STRING
+			"end_time": <HH:MM:SS> STRING
 			"day_of_week": <Monday - Sunday> STRING
 		}	    
 	500 Internal Error: not able to get availability
+
 
 **`POST /api/v1/availability`**: Adds a new time slot to `availability` for the current user.
 
 Request Body: A JSON object representing the new availability (Overlapping availabilities will NOT be inserted)
 	{
-		"start_time": <Start time of the time slot in ISO 8601 format, e.g., "2024-11-28T10:00:00Z">,
-		"end_time": <End time of the time slot in ISO 8601 format, e.g., "2024-11-28T11:00:00Z">,
-		"day_of_week": <Day of the week, e.g., "Monday">
+		"start_time": <Start time of the time slot in HH:MM:SS format, e.g., "10:00:00">,
+		"end_time": <End time of the time slot in HH:MM:SS format, e.g., "11:00:00">,
+		"day_of_week": <Full day of the week, capitalized. e.g., "Monday">
 	}
 
 Return:
@@ -66,8 +67,8 @@ Return:
 Request Body: A JSON object representing the updated availability entry
 	{
 		"id": <ID of the time slot to update, must be unique and exist in the database>,
-		"start_time": <New start time of the time slot in ISO 8601 format, e.g., "2024-11-28T10:00:00Z">,
-		"end_time": <New end time of the time slot in ISO 8601 format, e.g., "2024-11-28T11:00:00Z">,
+		"start_time": <New start time of the time slot in HH:MM:SS format, e.g., "10:00:00">,
+		"end_time": <New end time of the time slot in HH:MM:SS format, e.g., "11:00:00">,
 		"day_of_week": <New day of the week, e.g., "Monday">
 	}
 
@@ -198,21 +199,21 @@ Request Params:
 
 Returns:
 
-	200 OK: Returns a list of matches
+	200 OK: Returns a list of matches, each match has a list of availabilities.
 	[
-		{ // FIRST MATCH ENTRY
-			"user1_id": "afd37871-3445-4162-9de0-8e3bfd144b98",
-			"user2_id": "9e2d0dec-fec2-4cab-b742-bad2ea343490",
-			"similarity_score": 1,
+		{ 
+			"user1_id": current user id,
+			"user2_id": match user's id,
+			"similarity_score": 0.0 to 1.0,
 			"availabilities": [
-				{ // LIST OF AVAILABILITIES
+				{ 
 					"id": 0,
-					"user_id": "9e2d0dec-fec2-4cab-b742-bad2ea343490",
-					"start_time": "11:30",
-					"end_time": "12:00",
+					"user_id": match user's id,
+					"start_time": "HH:MM:SS",
+					"end_time": "HH:MM:SS",
 					"day_of_week": "Monday"
 				},
-				...
+				... // MORE AVAILABILITIES
 			]
 		},
 		... // MORE MATCH ENTRIES
