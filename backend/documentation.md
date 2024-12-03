@@ -111,8 +111,8 @@ Returns:
 	                "id": <int>,
 	                "user1_id": <current user id > STRING,
 					"user2_id": <other user id > STRING,
-	                "date_start": "<date_start> ISO 8601 format",
-	                "date_end": "<date_end> ISO 8601 format",
+	                "date_start": "<date_start> ISO 8601 format, (YYYY-MM-DDTHH:MM:SS)",
+	                "date_end": "<date_end> ISO 8601 format, (YYYY-MM-DDTHH:MM:SS)",
 	                "status": <boolean>
 	            },
 	            ...
@@ -137,8 +137,8 @@ Responses:
 				"id": <unique id> INT
 				"user1_id": <current user id > STRING,
 				"user2_id": <other user id > STRING,
-				"date_start": "<date_start> ISO 8601 format",
-				"date_end": "<date_end> ISO 8601 format",
+				"date_start": "<date_start> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
+				"date_end": "<date_end> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
 				"status": <"pending", "confirmed", "rejected">
 			}
 	    400 BAD REQUEST: Returns an error message if the request body is malformed or required fields are missing.
@@ -162,8 +162,8 @@ Returns:
 			"id": <unique id> INT
 			"user1_id": <current user id > STRING,
 			"user2_id": <other user id > STRING,
-			"date_start": "<date_start> ISO 8601 format",
-			"date_end": "<date_end> ISO 8601 format",
+			"date_start": "<date_start> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
+			"date_end": "<date_end> ISO 8601 format (YYYY-MM-DDTHH:MM:SS)",
 			"status": <"pending", "confirmed", "rejected">
 		}
 	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.

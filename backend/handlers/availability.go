@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"go-react-backend/contextkeys" // access request context
 	"go-react-backend/models"      // interact with db
-	"log"
 	"net/http"
 	"time"
 
@@ -23,15 +22,13 @@ Return:
 		{
 			"id": <unique ID for each timeslot> INT
 			"user_id": <corresponding user> STRING
-			"start_time": <HH:MM> STRING
-			"end_time": <HH:MM> STRING
+			"start_time": <HH:MM:SS> STRING
+			"end_time": <HH:MM:SS> STRING
 			"day_of_week": <Monday - Sunday> STRING
 		}
 	500 Internal Error: not able to get availability
 */
 func GetAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--GetAvailabilityHandler--") // logging all queries
-	// db and userID from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 	userID := r.Context().Value(contextkeys.UserIDKey).(string)
 
@@ -51,9 +48,9 @@ POST /api/v1/availability: Adds a new time slot to `availability` for the curren
 
 Request Body: A JSON object representing the new availability (Overlapping availabilities will NOT be inserted)
 	{
-		"start_time": <Start time of the time slot in ISO 8601 format, e.g., "2024-11-28T10:00:00Z">,
-		"end_time": <End time of the time slot in ISO 8601 format, e.g., "2024-11-28T11:00:00Z">,
-		"day_of_week": <Day of the week, e.g., "Monday">
+		"start_time": <New start time of the time slot in HH:MM:SS format, e.g., "10:00:00">,
+		"end_time": <New end time of the time slot in HH:MM:SS format, e.g., "11:00:00">,
+		"day_of_week": <New day of the week, e.g., "Monday">
 	}
 
 Return:
@@ -73,8 +70,7 @@ Return:
 */
 
 func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--PostAvailabilityHandler--") // logging all queries
-	// extract ID, database, and request body
+	// extract userID, db, and request body
 	var availability models.Availability
 	if err := json.NewDecoder(r.Body).Decode(&availability); err != nil {
 		http.Error(w, "Invalid request payload, must be well formatted JSON", http.StatusBadRequest)
@@ -236,14 +232,14 @@ func ValidateTimeslot(avail models.Availability) error {
 		return errors.New("invalid day_of_week; must be Monday through Sunday")
 	}
 	// Parse times to ensure start_time < end_time
-	start, err := time.Parse("15:04", avail.StartTime)
+	start, err := time.Parse("15:04:05", avail.StartTime)
 	if err != nil {
-		return errors.New("invalid start_time format")
+		return errors.New("invalid start_time format. Must be HH:MM:SS")
 	}
 
-	end, err := time.Parse("15:04", avail.EndTime)
+	end, err := time.Parse("15:04:05", avail.EndTime)
 	if err != nil {
-		return errors.New("invalid end_time format")
+		return errors.New("invalid end_time format. Must be HH:MM:SS")
 	}
 
 	if !start.Before(end) {

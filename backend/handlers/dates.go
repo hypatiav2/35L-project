@@ -3,12 +3,14 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go-react-backend/contextkeys"
 	"go-react-backend/models"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -220,4 +222,24 @@ func DeleteDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Send a response indicating success.
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// HELPER FUNC: Make sure date_start and date_end are valid ISO 8601 format
+func ValidateIsoTimestamp(date models.Date) error {
+	// Parse times to ensure start_time < end_time
+	start, err := time.Parse(time.RFC3339, date.DateStart)
+	if err != nil {
+		return errors.New("invalid date_start format. Must be valid ISO 8601 format (YYYY-MM-DDTHH:MM:SS)")
+	}
+
+	end, err := time.Parse(time.RFC3339, date.DateEnd)
+	if err != nil {
+		return errors.New("invalid date_end format.  Must be valid ISO 8601 format (YYYY-MM-DDTHH:MM:SS)")
+	}
+
+	if !start.Before(end) {
+		return errors.New("date_start must be earlier than date_end")
+	}
+
+	return nil
 }
