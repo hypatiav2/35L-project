@@ -34,9 +34,10 @@ func RegisterRoutes(r *mux.Router, db *sql.DB) {
 	r.HandleFunc("/matches", handlers.GetMatchesHandler).Methods("GET")
 
 	// query for dates
-	r.HandleFunc("/dates", handlers.PostDateHandler).Methods("POST")
-	r.HandleFunc("/dates", handlers.GetDatesHandler).Methods("GET")                  // Gets all dates for the user
-	r.HandleFunc("/dates/{matchId:[0-9]+}", handlers.GetDatesHandler).Methods("GET") // Gets dates for a specific match
+	r.HandleFunc("/dates", handlers.GetDatesHandler).Methods("GET")          // Gets all dates
+	r.HandleFunc("/dates/{status}", handlers.GetDatesHandler).Methods("GET") // Gets dates by status
+	r.HandleFunc("/dates", handlers.PostDateHandler).Methods("POST")         // Create new pending date for the user
+	r.HandleFunc("/dates", handlers.PatchDateHandler).Methods("PATCH")       // Update the status for a date
 	r.HandleFunc("/dates/{dateId:[0-9]+}", handlers.DeleteDateHandler).Methods("DELETE")
 
 	// sync users data with supabase
