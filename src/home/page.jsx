@@ -113,7 +113,11 @@ function FindDatePage({ dates }) {
     );
 }
 
-function PendingDatePage({ confirmedDates }) {
+function PendingDatePage({ dates }) {
+    const confirmedDates = dates.filter((date) => date.is_confirmed);
+    const unconfirmedDates = dates.filter((date) => !date.is_confirmed);
+    console.log(dates)
+
     return (
         <div className="p-6 space-y-4">
             <h1 className="text-2xl font-bold text-center text-blue-600">Confirmed Dates</h1>
@@ -141,6 +145,31 @@ function PendingDatePage({ confirmedDates }) {
                     No confirmed dates found.
                 </div>
             )}
+            <h1 className="text-2xl font-bold text-center text-blue-600">Pending Dates</h1>
+            {unconfirmedDates.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {unconfirmedDates.map((date) => (
+                        <div
+                            key={date.id}
+                            className="border rounded-lg p-4 shadow-lg bg-white"
+                        >
+                            <div className="text-lg font-semibold text-gray-800">
+                                Match ID: {date.match_id}
+                            </div>
+                            <div className="text-gray-600">
+                                Start: {new Date(date.date_start).toLocaleString()}
+                            </div>
+                            <div className="text-gray-600">
+                                End: {new Date(date.date_end).toLocaleString()}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center text-gray-500">
+                    No pending dates found.
+                </div>
+            )}
         </div>
     );
 }
@@ -149,15 +178,17 @@ function PendingDatePage({ confirmedDates }) {
 export default function HomePage() {
     const [view, setView] = useState('find');
     const [ dates, setDates ] = useState([]);
-    const [ confirmedDates, setConfirmedDates ] = useState([]);
     const { isAuthenticated, getSupabaseClient } = useAuth();
     
     useEffect(() => {
         function setDateData(data)
         {
-            setDates(data);
-            setConfirmedDates(dates.filter((date) => date.is_confirmed));
-            console.log(data);
+            const datesFormatted = data.reduce((acc, obj) => {
+                // Concatenate all dates from each object into the accumulator
+                return acc.concat(obj.dates);
+            }, []);
+            setDates(datesFormatted);
+            console.log(datesFormatted);
         }
         dbGetRequest('/api/v1/dates', setDateData, isAuthenticated, getSupabaseClient);
     }, [ isAuthenticated, getSupabaseClient ]);
@@ -187,7 +218,7 @@ export default function HomePage() {
                             onClick={() => setView('pending')}
                         >
                             Pending Dates{' '}
-                            <span className="text-sm text-gray-500">({confirmedDates.length})</span>
+                            <span className="text-sm text-gray-500">({dates.length})</span>
                         </button>
                     </div>
                 </div>
@@ -196,7 +227,7 @@ export default function HomePage() {
                     {view === 'find' ? (
                         <FindDatePage dates={dates} />
                     ) : (
-                        <PendingDatePage confirmedDates={confirmedDates} />
+                        <PendingDatePage dates={dates} />
                     )}
                 </div>
             </div>

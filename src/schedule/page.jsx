@@ -17,7 +17,6 @@ export default function SchedulePage() {
     useEffect(() => {
         function setAvailability(data)
         {
-            console.log(data)
             if (data)
             {
                 setSlotIds(data.map((slot) => slot.id));
@@ -71,19 +70,17 @@ export default function SchedulePage() {
         });
         function handleResponse(data)
         {
-            console.log(data)
+            // console.log(data)
         }
         
         for (let i = 0; i < slotIds.length; i++) {
             const id = slotIds[i];
             const idObj = { id: id };
-            console.log(idObj)
             await dbDeleteRequest('/api/v1/availability', idObj, handleResponse, isAuthenticated, getSupabaseClient);
         }
         
         for (let i = 0; i < formattedData.length; i++) {
             const slot = formattedData[i];
-            console.log(slot)
             await dbPostRequest('/api/v1/availability', slot, handleResponse, isAuthenticated, getSupabaseClient);
         }
 
