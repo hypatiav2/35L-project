@@ -8,8 +8,12 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
-	"sort"
 )
+
+type Similarity struct {
+	UserID string
+	Score  float64
+}
 
 /*
 Find similarity between the current user and each user in the input list, and return a list of matches
@@ -23,7 +27,7 @@ Returns:
 	map[string]float64
 		map between each userID and their similarity to the current user
 */
-func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Match, error) {
+func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Similarity, error) {
 
 	// STEP 1. get vectors for users and current user: GetVectors
 
@@ -40,37 +44,39 @@ func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Match, erro
 	delete(vectors, userID) // If users also includes the current user
 
 	// STEP 2. calculate similarity for each user: CosineSimilarity
-
-	similarityScores := make(map[string]float64)
+	var similarityScores []Similarity
 	for user2ID, vector := range vectors {
 		score := CosineSimilarity(currentUserVector, vector)
 		if score == -1 {
 			// check for mismatched vectors
 			return nil, fmt.Errorf("found a vector of the wrong length: %d", len(vector))
 		} else {
-			similarityScores[user2ID] = score
+			var similarity Similarity
+			similarity.UserID = user2ID
+			similarity.Score = score
+			similarityScores = append(similarityScores, similarity)
 		}
 	}
 
 	// STEP 3. return a list of sorted matches
 
-	var sortedMatches []Match
-	for user2ID, score := range similarityScores {
-		// Create a Match for each user, where User1ID is the current user and User2ID is the other user
-		match := Match{
-			User1ID:    userID,
-			User2ID:    user2ID,
-			Similarity: score,
-		}
-		sortedMatches = append(sortedMatches, match)
-	}
+	// var sortedMatches []Match
+	// for user2ID, score := range similarityScores {
+	// 	// Create a Match for each user, where User1ID is the current user and User2ID is the other user
+	// 	match := Match{
+	// 		User1ID:    userID,
+	// 		User2ID:    user2ID,
+	// 		Similarity: score,
+	// 	}
+	// 	sortedMatches = append(sortedMatches, match)
+	// }
 
-	// Sort the vector based on similarity score in descending order
-	sort.Slice(sortedMatches, func(i, j int) bool {
-		return sortedMatches[i].Similarity > sortedMatches[j].Similarity
-	})
+	// // Sort the vector based on similarity score in descending order
+	// sort.Slice(sortedMatches, func(i, j int) bool {
+	// 	return sortedMatches[i].Similarity > sortedMatches[j].Similarity
+	// })
 
-	return sortedMatches, nil
+	return similarityScores, nil
 }
 
 // calculates cosine similarity between two vectors (finds compatibility between two users)

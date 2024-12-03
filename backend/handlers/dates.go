@@ -14,10 +14,15 @@ import (
 )
 
 /*
-GET /api/v1/dates/{matchId}: Retrieves the dates corresponding to a specific matchId.
+GET /api/v1/dates/status?: Retrieves the dates for the current user. Optionally only get dates with a certain status by specifying the request url.
 
-- If the matchId is not provided, returns all matchIds and their corresponding dates for the current user.
-- matchId must be an integer > 0, provided in the request params (url)
+Request Params:
+
+	"status" = "pending", "confirmed", "rejected"
+
+Example:
+
+	GET `/api/v1/dates/pending` would return only pending dates.
 
 Returns:
 
@@ -27,10 +32,11 @@ Returns:
 	        "dates": [
 	            {
 	                "id": <int>,
-	                "match_id": <int>,
+	                "user1_id": <current user id > STRING,
+					"user2_id": <other user id > STRING,
 	                "date_start": "<date_start> ISO 8601 format",
 	                "date_end": "<date_end> ISO 8601 format",
-	                "is_confirmed": <boolean>
+	                "status": <boolean>
 	            },
 	            ...
 	        ]
@@ -45,63 +51,18 @@ func GetDatesHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Specific matchID from request params
 	vars := mux.Vars(r)
-	matchIDStr := vars["matchId"]
+	status := vars["status"]
 
-	type Match struct {
-		MatchID int           `json:"match_id"`
-		Dates   []models.Date `json:"dates"`
-	}
-	var matches []Match
-
-	// Get dates for a particular match, or for all matches
-	if matchIDStr != "" {
-		// Parse matchID as an integer
-		matchID, err := strconv.Atoi(matchIDStr)
-		if err != nil {
-			http.Error(w, "Invalid match ID format", http.StatusBadRequest)
-			return
-		}
-
-		// Fetch dates for the specific matchID
-		dates, err := models.GetDatesForMatch(matchID, db)
-		if err != nil {
-			http.Error(w, "Failed to get dates for requested matchID", http.StatusInternalServerError)
-			return
-		}
-
-		matches = append(matches, Match{
-			MatchID: matchID,
-			Dates:   dates,
-		})
-
-	} else {
-		// Fetch all matchIDs for the user
-		matchIDs, err := models.GetMatches(userID, db)
-		if err != nil {
-			fmt.Printf("Failed retrieving matches: %v\n", err)
-			http.Error(w, "Failed to retrieve matches for the current user", http.StatusInternalServerError)
-			return
-		}
-
-		// Fetch dates for each matchID
-		for _, matchID := range matchIDs {
-			dates, err := models.GetDatesForMatch(matchID.ID, db)
-			if err != nil {
-				fmt.Printf("error getting dates: %v\n", err)
-				http.Error(w, "Failed to get dates for a match", http.StatusInternalServerError)
-				return
-			}
-
-			matches = append(matches, Match{
-				MatchID: matchID.ID,
-				Dates:   dates,
-			})
-		}
+	dates, err := models.GetDates(userID, status, db)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to get dates", http.StatusInternalServerError)
+		return
 	}
 
 	// Return JSON response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(matches)
+	json.NewEncoder(w).Encode(dates)
 }
 
 /*
@@ -110,25 +71,27 @@ POST /api/v1/dates: Inserts a new date associated with a particular matchId.
 Request Body:
 
 	{
-	    "match_id": <id of the match this date will correspond to> INT,
+		"user2_id": <the other user ID> string
 	    "date_start": "<when the date will start> ISO 8601 format",
 	    "date_end": "<when the date will end> ISO 8601 format",
-	    "is_confirmed": <whether the date is confirmed; defaults to FALSE if not provided> BOOL
 	}
 
 Responses:
 
 	    200 OK: Returns the inserted date object upon successful creation.
 			{
-				"match_id": <match_id> INT,
+				"id": <unique id> INT
+				"user1_id": <current user id > STRING,
+				"user2_id": <other user id > STRING,
 				"date_start": "<date_start> ISO 8601 format",
 				"date_end": "<date_end> ISO 8601 format",
-				"is_confirmed": <boolean>
+				"status": <"pending", "confirmed", "rejected">
 			}
 	    400 BAD REQUEST: Returns an error message if the request body is malformed or required fields are missing.
 */
 func PostDateHandler(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
+	userID := r.Context().Value(contextkeys.UserIDKey).(string)
 
 	// Parse JSON from the request body
 	var date models.Date
@@ -138,12 +101,13 @@ func PostDateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate input ADD MORE LATER
-	if date.MatchID == 0 {
+	if date.User2ID == "" || date.DateStart == "" || date.DateEnd == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	log.Println(date.DateStart, date.DateEnd)
+	date.User1ID = userID
+	date.Status = "pending" // New dates start as pending
 
 	// insert the scheduled date
 	id, err := models.PostDate(date, db)
@@ -155,6 +119,69 @@ func PostDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(date)
+}
+
+/*
+PATCH /api/v1/dates: Update a date's status.
+
+Request Body:
+
+	{
+		"id" = valid date ID
+		"status" = "pending", "confirmed", "rejected"
+	}
+
+Example:
+
+	PATCH `/api/v1/dates/1/confirmed` would confirm date with ID 1
+
+Returns:
+
+	200 OK: Return the updated date
+		{
+			"id": <unique id> INT
+			"user1_id": <current user id > STRING,
+			"user2_id": <other user id > STRING,
+			"date_start": "<date_start> ISO 8601 format",
+			"date_end": "<date_end> ISO 8601 format",
+			"status": <"pending", "confirmed", "rejected">
+		}
+	500 INTERNAL SERVER ERROR: Returns an error message if an internal error occurs.
+	400 BAD REQUEST: Returns an error message if the request is invalid (e.g., invalid matchId format).
+*/
+func PatchDateHandler(w http.ResponseWriter, r *http.Request) {
+	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
+
+	// Parse JSON from the request body
+	var date models.Date
+	if err := json.NewDecoder(r.Body).Decode(&date); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+	if date.ID <= 0 {
+		http.Error(w, "Invalid status", http.StatusBadRequest)
+		return
+	}
+	if !models.IsValidStatus(date.Status) {
+		http.Error(w, "Invalid status", http.StatusBadRequest)
+		return
+	}
+
+	err := models.PatchDate(date.ID, date.Status, db)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Updating status failed", http.StatusInternalServerError)
+		return
+	}
+
+	updatedDate, err := models.GetDate(date.ID, db)
+	if err != nil {
+		http.Error(w, "Retrieving updated date failed", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedDate)
 }
 
 /*
