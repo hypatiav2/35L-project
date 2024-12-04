@@ -25,7 +25,10 @@ export default function SchedulePage() {
             }
             setLoading(false);
         }
-        dbGetRequest('/api/v1/availability', setAvailability, isAuthenticated, getSupabaseClient);
+        const handleError =  (error) => {
+            console.error("Unable to fetch availability", error)
+        }
+        dbGetRequest('/availability', setAvailability, handleError, isAuthenticated, getSupabaseClient);
     }, [isAuthenticated, getSupabaseClient]);
 
     const handleMouseDown = (day, time) => {
@@ -85,7 +88,10 @@ export default function SchedulePage() {
         }
 
         // make sure the slot ids reset
-        dbGetRequest('/api/v1/availability', (data) => setSlotIds(data.map((slot) => slot.id)), isAuthenticated, getSupabaseClient);
+        if(slotIds.length > 0)
+        {
+            dbGetRequest('/api/v1/availability', (data) => setSlotIds(data.map((slot) => slot.id)), isAuthenticated, getSupabaseClient);
+        }
     }
 
     return (

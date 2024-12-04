@@ -42,6 +42,34 @@ export function AuthProvider({ children }) {
         })
     }, [])
 
+    async function signUp(email, password) {
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+            });
+
+            if (error) {
+                console.error('Error signing up:', error.message);
+                return { success: false, message: error.message };
+            }
+
+            console.log('Sign-up successful:', data);
+            const session = data.session;
+            setIsAuthenticated(!!session);
+
+            return {
+                success: true,
+                message: session
+                    ? 'Sign-up successful! You are logged in.'
+                    : 'Sign-up successful! Please verify your email.',
+            };
+        } catch (err) {
+            console.error('Unexpected error during sign-up:', err);
+            return { success: false, message: 'An unexpected error occurred.' };
+        }
+    }
+
     async function login(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
@@ -70,7 +98,7 @@ export function AuthProvider({ children }) {
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout, getSupabaseClient }}>
+        <AuthContext.Provider value={{ isAuthenticated, signUp, login, logout, getSupabaseClient }}>
             {children}
         </AuthContext.Provider>
     );

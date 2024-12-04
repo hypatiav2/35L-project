@@ -69,23 +69,22 @@ func GetUserByID(userID string, db *sql.DB) (User, error) {
 }
 
 func PostUser(user User, db *sql.DB) error {
-	stmt, err := db.Prepare(`
+	_, err := db.Exec(`
 		INSERT INTO users (id, name, email, bio, profile_picture)
 		VALUES (?, ?, ?, ?, ?)
-	`)
-	if err != nil {
-		return fmt.Errorf("error preparing SQL statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(
+	`,
 		user.ID,
 		user.Name,
 		user.Email,
 		user.Bio,
-		user.ProfilePicture, // Add profile picture
+		user.ProfilePicture,
 	)
-	return fmt.Errorf("error executing statement: %w", err)
+
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+	
+	return nil;
 }
 
 // update user information
