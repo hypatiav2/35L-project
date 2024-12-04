@@ -3,6 +3,7 @@ import Navbar from '../home/navbar';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { dbPutRequest } from '../api/db';
 
 export default function QuizPage() {
  const navigate = useNavigate();
@@ -32,47 +33,12 @@ export default function QuizPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('Form Submitted:', scores);
-
-    if (!isAuthenticated) {
-      alert('You must be logged in to submit your quiz.');
-      return;
+    function handleResponse(data)
+    {
+        console.log(data)
     }
 
-
-    const supabase = getSupabaseClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    const jwtToken = session?.access_token;
-
-
-    if (!jwtToken) {
-      alert('Unable to retrieve authentication token. Please log in again.');
-      return;
-    }
-
-
-    try {
-      const response = await fetch('http://localhost:8080/api/v1/vector', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`, // Use the JWT token
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(scores),
-      });
-      if (response.ok) {
-        //const userData = await response.json();
-        console.log('Vector updated');
-        alert('Quiz submitted successfully!');
-      } else {
-        const errorData = await response.json();
-        console.error('Error creating profile:', errorData);
-        alert('Error submitting quiz. Check the console for details.');
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      alert('Unexpected error occurred. Check the console for details.');
-    }
+    dbPutRequest('/api/v1/vector', { similarity_vector: scores }, handleResponse, isAuthenticated, getSupabaseClient);
 
     navigate('/home');
   };

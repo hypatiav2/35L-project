@@ -67,6 +67,41 @@ export async function dbPostRequest(endpoint, payload, setData, isAuthenticated,
     }
 }
 
+export async function dbPutRequest(endpoint, payload, setData, isAuthenticated, getSupabaseClient) {
+    if (!isAuthenticated) {
+        console.log('User is not authenticated');
+        return; // Exit early if not authenticated
+    }
+
+    const supabase = getSupabaseClient();
+    
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const jwtToken = session?.access_token;
+
+        if (!jwtToken) {
+            console.error('No JWT token available');
+            return;
+        }
+
+        const response = await fetch('http://localhost:8080' + endpoint, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        setData(data); // Set the data after receiving the response
+        return data; // Return the data for further usage if needed
+    } catch (err) {
+        console.error('Error posting data:', err);
+        throw err; // Re-throw error to propagate it if needed
+    }
+}
+
 export async function dbDeleteRequest(endpoint, payload, setData, isAuthenticated, getSupabaseClient) {
     if (!isAuthenticated) {
         console.log('User is not authenticated');
