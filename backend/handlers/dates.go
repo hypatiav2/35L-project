@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"go-react-backend/contextkeys"
 	"go-react-backend/models"
 	"log"
@@ -51,7 +50,7 @@ func GetDatesHandler(w http.ResponseWriter, r *http.Request) {
 
 	dates, err := models.GetDates(userID, status, db)
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error getting dates: %v\n", err)
 		http.Error(w, "Failed to get dates", http.StatusInternalServerError)
 		return
 	}
@@ -92,12 +91,15 @@ func PostDateHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON from the request body
 	var date models.Date
 	if err := json.NewDecoder(r.Body).Decode(&date); err != nil {
+		log.Printf("Invalid request body: %v\n", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	// Validate input ADD MORE LATER
-	if date.User2ID == "" || date.DateStart == "" || date.DateEnd == "" {
+	// Validate input
+	err := ValidateIsoTimestamp(date)
+	if err != nil || date.User2ID == "" {
+		log.Printf("Request is missing required fields, %v\n", err)
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
@@ -108,7 +110,8 @@ func PostDateHandler(w http.ResponseWriter, r *http.Request) {
 	// insert the scheduled date
 	id, err := models.PostDate(date, db)
 	if err != nil {
-		http.Error(w, "Failed to insert scheduled date", http.StatusInternalServerError)
+		log.Printf("Failed to insert a date: %v\n", err)
+		http.Error(w, "Failed to insert date", http.StatusInternalServerError)
 		return
 	}
 	date.ID = int(id)
@@ -151,27 +154,31 @@ func PatchDateHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON from the request body
 	var date models.Date
 	if err := json.NewDecoder(r.Body).Decode(&date); err != nil {
+		log.Printf("Invalid request body: %v\n", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 	if date.ID <= 0 {
-		http.Error(w, "Invalid status", http.StatusBadRequest)
+		log.Printf("Invalid id provided: %d\n", date.ID)
+		http.Error(w, "Invalid id provided", http.StatusBadRequest)
 		return
 	}
 	if !models.IsValidStatus(date.Status) {
-		http.Error(w, "Invalid status", http.StatusBadRequest)
+		log.Printf("Invalid status provided: %s\n", date.Status)
+		http.Error(w, "Invalid status provided", http.StatusBadRequest)
 		return
 	}
 
 	err := models.PatchDate(date.ID, date.Status, db)
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error updating date status: %v\n", err)
 		http.Error(w, "Updating status failed", http.StatusInternalServerError)
 		return
 	}
 
 	updatedDate, err := models.GetDate(date.ID, db)
 	if err != nil {
+		log.Printf("Failed to retrieve updated date: %v\n", err)
 		http.Error(w, "Retrieving updated date failed", http.StatusInternalServerError)
 		return
 	}
@@ -203,6 +210,7 @@ func DeleteDateHandler(w http.ResponseWriter, r *http.Request) {
 	// convert into int
 	dateID, err := strconv.Atoi(dateIDStr)
 	if err != nil {
+		log.Printf("Invalid date ID: %d\n", dateID)
 		http.Error(w, "Invalid date ID", http.StatusBadRequest)
 		return
 	}
@@ -210,7 +218,8 @@ func DeleteDateHandler(w http.ResponseWriter, r *http.Request) {
 	// Call the function to delete the date.
 	err = models.DeleteDate(dateID, db)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error deleting date: %v", err), http.StatusInternalServerError)
+		log.Printf("Failed to delete date: %v\n", err)
+		http.Error(w, "Error deleting date", http.StatusInternalServerError)
 		return
 	}
 

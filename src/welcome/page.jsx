@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bruinpic from "./bruins.jpg"
+import { useAuth } from '../AuthContext';
+import { dbPostRequest } from '../api/db';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -14,10 +16,6 @@ const WelcomePage = () => {
   const handleSignUpClick = () => {
     setShowSignUpForm(true);
   };
-
-  const handleContinueClick = () => {
-    setShowQuizForm(true);
-  }
 
   return (
     <div className="flex flex-col h-screen font-sans">
@@ -48,7 +46,7 @@ const WelcomePage = () => {
             ) : (
               <div className="flex-1 pr-8 ml-28 justify-center items-center">
                 <h1 className="text-4xl font-bold mb-4">b-date</h1>
-                <p className="text-lg text-gray-600 mb-8">Dining hall-themed website for UCLA students</p>
+                <p className="text-lg text-gray-600 mb-8">Dating website for UCLA students</p>
                 <button
                   className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
                   onClick={handleSignUpClick}
@@ -61,7 +59,7 @@ const WelcomePage = () => {
         }
 
         <div className="w-1/2 flex justify-center items-center bg-gray-200 h-96">
-            <img src={bruinpic} alt="Description of the image" className="w-full h-full object-cover"/>
+            <img src={bruinpic} alt="Bruin bear" className="w-full h-full object-cover"/>
         </div>
       </div>
     </div>
@@ -70,11 +68,11 @@ const WelcomePage = () => {
 
 const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
   const [formData, setFormData] = useState({
-    username: '',
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    password: '',
+    bio: ''
   })
 
   const handleInputChange = (e) => {
@@ -94,10 +92,43 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
   };
 
 
-  const handleFormSubmit = (e) => {
+  const {signUp, getSupabaseClient } = useAuth();
+
+  const handleFormSubmit = async(e) => {
+
     e.preventDefault();
-    setShowQuizForm(true);
-    // TODO send form to server and go to login page
+
+    // Sign up the user
+    const { success, message } = await signUp(formData.email, formData.password);
+
+    if (!success) {
+        alert(message); // Display error message if sign-up fails
+        return;
+    }
+
+    console.log('Sign-up successful:', message);
+
+   const jsonPayload = {
+      "id": formData.email,
+      "name": formData.firstName + " " + formData.lastName,
+      "email": formData.email,
+      "bio": formData.bio
+   }
+
+    function handleResponse(data)
+    {
+        console.log(data)
+    }
+
+    try { 
+      const response = await dbPostRequest('/api/v1/users', jsonPayload, handleResponse, true, getSupabaseClient);
+      if (response) setShowQuizForm(true); // Go to the quiz form only if the request succeeds
+      else alert("Please try a different username.");
+    }
+    catch (err) {
+      console.error('Error during sign-up:', err);
+      alert('Failed to create user.');
+    }
   };
 
   return (
@@ -107,17 +138,6 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
           Tell us some more about yourself!
       </h2>
       <form onSubmit={handleFormSubmit} className="space-y-4">
-
-        {/* Username */}
-        <input
-            type="username"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
-            required
-        />
 
         {/* First Name and Last Name */}
         <div className="flex gap-4">
@@ -165,6 +185,17 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
             />
         </div>
 
+        {/* Bio */}
+        <input
+            type="bio"
+            name="bio"
+            placeholder="A short bio about you"
+            value={formData.bio}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+            required
+        />
+
 
 
 
@@ -206,7 +237,7 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
 
 
 
-{ /* Ask them to do the quiz right after signing up. They're given the option to take it now or skip. */ }
+/* Ask them to do the quiz right after signing up. They're given the option to take it now or skip. */
 const QuizForm = () => {
   const navigate = useNavigate();
 

@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"go-react-backend/contextkeys"
 	"go-react-backend/models"
 	"log"
@@ -34,13 +33,13 @@ Return:
 	500 INTERNAL ERROR: Returns an error message if the server is unable to retrieve users from the database.
 */
 func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--GetAllUsersHandler--") // Log query error
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 
 	// Fetch users from the database
 	users, err := models.GetAllUsers(db)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Failed retrieving all users: %v\n", err)
+		http.Error(w, "Error retrieving all users", http.StatusInternalServerError)
 		return
 	}
 
@@ -50,14 +49,14 @@ func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--GetCurrentUserHandler--") // Log query error
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 	userId := r.Context().Value(contextkeys.UserIDKey).(string)
 
 	// Fetch users from the database
 	user, err := models.GetUserByID(userId, db)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Failed to retrieve current user: %v\n", err)
+		http.Error(w, "Error getting current user", http.StatusInternalServerError)
 		return
 	}
 
@@ -85,12 +84,12 @@ Return:
 	500 INTERNAL ERROR: Returns an error message if the server fails to insert the new user into the database.
 */
 func PostUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--PostUserHandler--") // Log all requests
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 
 	// Decode the user from the request body
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Printf("Invalid request body provided: %v\n", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -99,6 +98,7 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	if user.ProfilePicture != "" {
 		decodedPicture, err := base64.StdEncoding.DecodeString(user.ProfilePicture)
 		if err != nil {
+			log.Printf("Invalid profile picture encoding: %v\n", err)
 			http.Error(w, "Invalid profile picture encoding", http.StatusBadRequest)
 			return
 		}
@@ -107,7 +107,8 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Call the PostUser function to insert the user into the database
 	if err := models.PostUser(user, db); err != nil {
-		http.Error(w, fmt.Sprintf("Error creating user: %v", err), http.StatusInternalServerError)
+		log.Printf("Error creating new user: %v\n", err)
+		http.Error(w, "Error creating user", http.StatusInternalServerError)
 		return
 	}
 
@@ -115,7 +116,6 @@ func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
-
 
 /*
 PATCH /api/v1/users: Updates the profile of the current user.
@@ -136,7 +136,6 @@ Return:
 	500 INTERNAL ERROR: Returns an error message if the server fails to update the user in the database.
 */
 func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--PatchUserHandler--") // Log all requests
 	// Extract db and userID from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 	userID := r.Context().Value(contextkeys.UserIDKey).(string)
@@ -144,6 +143,7 @@ func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
 	// decode the user from the request body
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Printf("Invalid request body provided: %v\n", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -152,7 +152,8 @@ func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Call patchUser to update the user in the database
 	if err := models.PatchUser(user, db); err != nil {
-		http.Error(w, fmt.Sprintf("Error updating user: %v", err), http.StatusInternalServerError)
+		log.Printf("Error updating user: %v\n", err)
+		http.Error(w, "Error updating user", http.StatusInternalServerError)
 		return
 	}
 
@@ -177,20 +178,21 @@ Return:
 	500 INTERNAL ERROR: unable to insert
 */
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--DeleteUserHandler--") // Log all requests
 	// Extract db from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 
 	// extract user id from request
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Printf("Invalid request body provided: %v\n", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// Call the DeleteUser function to delete the user from the database
 	if err := models.DeleteUser(user.ID, db); err != nil {
-		http.Error(w, fmt.Sprintf("Error deleting user: %v", err), http.StatusInternalServerError)
+		log.Printf("Error deleting user: %v\n", err)
+		http.Error(w, "Error deleting user", http.StatusInternalServerError)
 		return
 	}
 

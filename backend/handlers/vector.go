@@ -21,8 +21,6 @@ Returns:
 	500 INTERNAL ERROR: Could not fetch user vector
 */
 func GetVectorHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--GetVectorHandler--") // logging all queries
-
 	// db and userID from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 	userID := r.Context().Value(contextkeys.UserIDKey).(string)
@@ -30,6 +28,7 @@ func GetVectorHandler(w http.ResponseWriter, r *http.Request) {
 	// query vector
 	vector, err := models.GetUserVector(userID, db)
 	if err != nil {
+		log.Printf("Failed to retrieve user vector: %v\n", err)
 		http.Error(w, "Error getting user vector", http.StatusInternalServerError)
 		return
 	}
@@ -63,8 +62,6 @@ Returns:
 	500 INTERNAL ERROR: Could not update
 */
 func PutVectorHandler(w http.ResponseWriter, r *http.Request) {
-
-	log.Println("--PutVectorHandler--") // logging all queries
 	// db and userID from context
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 	userID := r.Context().Value(contextkeys.UserIDKey).(string)
@@ -74,6 +71,7 @@ func PutVectorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		log.Printf("Invalid request body provided: %v\n", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -81,6 +79,7 @@ func PutVectorHandler(w http.ResponseWriter, r *http.Request) {
 	// query vector
 	err := models.UpdateUserVector(requestBody.Vector, userID, db)
 	if err != nil {
+		log.Printf("Failed to update user vector: %v\n", err)
 		http.Error(w, "Error updating user vector", http.StatusInternalServerError)
 		return
 	}

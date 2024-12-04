@@ -38,7 +38,7 @@ func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Similarity,
 
 	currentUserVector, err := GetUserVector(userID, db)
 	if err != nil {
-		return nil, fmt.Errorf("current user vector not found for user ID: %s", userID)
+		return nil, fmt.Errorf("vector not found for current user ID: %s", userID[:8])
 	}
 
 	delete(vectors, userID) // If users also includes the current user

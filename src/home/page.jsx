@@ -289,8 +289,7 @@ export default function HomePage() {
     // Load dates and matches data on page load
     useEffect(() => {
         // extracts dates data
-        function setDatesData(data)
-        {
+        function setDatesData(data) {
             setDates(data);
         }
         // extracts matches data

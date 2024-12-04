@@ -31,7 +31,6 @@ func ComputeMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 	// Step 1: Find users with overlapping availabilities
 	userAvailabilities, err := GetAllAvailable(userID, db)
 	if err != nil {
-		fmt.Printf("Error finding users with overlapping availabilities: %v\n", err)
 		return nil, err
 	}
 
@@ -44,7 +43,6 @@ func ComputeMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 	// Step 2: Compute similarities
 	similarityScores, err := ComputeSimilarity(users, userID, db)
 	if err != nil {
-		fmt.Printf("Error computing similarities: %v\n", err)
 		return nil, err
 	}
 
@@ -54,9 +52,8 @@ func ComputeMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 	})
 
 	// create Match objects for each availability timeslot
-	matches, err := createUserMatches(userID, similarityScores, userAvailabilities)
+	matches, err := CreateUserMatches(userID, similarityScores, userAvailabilities)
 	if err != nil {
-		fmt.Println("Error adding availabilities to user matches:", err)
 		return nil, err
 	}
 	// Return list of match objects
@@ -65,7 +62,7 @@ func ComputeMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 }
 
 // Given a base user, and a set of similarities and availabilities, create a list of Match objects between the base user and each availability in availabilities.
-func createUserMatches(baseUser string, sortedSimilarities []Similarity, availabilities map[string][]Availability) ([]UserMatches, error) {
+func CreateUserMatches(baseUser string, sortedSimilarities []Similarity, availabilities map[string][]Availability) ([]UserMatches, error) {
 	var matches []UserMatches
 
 	// Iterate over the sorted similarities
@@ -104,7 +101,7 @@ func UpdateMatches(userID string, db *sql.DB) error {
 	matches := matchFromUserMatches(computedUserMatches)
 
 	// Prepare query
-	query := "INSERT INTO matches (user1_id, user2_id, day_of_week, start_time, end_time, similarity_score) VALUES (?, ?, ?, ?, ?)"
+	query := "INSERT INTO matches (user1_id, user2_id, day_of_week, start_time, end_time, similarity_score) VALUES (?, ?, ?, ?, ?, ?)"
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return fmt.Errorf("failed to prepare statement: %w", err)
@@ -133,8 +130,8 @@ func GetMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 
 	rows, err := db.Query(query, userID, userID)
 	if err != nil {
-		fmt.Printf("error getting matches: %v\n", err)
-		return nil, err
+
+		return nil, fmt.Errorf("error getting matches: %w", err)
 	}
 	defer rows.Close()
 
@@ -146,8 +143,7 @@ func GetMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 		// Scan each row into a Match struct
 		err := rows.Scan(&match.ID, &match.User1ID, &match.User2ID, &match.DayOfWeek, &match.StartTime, &match.EndTime, &match.Similarity)
 		if err != nil {
-			fmt.Printf("error scanning row: %v\n", err)
-			return nil, err
+			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
 
 		// Add the match to the slice
@@ -156,8 +152,7 @@ func GetMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 
 	// Check for errors encountered during iteration
 	if err := rows.Err(); err != nil {
-		fmt.Printf("error iterating rows: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("error iterating rows: %w", err)
 	}
 
 	return userMatchesFromMatch(matches), nil
@@ -169,13 +164,13 @@ func ClearMatches(userID string, db *sql.DB) error {
 
 	_, err := db.Exec(query, userID, userID)
 	if err != nil {
-		fmt.Printf("failed to delete matches: %v", err)
-		return err
+		return fmt.Errorf("failed to delete matches: %w", err)
 	}
 
 	return nil
 }
 
+// HELPER: Convert a list of userMatches into Match objects
 func matchFromUserMatches(userMatches []UserMatches) []Match {
 	var matches []Match
 
@@ -194,14 +189,12 @@ func matchFromUserMatches(userMatches []UserMatches) []Match {
 
 			// Append the new match to the matches slice
 			matches = append(matches, match)
-
-			// Increment the match ID for the next match
 		}
 	}
-
 	return matches
 }
 
+// HELPER: Convert a list of matches into UserMatches objects
 func userMatchesFromMatch(matches []Match) []UserMatches {
 	userMatchesMap := make(map[string]*UserMatches)
 

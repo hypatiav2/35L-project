@@ -20,14 +20,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		//Extract JWT from "Authorization" header: should be formatted "Bearer <token>"
 		tokenStr := r.Header.Get("Authorization")
 		if tokenStr == "" {
-			log.Println("JWT token missing")
+			log.Println("Authorization header missing (JWT token missing)")
 			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
 			return
 		}
 		// Parse for our actual token
 		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 		if len(tokenStr) == 0 {
-			log.Println("JWT was formatted improperly")
+			log.Println("Invalid JWT format provided")
 			http.Error(w, "Invalid token format", http.StatusUnauthorized)
 			return
 		}
@@ -35,7 +35,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// grab jwtKey from .env (need to store SUPABASE_JWT_SECRET in .env)
 		jwtKey := []byte(os.Getenv("SUPABASE_JWT_SECRET"))
 		if len(jwtKey) == 0 {
-			log.Println("JWT secret is missing or empty")
+			log.Println("Server configuration error: JWT secret is missing or empty")
 			http.Error(w, "Server configuration error", http.StatusInternalServerError)
 			return
 		}
@@ -44,12 +44,13 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 			// validate signing method and return the signing key
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				log.Printf("Unexpected JWT signing method")
 				return nil, fmt.Errorf("unexpected signing method")
 			}
 			return jwtKey, nil
 		})
 		if err != nil || !token.Valid {
-			log.Printf("JWT parsing failed: %v\n", err)
+			log.Printf("Invalid or expired JWT token: %v\n", err)
 			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 			return
 		}
@@ -57,6 +58,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// Extract JWT claims
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
+			log.Printf("Unable to extract JWT claims: %v\n", err)
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 			return
 		}
@@ -64,6 +66,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// and find the userID
 		userID, ok := claims["sub"].(string)
 		if !ok || userID == "" {
+			log.Printf("Unable to parse userID from JWT claims: %v\n", err)
 			http.Error(w, "User ID missing in token claims", http.StatusUnauthorized)
 			return
 		}

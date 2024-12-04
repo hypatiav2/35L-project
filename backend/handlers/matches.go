@@ -67,6 +67,7 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 		var err error
 		count, err = strconv.Atoi(countParam)
 		if err != nil || count <= 0 {
+			log.Printf("Invalid count provided (%d): %v\n", count, err)
 			http.Error(w, "Invalid count parameter", http.StatusBadRequest)
 			return
 		}
@@ -77,6 +78,7 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 		var err error
 		offset, err = strconv.Atoi(offsetParam)
 		if err != nil || offset < 0 {
+			log.Printf("Invalid offset provided (%d): %v\n", offset, err)
 			http.Error(w, "Invalid offset parameter", http.StatusBadRequest)
 			return
 		}
@@ -89,14 +91,16 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 		// If offset + count < 50 matches: call models.GetMatches to get matches from our table
 		matches, err = models.GetMatches(userID, db)
 		if err != nil {
+			log.Printf("Error retrieving matches: %v\n", err)
 			http.Error(w, "Error getting matches", http.StatusInternalServerError)
 			return
 		}
 	}
 	if len(matches) < 50 {
 		// update matches table if it looks too empty
-		models.UpdateMatches(userID, db)
+		err = models.UpdateMatches(userID, db)
 		if err != nil {
+			log.Printf("Error updating matches: %v\n", err)
 			http.Error(w, "Error updating matches", http.StatusInternalServerError)
 			return
 		}
@@ -105,19 +109,19 @@ func GetMatchesHandler(w http.ResponseWriter, r *http.Request) {
 		// If offset + count > 50 or if querying GetMatches didn't return enough matches: compute matches manually
 		matches, err = models.ComputeMatches(userID, db)
 		if err != nil {
+			log.Printf("Error computing new matches: %v\n", err)
 			http.Error(w, "Error computing matches", http.StatusInternalServerError)
 			return
 		}
 	}
-	log.Println(matches)
 
 	// Get an appropriate subset of matches
 	matchesSlice, err := PaginateMatches(matches, count, offset)
 	if err != nil {
+		log.Printf("Error getting a subset of matches to return: %v\n", err)
 		http.Error(w, "Error getting a subset of matches: invalid offset.", http.StatusBadRequest)
 		return
 	}
-	log.Println(matchesSlice)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(matchesSlice)

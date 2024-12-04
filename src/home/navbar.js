@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 
 function NavComponent({ link, children }) {
     const navigate = useNavigate();
@@ -16,6 +17,19 @@ function NavComponent({ link, children }) {
 }
 
 export default function Navbar() {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await logout(); // Try to logout
+            navigate('/login'); // Redirect to login page after logging out
+        } catch (error) {
+            console.error('Logout failed:', error);
+            alert('An error occurred during logout. Please try again.');
+        }
+    };
+
     return (
         <nav className="bg-white text-blue-600 px-6 py-4 shadow-lg">
             <div className="flex justify-between items-center">
@@ -28,7 +42,17 @@ export default function Navbar() {
                     <NavComponent link="/profile">Profile</NavComponent>
                     <NavComponent link="/schedule">Schedule</NavComponent>
                     <NavComponent link="/quiz">Quiz</NavComponent>
+
+                    {/* Logout Button */}
+                    <button
+                        onClick={handleLogout}
+                        className="text-red-600 font-semibold px-4 py-2 hover:text-white hover:bg-red-600 rounded transition"
+                    >
+                        Log Out
+                    </button>
                 </ul>
+
+                
             </div>
         </nav>
     );
