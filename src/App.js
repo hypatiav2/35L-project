@@ -35,7 +35,7 @@ function App() {
             <Route
                 path="*"
                 element={
-                    <Navigate to={isAuthenticated ? "/home" : "/login"} replace />
+                    <Navigate to={isAuthenticated ? "/home" : "/welcome"} replace />
                 }
             />
         </Routes>
