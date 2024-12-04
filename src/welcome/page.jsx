@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bruinpic from "./bruins.jpg"
+import { useAuth } from '../AuthContext';
+import { dbPostRequest } from '../api/db';
+import { get } from 'axios';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -74,8 +77,11 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    password: '',
+    bio: ''
   })
+
+  const {isAuthenticated, getSupabaseClient } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -94,10 +100,46 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
   };
 
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async(e) => {
+
+    const supabase = getSupabaseClient();
+
     e.preventDefault();
-    setShowQuizForm(true);
-    // TODO send form to server and go to login page
+
+    // Add user to supabase authentication
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+    });
+  
+    if (authError) {
+      console.error('Error creating authentication:', authError.message);
+      alert('Error signing up: ' + authError.message);
+      return;
+    }
+  
+    console.log('Authentication created:', authData);
+
+   const jsonPayload = {
+      "id": formData.username,
+      "name": formData.firstName + " " + formData.lastName,
+      "email": formData.email,
+      "bio": formData.bio
+   }
+
+    function handleResponse(data)
+    {
+        console.log(data)
+    }
+
+    try {
+      dbPostRequest('/api/v1/users', jsonPayload, handleResponse, isAuthenticated, getSupabaseClient);
+      setShowQuizForm(true); // Navigate to the quiz form
+    }
+    catch (err) {
+      console.error('Error during sign-up:', err);
+      alert('Failed to create user.');
+    }
   };
 
   return (
