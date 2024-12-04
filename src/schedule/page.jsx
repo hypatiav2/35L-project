@@ -85,7 +85,10 @@ export default function SchedulePage() {
         }
 
         // make sure the slot ids reset
-        dbGetRequest('/api/v1/availability', (data) => setSlotIds(data.map((slot) => slot.id)), isAuthenticated, getSupabaseClient);
+        if(slotIds.length > 0)
+        {
+            dbGetRequest('/api/v1/availability', (data) => setSlotIds(data.map((slot) => slot.id)), isAuthenticated, getSupabaseClient);
+        }
     }
 
     return (

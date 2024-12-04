@@ -52,7 +52,7 @@ func ComputeMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 	})
 
 	// create Match objects for each availability timeslot
-	matches, err := createUserMatches(userID, similarityScores, userAvailabilities)
+	matches, err := CreateUserMatches(userID, similarityScores, userAvailabilities)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func ComputeMatches(userID string, db *sql.DB) ([]UserMatches, error) {
 }
 
 // Given a base user, and a set of similarities and availabilities, create a list of Match objects between the base user and each availability in availabilities.
-func createUserMatches(baseUser string, sortedSimilarities []Similarity, availabilities map[string][]Availability) ([]UserMatches, error) {
+func CreateUserMatches(baseUser string, sortedSimilarities []Similarity, availabilities map[string][]Availability) ([]UserMatches, error) {
 	var matches []UserMatches
 
 	// Iterate over the sorted similarities
@@ -101,7 +101,7 @@ func UpdateMatches(userID string, db *sql.DB) error {
 	matches := matchFromUserMatches(computedUserMatches)
 
 	// Prepare query
-	query := "INSERT INTO matches (user1_id, user2_id, day_of_week, start_time, end_time, similarity_score) VALUES (?, ?, ?, ?, ?)"
+	query := "INSERT INTO matches (user1_id, user2_id, day_of_week, start_time, end_time, similarity_score) VALUES (?, ?, ?, ?, ?, ?)"
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return fmt.Errorf("failed to prepare statement: %w", err)

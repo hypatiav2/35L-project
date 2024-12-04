@@ -83,6 +83,13 @@ func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(contextkeys.UserIDKey).(string)
 	availability.UserID = userID
 
+	if len(availability.StartTime) == 5 { // "HH:MM" length
+		availability.StartTime += ":00"
+	}
+	if len(availability.EndTime) == 5 { // "HH:MM" length
+		availability.EndTime += ":00"
+	}
+
 	err := ValidateTimeslot(availability)
 	if err != nil {
 		log.Printf("Provided timeslot is invalid: %v\n", err)

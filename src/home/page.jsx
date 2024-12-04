@@ -183,12 +183,14 @@ export default function HomePage() {
     useEffect(() => {
         function setDateData(data)
         {
-            const datesFormatted = data.reduce((acc, obj) => {
-                // Concatenate all dates from each object into the accumulator
-                return acc.concat(obj.dates);
-            }, []);
-            setDates(datesFormatted);
-            console.log(datesFormatted);
+            if(data != null) {
+                const datesFormatted = data.reduce((acc, obj) => {
+                    // Concatenate all dates from each object into the accumulator
+                    return acc.concat(obj.dates);
+                }, []);
+                setDates(datesFormatted);
+                console.log(datesFormatted);
+            }
         }
         dbGetRequest('/api/v1/dates', setDateData, isAuthenticated, getSupabaseClient);
     }, [ isAuthenticated, getSupabaseClient ]);
