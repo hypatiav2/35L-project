@@ -68,7 +68,6 @@ const WelcomePage = () => {
 
 const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
   const [formData, setFormData] = useState({
-    username: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -110,7 +109,7 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
     console.log('Sign-up successful:', message);
 
    const jsonPayload = {
-      "id": formData.username,
+      "id": formData.email,
       "name": formData.firstName + " " + formData.lastName,
       "email": formData.email,
       "bio": formData.bio
@@ -139,17 +138,6 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
           Tell us some more about yourself!
       </h2>
       <form onSubmit={handleFormSubmit} className="space-y-4">
-
-        {/* Username */}
-        <input
-            type="username"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
-            required
-        />
 
         {/* First Name and Last Name */}
         <div className="flex gap-4">
@@ -196,6 +184,17 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
                 required
             />
         </div>
+
+        {/* Bio */}
+        <input
+            type="bio"
+            name="bio"
+            placeholder="A short bio about you"
+            value={formData.bio}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+            required
+        />
 
 
 
