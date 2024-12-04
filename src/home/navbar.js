@@ -26,6 +26,7 @@ export default function Navbar() {
                 <ul className="flex space-x-4">
                     <NavComponent link="/home">Home</NavComponent>
                     <NavComponent link="/profile">Profile</NavComponent>
+                    <NavComponent link="/schedule">Schedule</NavComponent>
                     <NavComponent link="/quiz">Quiz</NavComponent>
                 </ul>
             </div>
