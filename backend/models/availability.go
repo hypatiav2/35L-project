@@ -17,13 +17,11 @@ type Availability struct {
 
 // fetches all availabilities for UserID from the database
 func GetAvailability(userID string, db *sql.DB) ([]Availability, error) {
-	fmt.Printf("Fetching availability from the database...\n") // Log to indicate function is called
 	query := "SELECT id, user_id, day_of_week, start_time, end_time FROM availability WHERE user_id = ?"
 
 	// Query to get all users and their profile information
 	rows, err := db.Query(query, userID)
 	if err != nil {
-		fmt.Printf("Error executing query: %v\n", err) // Log query error
 		return nil, err
 	}
 	defer rows.Close()
@@ -34,31 +32,22 @@ func GetAvailability(userID string, db *sql.DB) ([]Availability, error) {
 
 		err := rows.Scan(&a.ID, &a.UserID, &a.DayOfWeek, &a.StartTime, &a.EndTime)
 		if err != nil {
-			fmt.Printf("Error scanning row: %v\n", err) // Log scanning error
 			return nil, err
 		}
 
-		// Log each availability being added to the slice
-		fmt.Printf("Fetched availability: %v\n", a)
-
 		availabilities = append(availabilities, a)
 	}
-
-	// Log the total number of profiles fetched
-	fmt.Printf("Total profiles fetched: %d\n\n", len(availabilities))
 
 	return availabilities, nil
 }
 
 // post availability to availability table
 func PostAvailability(availability Availability, db *sql.DB) error {
-	fmt.Printf("Posting availability to the database...\n") // Log to indicate function is called
 	stmt, err := db.Prepare(`
 		INSERT INTO availability (user_id, day_of_week, start_time, end_time)
 		VALUES (?, ?, ?, ?)
 	`)
 	if err != nil {
-		fmt.Printf("Error posting availability.")
 		return err
 	}
 	defer stmt.Close()
@@ -185,7 +174,7 @@ func GetAllAvailable(userID string, db *sql.DB) (map[string][]Availability, erro
 	// query the db
 	overlapRows, err := db.Query(overlapQuery, userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get overlapping availability: %v", err)
+		return nil, fmt.Errorf("failed to get overlapping availability: %w", err)
 	}
 	defer overlapRows.Close()
 
@@ -194,13 +183,13 @@ func GetAllAvailable(userID string, db *sql.DB) (map[string][]Availability, erro
 		var availability Availability
 
 		if err := overlapRows.Scan(&availability.UserID, &availability.DayOfWeek, &availability.StartTime, &availability.EndTime); err != nil {
-			return nil, fmt.Errorf("failed to scan overlapping user ID: %v", err)
+			return nil, fmt.Errorf("failed to scan overlapping user ID: %w", err)
 		}
 		overlappingAvailabilities[availability.UserID] = append(overlappingAvailabilities[availability.UserID], availability) // Insert userId into map if its unique (struct{}{} is an empty value)
 	}
 
 	if err := overlapRows.Err(); err != nil {
-		return nil, fmt.Errorf("failed to iterate over overlapping users: %v", err)
+		return nil, fmt.Errorf("failed to iterate over overlapping users: %w", err)
 	}
 
 	return overlappingAvailabilities, nil

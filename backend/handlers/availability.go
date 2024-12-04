@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"go-react-backend/contextkeys" // access request context
 	"go-react-backend/models"      // interact with db
+	"log"
 	"net/http"
 	"time"
 
@@ -35,6 +35,7 @@ func GetAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	// query availability
 	availability, err := models.GetAvailability(userID, db)
 	if err != nil {
+		log.Printf("Error querying for user's availability: %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -73,15 +74,18 @@ func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	// extract userID, db, and request body
 	var availability models.Availability
 	if err := json.NewDecoder(r.Body).Decode(&availability); err != nil {
+		log.Printf("Provided availability was not formatted correctly: %v\n", err)
 		http.Error(w, "Invalid request payload, must be well formatted JSON", http.StatusBadRequest)
 		return
 	}
-	availability.UserID = r.Context().Value(contextkeys.UserIDKey).(string)
+
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
+	userID := r.Context().Value(contextkeys.UserIDKey).(string)
+	availability.UserID = userID
 
 	err := ValidateTimeslot(availability)
 	if err != nil {
-		fmt.Print(err.Error())
+		log.Printf("Provided timeslot is invalid: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -89,6 +93,7 @@ func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	// check for overlapping timeslots
 	overlap, err := models.GetOverlapping(availability, db)
 	if err != nil {
+		log.Printf("Error checking for overlapping availabilities: %v\n", err)
 		http.Error(w, "Failed to check overlap", http.StatusInternalServerError)
 		return
 	}
@@ -107,7 +112,16 @@ func PostAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	// Post Availability
 	err = models.PostAvailability(availability, db)
 	if err != nil {
+		log.Printf("Error posting availability: %v\n", err)
 		http.Error(w, "Failed to set availability", http.StatusInternalServerError)
+		return
+	}
+
+	// update matches with new availability
+	err = models.UpdateMatches(userID, db)
+	if err != nil {
+		log.Printf("Error updating user's matches: %v\n", err)
+		http.Error(w, "Error updating matches", http.StatusInternalServerError)
 		return
 	}
 
@@ -140,22 +154,34 @@ func PutAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
 	// Parse the JSON request body
 	if err := json.NewDecoder(r.Body).Decode(&availability); err != nil {
+		log.Printf("Provided availability is poorly formatted: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Validate the timeslot data
 	if err := ValidateTimeslot(availability); err != nil {
+		log.Printf("Provided availability is not valid: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Can only update current user
-	availability.UserID = r.Context().Value(contextkeys.UserIDKey).(string)
+	userID := r.Context().Value(contextkeys.UserIDKey).(string)
+	availability.UserID = userID
 
 	// Update the availability in the database
 	if err := models.PutAvailability(availability, db); err != nil {
+		log.Printf("Error writing response: %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Update match based on availability
+	err := models.UpdateMatches(userID, db)
+	if err != nil {
+		log.Printf("Failed to update matches: %v\n", err)
+		http.Error(w, "Error updating matches", http.StatusInternalServerError)
 		return
 	}
 
@@ -188,10 +214,12 @@ func DeleteAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var req payload
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Invalid request body body provided: %v\n", err)
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 	if req.ID == 0 {
+		log.Print("Request body must contain an Availability ID")
 		http.Error(w, "Request body must contain an 'id'", http.StatusBadRequest)
 		return
 	}
@@ -201,7 +229,8 @@ func DeleteAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 	// Call the DeleteAvailability function to delete the entry
 	err := models.DeleteAvailability(req.ID, req.UserID, db)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error deleting availability: %s", err), http.StatusInternalServerError)
+
+		http.Error(w, "Error deleting availability", http.StatusInternalServerError)
 		return
 	}
 

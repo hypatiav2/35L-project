@@ -19,13 +19,10 @@ type User struct {
 
 // GetAllUsers fetches alsl profiles from the database
 func GetAllUsers(db *sql.DB) ([]User, error) {
-	fmt.Printf("Fetching users from the database...\n") // Log to indicate function is called
-
 	// Query to get all users and their profile information
 	rows, err := db.Query("SELECT id, name, email, bio, vector, profile_picture FROM users")
 	if err != nil {
-		fmt.Printf("Error executing query: %v\n", err) // Log query error
-		return nil, err
+		return nil, fmt.Errorf("error executing query %w", err)
 	}
 	defer rows.Close()
 
@@ -36,29 +33,20 @@ func GetAllUsers(db *sql.DB) ([]User, error) {
 
 		err := rows.Scan(&u.ID, &u.Name, &u.Email, &u.Bio, &u.Vector, &profilePicture)
 		if err != nil {
-			fmt.Printf("Error scanning row: %v\n", err) // Log scanning error
-			return nil, err
+			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
 
 		// Convert BLOB to base64 string
 		u.ProfilePicture = base64.StdEncoding.EncodeToString(profilePicture)
 
-		// Log each profile being added to the slice
-		fmt.Printf("Fetched profile: %v\n", u)
-
 		users = append(users, u)
 	}
-
-	// Log the total number of profiles fetched
-	fmt.Printf("Total profiles fetched: %d\n\n", len(users))
 
 	return users, nil
 }
 
 // GetUserByID fetches a single user profile from the database by ID
 func GetUserByID(userID string, db *sql.DB) (User, error) {
-	fmt.Printf("Fetching user with ID %s from the database...\n", userID) // Log to indicate function is called
-
 	// Query to get the user's profile information
 	row := db.QueryRow("SELECT id, name, email, bio, vector, profile_picture FROM users WHERE id = ?", userID)
 
@@ -69,31 +57,24 @@ func GetUserByID(userID string, db *sql.DB) (User, error) {
 	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Bio, &u.Vector, &profilePicture)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Printf("No user found with ID %s\n", userID) // Log if no rows were returned
-			return User{}, fmt.Errorf("user with ID %s not found", userID)
+			return User{}, fmt.Errorf("user with ID %s not found: %w", userID, err)
 		}
-		fmt.Printf("Error scanning user: %v\n", err) // Log scanning error
+		fmt.Printf("Error scanning user: %v", err) // Log scanning error
 		return User{}, err
 	}
 
 	// Convert BLOB to base64 string
 	u.ProfilePicture = base64.StdEncoding.EncodeToString(profilePicture)
-
-	// Log the fetched profile
-	fmt.Printf("Fetched user profile: %v\n", u)
-
 	return u, nil
 }
 
 func PostUser(user User, db *sql.DB) error {
-	fmt.Printf("Posting user to the database...\n") // Log to indicate function is called
 	stmt, err := db.Prepare(`
 		INSERT INTO users (id, name, email, bio, profile_picture)
 		VALUES (?, ?, ?, ?, ?)
 	`)
 	if err != nil {
-		fmt.Printf("Error preparing statement: %v\n", err)
-		return err
+		return fmt.Errorf("error preparing SQL statement: %w", err)
 	}
 	defer stmt.Close()
 
@@ -104,9 +85,8 @@ func PostUser(user User, db *sql.DB) error {
 		user.Bio,
 		user.ProfilePicture, // Add profile picture
 	)
-	return err
+	return fmt.Errorf("error executing statement: %w", err)
 }
-
 
 // update user information
 func PatchUser(user User, db *sql.DB) error {

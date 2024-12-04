@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go-react-backend/contextkeys"
 	"go-react-backend/models"
+	"log"
 	"net/http"
 )
 
@@ -61,6 +62,7 @@ func UserSyncWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract webhook payload from request body
 	var payload WebhookPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		log.Printf("Invalid payload: %v\n", err)
 		http.Error(w, "Invalid payload", http.StatusBadRequest)
 		return
 	}
@@ -72,22 +74,26 @@ func UserSyncWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	case "INSERT":
 		err := models.PostUser(user, db)
 		if err != nil {
+			log.Printf("Failed to insert a new user: %v\n", err)
 			http.Error(w, fmt.Sprintf("Failed to insert user: %s", err), http.StatusInternalServerError)
 			return
 		}
 	case "UPDATE":
 		err := models.PatchUser(user, db)
 		if err != nil {
+			log.Printf("Invalid update a user: %v\n", err)
 			http.Error(w, fmt.Sprintf("Failed to update user: %s", err), http.StatusInternalServerError)
 			return
 		}
 	case "DELETE":
 		err := models.DeleteUser(user.ID, db)
 		if err != nil {
+			log.Printf("Failed to delete a user: %v\n", err)
 			http.Error(w, fmt.Sprintf("Failed to delete user: %s", err), http.StatusInternalServerError)
 			return
 		}
 	default:
+		log.Printf("Provided an invalid event type: %s", payload.Event)
 		http.Error(w, "Unsupported event type", http.StatusBadRequest)
 		return
 	}
