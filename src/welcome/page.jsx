@@ -46,7 +46,7 @@ const WelcomePage = () => {
             ) : (
               <div className="flex-1 pr-8 ml-28 justify-center items-center">
                 <h1 className="text-4xl font-bold mb-4">b-date</h1>
-                <p className="text-lg text-gray-600 mb-8">Dining hall-themed website for UCLA students</p>
+                <p className="text-lg text-gray-600 mb-8">Dating website for UCLA students</p>
                 <button
                   className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
                   onClick={handleSignUpClick}
@@ -76,8 +76,6 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
     bio: ''
   })
 
-  const {isAuthenticated, getSupabaseClient } = useAuth();
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -95,25 +93,21 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
   };
 
 
-  const handleFormSubmit = async(e) => {
+  const {signUp, getSupabaseClient } = useAuth();
 
-    const supabase = getSupabaseClient();
+  const handleFormSubmit = async(e) => {
 
     e.preventDefault();
 
-    // Add user to supabase authentication
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-    });
-  
-    if (authError) {
-      console.error('Error creating authentication:', authError.message);
-      alert('Error signing up: ' + authError.message);
-      return;
+    // Sign up the user
+    const { success, message } = await signUp(formData.email, formData.password);
+
+    if (!success) {
+        alert(message); // Display error message if sign-up fails
+        return;
     }
-  
-    console.log('Authentication created:', authData);
+
+    console.log('Sign-up successful:', message);
 
    const jsonPayload = {
       "id": formData.username,
@@ -128,7 +122,7 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
     }
 
     try { 
-      const response = await dbPostRequest('/api/v1/users', jsonPayload, handleResponse, isAuthenticated, getSupabaseClient);
+      const response = await dbPostRequest('/api/v1/users', jsonPayload, handleResponse, true, getSupabaseClient);
       if (response) setShowQuizForm(true); // Go to the quiz form only if the request succeeds
       else alert("Please try a different username.");
     }
