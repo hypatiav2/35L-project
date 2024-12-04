@@ -1,6 +1,97 @@
-# 35L-project
+# BDate - the Bruin Blind Date Solution (CS 35L)
 
-*Documentation for each other for now*
+## Overview
+
+This guide provides all the steps you need to set up, initialize, and run the project. The app uses React for the frontend, Go for the backend, and SQLite for the database. 
+
+Before you start, ensure you meet the **Prerequisites** listed below. You'll also need to create a Supabase account to obtain the required API keys and secrets.
+
+---
+
+## Prerequisites
+
+1. **Install Required Software**
+   - [Node.js and npm](https://nodejs.org/) (latest stable version)
+   - [Go](https://golang.org/) (latest stable version)
+   - [SQLite](https://sqlite.org/download.html)
+   - Git (optional, for cloning the repository)
+
+2. **Set Up Supabase**
+   - Create a Supabase account at [supabase.com](https://supabase.com/).
+   - Create a new project and note down your:
+     - `REACT_APP_SUPABASE_URL`
+     - `REACT_APP_SUPABASE_ANON_KEY`
+   - Obtain a `SUPABASE_JWT_SECRET` from your Supabase project settings.
+
+3. **Environment Setup**
+   - Ensure your system has a terminal or shell configured to run Node.js, Go, and SQLite commands.
+
+---
+
+## Project Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/hypatiav2/35L-project
+cd 35L-project
+```
+
+## 2. Install Dependencies
+For the frontend (React):
+
+```bash
+npm install
+```
+This will use the provided package-lock.json to ensure consistent dependency versions.
+
+For the backend (Go): No additional dependencies are needed at this point.
+
+3. Configure Environment Variables
+Create a .env file in both the frontend and backend directories with the following content:
+
+Frontend .env:
+env
+Copy code
+REACT_APP_SUPABASE_URL=<your-supabase-url>
+REACT_APP_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+Backend .env:
+env
+Copy code
+SUPABASE_JWT_SECRET=<your-supabase-jwt-secret>
+Replace <your-supabase-url>, <your-supabase-anon-key>, and <your-supabase-jwt-secret> with the values from your Supabase account.
+
+Running the App
+1. Initialize the SQLite Database
+Navigate to the backend directory:
+
+bash
+Copy code
+cd backend
+Run the database initialization script:
+
+bash
+Copy code
+go run init_db.go
+2. Start the Backend Server
+Run the main Go application:
+
+bash
+Copy code
+go run main.go
+3. Start the Frontend
+Navigate to the frontend directory:
+
+bash
+Copy code
+cd ../frontend
+npm start
+Accessing the App
+Once both the backend and frontend are running:
+
+Open your browser and navigate to http://localhost:3000
+
+
+## Documentation for each other for now*
 
 1. [Frontend](#frontend)
 2. [Backend](#backend)
@@ -11,6 +102,7 @@
 3. [Supabase](#database-(supabase))
    - [Profiles](#public.profiles)
    - [Availability](#public.availability)
+
 
 ## Frontend
 
