@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import bruinpic from "./bruins.jpg"
 import { useAuth } from '../AuthContext';
 import { dbPostRequest } from '../api/db';
-import { get } from 'axios';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -17,10 +16,6 @@ const WelcomePage = () => {
   const handleSignUpClick = () => {
     setShowSignUpForm(true);
   };
-
-  const handleContinueClick = () => {
-    setShowQuizForm(true);
-  }
 
   return (
     <div className="flex flex-col h-screen font-sans">
@@ -64,7 +59,7 @@ const WelcomePage = () => {
         }
 
         <div className="w-1/2 flex justify-center items-center bg-gray-200 h-96">
-            <img src={bruinpic} alt="Description of the image" className="w-full h-full object-cover"/>
+            <img src={bruinpic} alt="Bruin bear" className="w-full h-full object-cover"/>
         </div>
       </div>
     </div>
@@ -132,9 +127,10 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
         console.log(data)
     }
 
-    try {
-      dbPostRequest('/api/v1/users', jsonPayload, handleResponse, isAuthenticated, getSupabaseClient);
-      setShowQuizForm(true); // Navigate to the quiz form
+    try { 
+      const response = await dbPostRequest('/api/v1/users', jsonPayload, handleResponse, isAuthenticated, getSupabaseClient);
+      if (response) setShowQuizForm(true); // Go to the quiz form only if the request succeeds
+      else alert("Please try a different username.");
     }
     catch (err) {
       console.error('Error during sign-up:', err);
@@ -248,7 +244,7 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
 
 
 
-{ /* Ask them to do the quiz right after signing up. They're given the option to take it now or skip. */ }
+/* Ask them to do the quiz right after signing up. They're given the option to take it now or skip. */
 const QuizForm = () => {
   const navigate = useNavigate();
 
