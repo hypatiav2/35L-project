@@ -46,17 +46,12 @@ This will use the provided package-lock.json to ensure consistent dependency ver
 
 
 ### 3. Configure Environment Variables
-Create a .env file in both the frontend and backend directories with the following content:
+Create a .env file in the root directory with the following content:
 
 Frontend .env:
 ```bash
 REACT_APP_SUPABASE_URL=<your-supabase-url>
 REACT_APP_SUPABASE_ANON_KEY=<your-supabase-anon-key>
-```
-
-Backend .env:
-Copy code
-```bash
 SUPABASE_JWT_SECRET=<your-supabase-jwt-secret>
 Replace <your-supabase-url>, <your-supabase-anon-key>, and <your-supabase-jwt-secret> with the values from your Supabase account.
 ```
@@ -89,7 +84,7 @@ Open your browser and navigate to http://localhost:3000
 
 ---
 
-## Documentation for each other for now*
+## Internal Documentation for each other*
 
 1. [Frontend](#frontend)
 2. [Backend](#backend)
