@@ -17,7 +17,7 @@ export default function QuizPage() {
    ["Do you enjoy partying/drinking?", "Never", "Wilding every night"],
    ["How chill are you?", "Not so easygoing", "Easygoing"],
    ["STEM or art?", "Art", "STEM"],
-   ["How would you describe your life currenlty?", "Absolute clownery", "Have life together"],
+   ["How would you describe your life currently?", "Absolute clownery", "Have life together"],
    ["How fast is your response time?", "Several days", "Immediately"],
    ["What do you enjoy doing?", "Watching a movie in bed", "Adventuring in the Alps"]
   ]
