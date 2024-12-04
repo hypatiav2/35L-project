@@ -1,16 +1,48 @@
 import React from 'react';
 import Navbar from '../home/navbar';
 import { useAuth } from '../AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { dbGetRequest, dbPostRequest } from '../api/db';
 
+/**
+ * Profile Page
+ * 
+ * @var {Object} users
+ *   @property {string} id - Unique identifier for the user.
+ *   @property {string} name - Name of the user.
+ *   @property {string} email - Unique email of the user.
+ *   @property {string} bio - Short biography of the user.
+ *   @property {string} vector - Similarity vector for recommendations.
+ *   @property {string} profile_picture - Base64-encoded profile picture string.
+ */
 export default function ProfilePage() {
-    const { logout } = useAuth();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [bio, setBio] = useState('');
-    const [profilePicture, setProfilePicture] = useState(null);
-    const { isAuthenticated, getSupabaseClient } = useAuth();
+    const { logout, isAuthenticated, getSupabaseClient } = useAuth();
+    const [user, setUser] = useState({
+        id: null,
+        name: "",
+        email: "",
+        bio: "",
+        profilePicture: null
+    })
+
+    // load user data on mount
+    useEffect(() => {
+        console.log("loading user info...")
+        dbGetRequest('/users/me', setUser, handleFetchError, isAuthenticated, getSupabaseClient);
+    }, [])
+
+    // update user and display success on post
+    const handlePostUser = (user) => {
+        alert('Profile created successfully!');
+    }
+    // make better error response later?
+    const handlePostError = (error) => {
+        alert(error);
+        alert('Error creating profile. Check the console for details.');
+    };
+    const handleFetchError = (error) => {
+        console.error("Failed to fetch user information on page load:", error);
+    };
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -21,56 +53,50 @@ export default function ProfilePage() {
             return;
         }
 
-        const supabase = getSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        const jwtToken = session?.access_token;
-
-        if (!jwtToken) {
-            alert('Unable to retrieve authentication token. Please log in again.');
-            return;
-        }
-
         // Read the profile picture file as a base64 string
         let profilePictureBase64 = '';
-        if (profilePicture) {
+        if (user.profilePicture) {
             const reader = new FileReader();
-            reader.readAsDataURL(profilePicture);
+            reader.readAsDataURL(user.profilePicture);
             profilePictureBase64 = await new Promise((resolve) => {
                 reader.onload = () => resolve(reader.result.split(',')[1]);
             });
         }
 
         const formData = {
-            name,
-            email,
-            phone,
-            bio,
-            profile_picture: profilePictureBase64,
+            name: user.name,
+            email: user.email,
+            bio: user.bio,
+            profilePicture: profilePictureBase64,
         };
 
         try {
-            const response = await fetch('http://localhost:8080/api/v1/users', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${jwtToken}`, // Use the JWT token
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (response.ok) {
-                const userData = await response.json();
-                console.log('User created:', userData);
-                alert('Profile created successfully!');
-            } else {
-                const errorData = await response.json();
-                console.error('Error creating profile:', errorData);
-                alert('Error creating profile. Check the console for details.');
-            }
+            dbPostRequest('/users', formData, handlePostUser, handlePostError, isAuthenticated, getSupabaseClient)  
         } catch (error) {
             console.error('Unexpected error:', error);
-            alert('Unexpected error occurred. Check the console for details.');
         }
+    };
+
+    const handleSetUser = (value, target) => {
+        let newUser = { ...user };
+        switch(target) {
+            case "name":
+                newUser.name = value;
+                break;
+            case "email":
+                newUser.email = value;
+                break;
+            case "bio":
+                newUser.bio = value;
+                break;
+            case "profile-picture":
+                newUser.profilePicture = value;
+                break;
+            default:
+                console.error("Unexpected target for handleSetUser");
+                break;
+        }
+        setUser(newUser);
     };
 
     return (
@@ -78,15 +104,15 @@ export default function ProfilePage() {
             <Navbar />
             <div className="min-h-screen bg-gray-100 py-8 px-4">
                 <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-                    <h1 className="text-3xl font-bold text-center mb-6 text-gray-700">Profile Page</h1>
+                    <h1 className="text-3xl font-bold text-center mb-6 text-gray-700">Edit Profile</h1>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="flex flex-col">
                             <label htmlFor="name" className="text-gray-600 font-medium mb-2">Name:</label>
                             <input
                                 type="text"
                                 id="name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                value={user.name}
+                                onChange={(e) => handleSetUser(e.target.value, "name")}
                                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
@@ -95,18 +121,8 @@ export default function ProfilePage() {
                             <input
                                 type="email"
                                 id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="phone" className="text-gray-600 font-medium mb-2">Phone Number:</label>
-                            <input
-                                type="tel"
-                                id="phone"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                value={user.email}
+                                onChange={(e) => handleSetUser(e.target.value, "email")}
                                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
@@ -114,8 +130,8 @@ export default function ProfilePage() {
                             <label htmlFor="bio" className="text-gray-600 font-medium mb-2">Bio:</label>
                             <textarea
                                 id="bio"
-                                value={bio}
-                                onChange={(e) => setBio(e.target.value)}
+                                value={user.bio}
+                                onChange={(e) => handleSetUser(e.target.value, "bio")}
                                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 rows="4"
                             />
@@ -126,7 +142,7 @@ export default function ProfilePage() {
                                 type="file"
                                 id="profile-picture"
                                 accept="image/*"
-                                onChange={(e) => setProfilePicture(e.target.files[0])}
+                                onChange={(e) => handleSetUser(e.target.value, "profile-picture")}
                                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>

@@ -41,11 +41,13 @@ function MatchOption({ match }) {
     }
 
     return (
-        <div className="bg-gray-100 border border-gray-300 rounded-lg p-8 max-w-lg mx-auto">
-            <div className="aspect-square bg-gray-300 rounded-md mb-6" style={{ height: '300px', width: '300px' }}></div>
-            <h2 className="mt-4 text-lg font-semibold text-gray-700 text-center">User2 ID: {match.user2_id}</h2>
-            <p className="text-sm text-gray-500 text-center">Later we'll display user name and photo instead</p>
-            <button onClick={scheduleDate} className="mt-6 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-6 py-3 rounded w-full">
+        <div className="bg-gray-100 border border-gray-300 rounded-lg p-8 max-w-lg mx-auto h-full flex flex-col">
+            <div className="mb-auto">
+                <div className="aspect-square bg-gray-300 rounded-md mb-6 mx-auto" style={{ height: '300px', width: '300px' }}></div>
+                <h2 className="mt-4 text-lg font-semibold text-gray-700 text-center">User2 ID: {match.user2_id}</h2>
+                <p className="text-sm text-gray-500 text-center">Later we'll display user name and photo instead</p>
+            </div>
+            <button onClick={scheduleDate} className="mt-6 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-6 py-3 rounded w-full ">
                 Schedule
             </button>
         </div>
@@ -78,6 +80,12 @@ function FindDatePage({ matches }) {
     const [filteredMatches, setFilteredMatches] = useState(matches);
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [isDropdownVisible, setDropdownVisible] = useState(false);
+
+    // force rerender when supplied matches change
+    useEffect(() => {
+        setFilteredMatches(matches);
+        handleApplyClick();
+    }, [matches]);
 
     // apply the current `selectedFilters` to filter out matches
     const handleApplyClick = () => {
@@ -289,9 +297,14 @@ export default function HomePage() {
         function setMatchesData(data) {
             setMatches(data);
         }
+        // BETTER ERROR RESPONSE LATER
+        function setError(error) {
+            console.error("Error occurred while fetching data", error);
+            alert("An unexpected error occurred while fetching data");
+        }
 
-        dbGetRequest('/dates', setDatesData, isAuthenticated, getSupabaseClient);
-        dbGetRequest('/matches', setMatchesData, isAuthenticated, getSupabaseClient);
+        dbGetRequest('/dates', setDatesData, setError, isAuthenticated, getSupabaseClient);
+        dbGetRequest('/matches', setMatchesData, setError, isAuthenticated, getSupabaseClient);
     }, [ isAuthenticated, getSupabaseClient ]);
 
     return (

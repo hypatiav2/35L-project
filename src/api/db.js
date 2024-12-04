@@ -1,4 +1,4 @@
-export async function dbGetRequest(endpoint, setData, isAuthenticated, getSupabaseClient) {
+export async function dbGetRequest(endpoint, setData, setError, isAuthenticated, getSupabaseClient) {
     if (!isAuthenticated) {
         console.log('User is not authenticated');
         return; // Exit early if not authenticated
@@ -23,16 +23,26 @@ export async function dbGetRequest(endpoint, setData, isAuthenticated, getSupaba
             },
         });
 
+        // check for failed request
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Error posting to API:', error);
+
+            if (setError) setError(error.message || 'An error occurred while fetching data.');
+            return;
+        }
+
         const data = await response.json();
-        setData(data); // Set the data after receiving the response
+        if (setData) setData(data); // Set the data after receiving the response
         return data; // Return the data for further usage if needed
     } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('Possible network error:', err);
+        if (setError) setError('Network error. Please check your connection and try again.');
         throw err; // Re-throw error to propagate it if needed
     }
 }
 
-export async function dbPostRequest(endpoint, payload, setData, isAuthenticated, getSupabaseClient) {
+export async function dbPostRequest(endpoint, payload, setData, setError, isAuthenticated, getSupabaseClient) {
     if (!isAuthenticated) {
         console.log('User is not authenticated');
         return; // Exit early if not authenticated
@@ -49,7 +59,7 @@ export async function dbPostRequest(endpoint, payload, setData, isAuthenticated,
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,
@@ -58,11 +68,21 @@ export async function dbPostRequest(endpoint, payload, setData, isAuthenticated,
             body: JSON.stringify(payload),
         });
 
+        // check for failed request
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Error posting to API:', error);
+
+            if (setError) setError(error.message || 'An error occurred while fetching data.');
+            return;
+        }
+
         const data = await response.json();
-        setData(data); // Set the data after receiving the response
+        if (setData) setData(data);
         return data; // Return the data for further usage if needed
     } catch (err) {
-        console.error('Error posting data:', err);
+        console.error('Network error:', err);
+        if (setError) setError('Network error. Please check your connection and try again.');
         throw err; // Re-throw error to propagate it if needed
     }
 }
