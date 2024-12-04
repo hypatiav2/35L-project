@@ -36,7 +36,7 @@ git clone https://github.com/hypatiav2/35L-project
 cd 35L-project
 ```
 
-## 2. Install Dependencies
+### 2. Install Dependencies
 For the frontend (React):
 
 ```bash
@@ -44,52 +44,50 @@ npm install
 ```
 This will use the provided package-lock.json to ensure consistent dependency versions.
 
-For the backend (Go): No additional dependencies are needed at this point.
 
-3. Configure Environment Variables
+### 3. Configure Environment Variables
 Create a .env file in both the frontend and backend directories with the following content:
 
 Frontend .env:
-env
-Copy code
+```bash
 REACT_APP_SUPABASE_URL=<your-supabase-url>
 REACT_APP_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+```
+
 Backend .env:
-env
 Copy code
+```bash
 SUPABASE_JWT_SECRET=<your-supabase-jwt-secret>
 Replace <your-supabase-url>, <your-supabase-anon-key>, and <your-supabase-jwt-secret> with the values from your Supabase account.
-
-Running the App
-1. Initialize the SQLite Database
+```
+## Running the App
+### 1. Initialize the SQLite Database
 Navigate to the backend directory:
-
-bash
-Copy code
+```bash
 cd backend
+```
 Run the database initialization script:
 
-bash
-Copy code
+```bash
 go run init_db.go
-2. Start the Backend Server
+```
+### 2. Start the Backend Server
 Run the main Go application:
-
-bash
-Copy code
+```bash
 go run main.go
-3. Start the Frontend
-Navigate to the frontend directory:
+```
+### 3. Start the Frontend
+Navigate to the root directory:
 
-bash
-Copy code
-cd ../frontend
+```bash
 npm start
-Accessing the App
+```
+## Accessing the App
 Once both the backend and frontend are running:
 
 Open your browser and navigate to http://localhost:3000
 
+---
 
 ## Documentation for each other for now*
 
