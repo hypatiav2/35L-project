@@ -22,13 +22,13 @@ func main() {
 	// load environment vars
 	err := godotenv.Load("../.env")
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Fatalf("Error loading .env file: %w", err)
 	}
 
 	// connection pool to db
 	db, err := sql.Open("sqlite", "./bdate.db")
 	if err != nil {
-		log.Fatalf("Failed to connect to SQLite: %v", err)
+		log.Fatalf("Failed to connect to SQLite: %w", err)
 	}
 	defer db.Close()
 
@@ -58,7 +58,7 @@ func main() {
 	go func() {
 		fmt.Println("Server starting on port 8080")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("HTTP server failed: %v", err)
+			log.Fatalf("HTTP server failed: %w", err)
 		}
 	}()
 
@@ -66,7 +66,7 @@ func main() {
 	<-stop
 	fmt.Println("\nShutting down server...")
 	if err := server.Close(); err != nil {
-		log.Fatalf("Server shutdown failed: %v", err)
+		log.Fatalf("Server shutdown failed: %w", err)
 	}
 	fmt.Println("Server stopped")
 }

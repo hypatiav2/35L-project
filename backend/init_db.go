@@ -21,7 +21,7 @@ func main() {
 		// If file exists, delete it (overwrite it)
 		err := os.Remove(dbPath)
 		if err != nil {
-			log.Fatalf("Failed to delete existing database file: %v", err)
+			log.Fatalf("Failed to delete existing database file: %w", err)
 		}
 		log.Println("Existing database file deleted. Creating a new one...")
 	}
@@ -29,28 +29,28 @@ func main() {
 	// Open the database connection (creates a new file if it doesn't exist)
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
-		log.Fatalf("Failed to connect to SQLite: %v", err)
+		log.Fatalf("Failed to connect to SQLite: %w", err)
 	}
 	defer db.Close()
 
 	// Execute the schema
 	schema, err := ioutil.ReadFile("db/schema.sql")
 	if err != nil {
-		log.Fatalf("Failed to read schema file: %v", err)
+		log.Fatalf("Failed to read schema file: %w", err)
 	}
 	_, err = db.Exec(string(schema))
 	if err != nil {
-		log.Fatalf("Failed to execute schema: %v", err)
+		log.Fatalf("Failed to execute schema: %w", err)
 	}
 
 	// Execute seed data
 	seed, err := ioutil.ReadFile("db/seed.sql")
 	if err != nil {
-		log.Fatalf("Failed to read seed file: %v", err)
+		log.Fatalf("Failed to read seed file: %w", err)
 	}
 	_, err = db.Exec(string(seed))
 	if err != nil {
-		log.Fatalf("Failed to execute seed data: %v", err)
+		log.Fatalf("Failed to execute seed data: %w", err)
 	}
 
 	log.Println("Database and seed data initialized successfully!")

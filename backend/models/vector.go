@@ -15,11 +15,11 @@ func GetUserVector(userID string, db *sql.DB) ([]int, error) {
 	err := db.QueryRow("SELECT vector FROM users WHERE id = ?", userID).Scan(&vectorJSON)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Printf("No user found with ID: %s\n", userID)
+			return nil, fmt.Errorf("no vector found for user: %w", err)
 		} else {
-			fmt.Printf("Error querying user vector: %v\n", err)
+			return nil, fmt.Errorf("error querying user vector: %w", err)
 		}
-		return nil, err
+
 	}
 
 	// turn the string into an array
@@ -42,8 +42,7 @@ func UpdateUserVector(vector []int, userID string, db *sql.DB) error {
 
 	_, err = db.Exec("UPDATE users SET vector = ? WHERE id = ?", vectorJSON, userID)
 	if err != nil {
-		fmt.Printf("Error updating user vector.")
-		return err
+		return fmt.Errorf("failed to convert update user vector: %w", err)
 	}
 
 	return nil
