@@ -8,37 +8,14 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 const AuthContext = createContext();
 
-// fetch data from protected route
-const fetchProtectedData = async (jwtToken) => {
-    try {
-        if (!jwtToken) {
-            throw new Error('No token provided. User may not be authenticated.');
-        }
-        // make request to our dummy protected route
-        const response = await fetch('http://localhost:8080/protected', {
-            method: 'GET',
-            headers: {
-            'Authorization': `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json',
-        },});
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-        // return the response json
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching protected data:', error);
-        return null;
-    }
-};
-
 export function AuthProvider({ children }) {
     const [ isAuthenticated, setIsAuthenticated ] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {        
         supabase.auth.getSession().then(({ data: { session } }) => {
             setIsAuthenticated(!!session)
+            setIsLoading(false);
         })
     }, [])
 
@@ -98,7 +75,7 @@ export function AuthProvider({ children }) {
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, signUp, login, logout, getSupabaseClient }}>
+        <AuthContext.Provider value={{ isAuthenticated, isLoading, signUp, login, logout, getSupabaseClient }}>
             {children}
         </AuthContext.Provider>
     );

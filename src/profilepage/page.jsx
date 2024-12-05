@@ -2,7 +2,8 @@ import React from 'react';
 import Navbar from '../home/navbar';
 import { useAuth } from '../AuthContext';
 import { useState, useEffect } from 'react';
-import { dbGetRequest, dbPostRequest } from '../api/db';
+import { dbGetRequest, dbPatchRequest, dbPostRequest, dbPutRequest } from '../api/db';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Profile Page
@@ -16,7 +17,8 @@ import { dbGetRequest, dbPostRequest } from '../api/db';
  *   @property {string} profile_picture - Base64-encoded profile picture string.
  */
 export default function ProfilePage() {
-    const { logout, isAuthenticated, getSupabaseClient } = useAuth();
+    const { logout, isAuthenticated, isLoading, getSupabaseClient } = useAuth();
+    const navigate = useNavigate();
     const [user, setUser] = useState({
         id: null,
         name: "",
@@ -29,7 +31,11 @@ export default function ProfilePage() {
     useEffect(() => {
         console.log("loading user info...")
         dbGetRequest('/users/me', setUser, handleFetchError, isAuthenticated, getSupabaseClient);
-    }, [])
+    }, [isAuthenticated, getSupabaseClient])
+
+    useEffect(() => {
+        if(!isLoading && !isAuthenticated) navigate("/welcome");
+    }, [isAuthenticated])
 
     // update user and display success on post
     const handlePostUser = (user) => {
@@ -65,13 +71,12 @@ export default function ProfilePage() {
 
         const formData = {
             name: user.name,
-            email: user.email,
             bio: user.bio,
-            profilePicture: profilePictureBase64,
+            profile_picture: profilePictureBase64,
         };
 
         try {
-            dbPostRequest('/users', formData, handlePostUser, handlePostError, isAuthenticated, getSupabaseClient)  
+            dbPatchRequest('/users', formData, handlePostUser, handlePostError, isAuthenticated, getSupabaseClient)  
         } catch (error) {
             console.error('Unexpected error:', error);
         }
@@ -82,9 +87,6 @@ export default function ProfilePage() {
         switch(target) {
             case "name":
                 newUser.name = value;
-                break;
-            case "email":
-                newUser.email = value;
                 break;
             case "bio":
                 newUser.bio = value;
@@ -113,16 +115,6 @@ export default function ProfilePage() {
                                 id="name"
                                 value={user.name}
                                 onChange={(e) => handleSetUser(e.target.value, "name")}
-                                className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="email" className="text-gray-600 font-medium mb-2">Email:</label>
-                            <input
-                                type="email"
-                                id="email"
-                                value={user.email}
-                                onChange={(e) => handleSetUser(e.target.value, "email")}
                                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>

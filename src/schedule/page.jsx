@@ -25,7 +25,7 @@ export default function SchedulePage() {
             }
             setLoading(false);
         }
-        const handleError =  (error) => {
+        const handleError = (error) => {
             console.error("Unable to fetch availability", error)
         }
         dbGetRequest('/availability', setAvailability, handleError, isAuthenticated, getSupabaseClient);

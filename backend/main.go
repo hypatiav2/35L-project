@@ -39,7 +39,7 @@ func main() {
 	// Configure CORS (allowing the React frontend to communicate with the backend)
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"}, // Update with your frontend URL if needed
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	})

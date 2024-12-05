@@ -156,6 +156,60 @@ export async function dbPutRequest(endpoint, payload, setData, setError, isAuthe
     }
 }
 
+export async function dbPatchRequest(endpoint, payload, setData, setError, isAuthenticated, getSupabaseClient) {
+    if (!isAuthenticated) {
+        console.log('User is not authenticated');
+        return; // Exit early if not authenticated
+    }
+
+    const supabase = getSupabaseClient();
+    
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const jwtToken = session?.access_token;
+
+        if (!jwtToken) {
+            console.error('No JWT token available');
+            return;
+        }
+
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        // check for failed request
+        if (!response.ok) {
+            let errorMessage = 'An error occurred while patching data.'; // Default error message
+
+            try {
+                const error = await response.json(); // Attempt to parse JSON error
+                errorMessage = error.message || errorMessage; // Use the error message from the response if available
+            } catch (jsonError) {
+                console.warn("Response is not JSON");
+                errorMessage = `Error: ${response.statusText} (${response.status})`; // Fallback to status text
+            }
+            console.error('Error patching to API:', errorMessage);
+
+            if (setError) setError(errorMessage);
+            return;
+        }
+
+        const data = await response.json();
+        setData(data); // Set the data after receiving the response
+        return;
+    } catch (err) {
+        console.error('Network error:', err);
+        if (setError) setError('Network error. Please check your connection and try again.');
+        return;
+    }
+}
+
+
 export async function dbDeleteRequest(endpoint, payload, setData, setError, isAuthenticated, getSupabaseClient) {
     if (!isAuthenticated) {
         console.log('User is not authenticated');
