@@ -24,18 +24,6 @@ import { dbGetRequest } from '../api/db';
  *   @param {string} availability.end_time - Ending time of the availability in HH:MM:SS format.
  */
 function MatchOption({ match }) {
-    // function formatDateAbbreviated(isoDateString) {
-    //     const date = new Date(isoDateString);
-    
-    //     const options = {
-    //         weekday: 'short',
-    //         month: 'short',
-    //         day: 'numeric'
-    //     };
-    
-    //     const formatter = new Intl.DateTimeFormat('en-US', options);
-    //     return formatter.format(date);
-    // }
     function scheduleDate() {
         alert("not implemented yet!")
     }
@@ -92,7 +80,6 @@ function FindDatePage({ matches }) {
         if (!matches) return;
 
         let filtered = matches;
-        console.log(filtered)
 
         // check if each match contains at least one availability that matches any filter
         if (selectedFilters.length > 0) {
@@ -114,7 +101,6 @@ function FindDatePage({ matches }) {
                 });
             });
         }
-        console.log(filtered)
 
         setFilteredMatches(filtered);
     };
@@ -299,7 +285,6 @@ export default function HomePage() {
         // BETTER ERROR RESPONSE LATER
         function setError(error) {
             console.error("Error occurred while fetching data", error);
-            alert("An unexpected error occurred while fetching data");
         }
 
         dbGetRequest('/dates', setDatesData, setError, isAuthenticated, getSupabaseClient);

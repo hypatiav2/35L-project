@@ -25,10 +25,18 @@ export async function dbGetRequest(endpoint, setData, setError, isAuthenticated,
 
         // check for failed request
         if (!response.ok) {
-            const error = await response.json();
-            console.error('Error posting to API:', error);
+            let errorMessage = 'An error occurred while fetching data.'; // Default error message
 
-            if (setError) setError(error.message || 'An error occurred while fetching data.');
+            try {
+                const error = await response.json(); // Attempt to parse JSON error
+                errorMessage = error.message || errorMessage; // Use the error message from the response if available
+            } catch (jsonError) {
+                console.warn("Response is not JSON");
+                errorMessage = `Error: ${response.statusText} (${response.status})`; // Fallback to status text
+            }
+            console.error('Error posting to API:', errorMessage);
+
+            if (setError) setError(errorMessage);
             return;
         }
 
@@ -38,7 +46,7 @@ export async function dbGetRequest(endpoint, setData, setError, isAuthenticated,
     } catch (err) {
         console.error('Possible network error:', err);
         if (setError) setError('Network error. Please check your connection and try again.');
-        throw err; // Re-throw error to propagate it if needed
+        return;
     }
 }
 
@@ -70,24 +78,32 @@ export async function dbPostRequest(endpoint, payload, setData, setError, isAuth
 
         // check for failed request
         if (!response.ok) {
-            const error = await response.json();
-            console.error('Error posting to API:', error);
+            let errorMessage = 'An error occurred while posting data.'; // Default error message
 
-            if (setError) setError(error.message || 'An error occurred while fetching data.');
+            try {
+                const error = await response.json(); // Attempt to parse JSON error
+                errorMessage = error.message || errorMessage; // Use the error message from the response if available
+            } catch (jsonError) {
+                console.warn("Response is not JSON");
+                errorMessage = `Error: ${response.statusText} (${response.status})`; // Fallback to status text
+            }
+            console.error('Error posting to API:', errorMessage);
+
+            if (setError) setError(errorMessage);
             return;
         }
 
         const data = await response.json();
         if (setData) setData(data);
-        return data; // Return the data for further usage if needed
+        return; // Return the data for further usage if needed
     } catch (err) {
         console.error('Network error:', err);
         if (setError) setError('Network error. Please check your connection and try again.');
-        throw err; // Re-throw error to propagate it if needed
+        return;
     }
 }
 
-export async function dbPutRequest(endpoint, payload, setData, isAuthenticated, getSupabaseClient) {
+export async function dbPutRequest(endpoint, payload, setData, setError, isAuthenticated, getSupabaseClient) {
     if (!isAuthenticated) {
         console.log('User is not authenticated');
         return; // Exit early if not authenticated
@@ -113,16 +129,34 @@ export async function dbPutRequest(endpoint, payload, setData, isAuthenticated, 
             body: JSON.stringify(payload),
         });
 
+        // check for failed request
+        if (!response.ok) {
+            let errorMessage = 'An error occurred while putting data.'; // Default error message
+
+            try {
+                const error = await response.json(); // Attempt to parse JSON error
+                errorMessage = error.message || errorMessage; // Use the error message from the response if available
+            } catch (jsonError) {
+                console.warn("Response is not JSON");
+                errorMessage = `Error: ${response.statusText} (${response.status})`; // Fallback to status text
+            }
+            console.error('Error posting to API:', errorMessage);
+
+            if (setError) setError(errorMessage);
+            return;
+        }
+
         const data = await response.json();
         setData(data); // Set the data after receiving the response
-        return data; // Return the data for further usage if needed
+        return;
     } catch (err) {
-        console.error('Error posting data:', err);
-        throw err; // Re-throw error to propagate it if needed
+        console.error('Network error:', err);
+        if (setError) setError('Network error. Please check your connection and try again.');
+        return;
     }
 }
 
-export async function dbDeleteRequest(endpoint, payload, setData, isAuthenticated, getSupabaseClient) {
+export async function dbDeleteRequest(endpoint, payload, setData, setError, isAuthenticated, getSupabaseClient) {
     if (!isAuthenticated) {
         console.log('User is not authenticated');
         return;
@@ -148,11 +182,29 @@ export async function dbDeleteRequest(endpoint, payload, setData, isAuthenticate
             body: JSON.stringify(payload),
         });
 
+        // check for failed request
+        if (!response.ok) {
+            let errorMessage = 'An error occurred while putting data.'; // Default error message
+
+            try {
+                const error = await response.json(); // Attempt to parse JSON error
+                errorMessage = error.message || errorMessage; // Use the error message from the response if available
+            } catch (jsonError) {
+                console.warn("Response is not JSON");
+                errorMessage = `Error: ${response.statusText} (${response.status})`; // Fallback to status text
+            }
+            console.error('Error posting to API:', errorMessage);
+
+            if (setError) setError(errorMessage);
+            return;
+        }
+
         const data = await response.json();
         setData(data); // Set the data after receiving the response
-        return data; // Return the data for further usage if needed
+        return; // Return the data for further usage if needed
     } catch (err) {
-        console.error('Error deleting data:', err);
-        throw err; // Re-throw error to propagate it if needed
+        console.error('Network error:', err);
+        if (setError) setError('Network error. Please check your connection and try again.');
+        return;
     }
 }

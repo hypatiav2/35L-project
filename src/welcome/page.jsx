@@ -117,11 +117,14 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
 
     function handleResponse(data)
     {
-        console.log(data)
+        console.log(data);
+    }
+    function handleError(error) {
+      console.error("uh oh", error);
     }
 
     try { 
-      const response = await dbPostRequest('/api/v1/users', jsonPayload, handleResponse, true, getSupabaseClient);
+      const response = await dbPostRequest('/api/v1/users', jsonPayload, handleResponse, handleError, true, getSupabaseClient);
       if (response) setShowQuizForm(true); // Go to the quiz form only if the request succeeds
       else alert("Please try a different username.");
     }

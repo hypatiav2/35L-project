@@ -8,8 +8,12 @@ function ViewProfilesPage() {
     const [ profiles, setProfiles ] = useState([]);
     const { isAuthenticated, getSupabaseClient } = useAuth();
 
+    const handleError = (error) => {
+        console.error('erhm we got an error', error)
+    }
+
     useEffect(() => {
-        dbGetRequest('/api/v1/users', setProfiles, isAuthenticated, getSupabaseClient);
+        dbGetRequest('/api/v1/users', setProfiles, handleError, isAuthenticated, getSupabaseClient);
     }, [ isAuthenticated, getSupabaseClient ]);
 
     return (

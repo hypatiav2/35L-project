@@ -37,8 +37,11 @@ export default function QuizPage() {
     {
         console.log(data)
     }
+    function handleError(error) {
+      console.error("booo", error)
+    }
 
-    dbPutRequest('/api/v1/vector', { similarity_vector: scores }, handleResponse, isAuthenticated, getSupabaseClient);
+    dbPutRequest('/api/v1/vector', { similarity_vector: scores }, handleResponse, handleError, isAuthenticated, getSupabaseClient);
 
     navigate('/home');
   };
