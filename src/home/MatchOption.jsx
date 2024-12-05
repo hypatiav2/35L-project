@@ -31,8 +31,31 @@ function RingComponent({ N, size = 60 }) {
     const circumference = 2 * Math.PI * radius; // Circumference of the circle
     const offset = circumference - (percentage / 100) * circumference; // Offset for the filled portion
 
-    // Color based on percentage (from green to yellow)
-    const color = `hsl(${60 + ( N / 100) * 60}, 60%, 50%)`;
+    // Interpolate color based on percentage
+    const getColor = (percentage) => {
+        if (percentage >= 50) {
+            // Between 50% (yellow) and 100% (green)
+            const ratio = (percentage - 50) / 50; // Normalize to [0, 1]
+            return interpolateColor('#e9f030', '#0eb324', ratio);
+        } else {
+            // Between 0% (red) and 50% (yellow)
+            const ratio = percentage / 50; // Normalize to [0, 1]
+            return interpolateColor('#c73222', '#e9f030', ratio);
+        }
+    };
+
+    const interpolateColor = (color1, color2, ratio) => {
+        const hex = (color) =>
+            color.replace('#', '').match(/.{2}/g).map((hex) => parseInt(hex, 16));
+        const [r1, g1, b1] = hex(color1);
+        const [r2, g2, b2] = hex(color2);
+        const r = Math.round(r1 + (r2 - r1) * ratio);
+        const g = Math.round(g1 + (g2 - g1) * ratio);
+        const b = Math.round(b1 + (b2 - b1) * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+    };
+
+    const color = getColor(percentage);
 
     return (
         <svg
@@ -41,6 +64,7 @@ function RingComponent({ N, size = 60 }) {
             viewBox={`0 0 ${size} ${size}`}
             className="mx-auto"
         >
+            {/* Background Circle */}
             <circle
                 cx={size / 2}
                 cy={size / 2}
@@ -49,6 +73,7 @@ function RingComponent({ N, size = 60 }) {
                 strokeWidth={strokeWidth}
                 fill="none"
             />
+            {/* Progress Circle */}
             <circle
                 cx={size / 2}
                 cy={size / 2}
@@ -59,7 +84,12 @@ function RingComponent({ N, size = 60 }) {
                 strokeDashoffset={offset}
                 strokeLinecap="round"
                 fill="none"
+                style={{
+                    transform: `rotate(-90deg)`,
+                    transformOrigin: '50% 50%',
+                }}
             />
+            {/* Percentage Text */}
             <text
                 x="50%"
                 y="50%"
