@@ -15,7 +15,7 @@ export async function dbGetRequest(endpoint, setData, setError, isAuthenticated,
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,
@@ -67,7 +67,7 @@ export async function dbPostRequest(endpoint, payload, setData, setError, isAuth
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,
@@ -120,7 +120,7 @@ export async function dbPutRequest(endpoint, payload, setData, setError, isAuthe
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,
@@ -173,7 +173,7 @@ export async function dbDeleteRequest(endpoint, payload, setData, setError, isAu
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,

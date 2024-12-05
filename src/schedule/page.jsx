@@ -28,7 +28,7 @@ export default function SchedulePage() {
         const handleError =  (error) => {
             console.error("Unable to fetch availability", error)
         }
-        dbGetRequest('/api/v1/availability', setAvailability, handleError, isAuthenticated, getSupabaseClient);
+        dbGetRequest('/availability', setAvailability, handleError, isAuthenticated, getSupabaseClient);
     }, [isAuthenticated, getSupabaseClient]);
 
     const handleMouseDown = (day, time) => {
@@ -82,18 +82,18 @@ export default function SchedulePage() {
         for (let i = 0; i < slotIds.length; i++) {
             const id = slotIds[i];
             const idObj = { id: id };
-            await dbDeleteRequest('/api/v1/availability', idObj, handleResponse, handleError, isAuthenticated, getSupabaseClient);
+            await dbDeleteRequest('/availability', idObj, handleResponse, handleError, isAuthenticated, getSupabaseClient);
         }
         
         for (let i = 0; i < formattedData.length; i++) {
             const slot = formattedData[i];
-            await dbPostRequest('/api/v1/availability', slot, handleResponse, handleError, isAuthenticated, getSupabaseClient);
+            await dbPostRequest('/availability', slot, handleResponse, handleError, isAuthenticated, getSupabaseClient);
         }
 
         // make sure the slot ids reset
         if(slotIds.length > 0)
         {
-            dbGetRequest('/api/v1/availability', (data) => setSlotIds(data.map((slot) => slot.id)), handleError, isAuthenticated, getSupabaseClient);
+            dbGetRequest('/availability', (data) => setSlotIds(data.map((slot) => slot.id)), handleError, isAuthenticated, getSupabaseClient);
         }
     }
 

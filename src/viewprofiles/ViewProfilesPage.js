@@ -13,7 +13,7 @@ function ViewProfilesPage() {
     }
 
     useEffect(() => {
-        dbGetRequest('/api/v1/users', setProfiles, handleError, isAuthenticated, getSupabaseClient);
+        dbGetRequest('/users', setProfiles, handleError, isAuthenticated, getSupabaseClient);
     }, [ isAuthenticated, getSupabaseClient ]);
 
     return (
