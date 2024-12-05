@@ -31,12 +31,26 @@ export function AuthProvider({ children }) {
                 return { success: false, message: error.message };
             }
 
-            console.log('Sign-up successful:', data);
+            
+
+            console.log('Sign-up completed:', data);
+           
             const session = data.session;
             setIsAuthenticated(!!session);
+            
+            if (!session || !session.user) {
+                return { 
+                    success: false,
+                    userID: null,
+                    message: session
+                    ? 'Sign-up completed, but user ID not found!'
+                    : 'Sign-up completed! Please verify your email.',
+                }
+            }
 
             return {
                 success: true,
+                userID: session.user.id,
                 message: session
                     ? 'Sign-up successful! You are logged in.'
                     : 'Sign-up successful! Please verify your email.',

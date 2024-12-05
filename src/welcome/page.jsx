@@ -105,21 +105,22 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
     e.preventDefault();
 
     // Sign up the user
-    const { success, message } = await signUp(formData.email, formData.password);
+    const { success, userID, message } = await signUp(formData.email, formData.password);
 
     if (!success) {
         alert(message); // Display error message if sign-up fails
         return;
     }
 
-    console.log('Sign-up successful:', message);
+    console.log(message);
+   
 
-   const jsonPayload = {
-      "id": formData.email,
+    const jsonPayload = {
+      "id": userID, // retrieve JWT from signup
       "name": formData.firstName + " " + formData.lastName,
       "email": formData.email,
       "bio": formData.bio
-   }
+    }
 
     function handleResponse(data)
     {
@@ -131,7 +132,7 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
       alert('Failed to create user.');
     }
 
-    const response = await dbPostRequest('/users', jsonPayload, handleResponse, handleError, true, getSupabaseClient);
+    await dbPostRequest('/users', jsonPayload, handleResponse, handleError, true, getSupabaseClient);
   };
 
   return (

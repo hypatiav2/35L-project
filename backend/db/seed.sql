@@ -10,21 +10,17 @@ INSERT INTO users (id, name, email, bio, vector) VALUES
 ('1c3d5e7f-89ab-4ced-b610-2d4a8f9c6e2f', 'Charlie', 'charlie@gmail.com', 'Tech enthusiast and gamer', '[1, 2, 1, 3, 3, 2, 4, 3, 4, 5]'),
 ('2f4b6d8c-7a9e-4fbd-aed3-3c6d9b8f7e3d', 'Diana', 'diana@gmail.com', 'Passionate about painting and photography', '[4, 5, 4, 3, 2, 1, 2, 3, 4, 5]'),
 ('3e5c7f9b-8adb-4cef-b731-4e7d9c0f8a1b', 'Eve', 'eve@gmail.com', 'Avid runner and fitness coach', '[5, 4, 4, 4, 3, 4, 2, 3, 5, 4]'),
-('4f6d8b9a-9cbe-4fad-b842-5f9e0d2c8b4a', 'Frank', 'frank@gmail.com', 'Loves traveling and trying new foods', '[1, 2, 3, 2, 3, 2, 1, 2, 3, 4]');
-
--- Adding sample users with placeholder profile pictures
-INSERT INTO users (id, name, email, bio) VALUES
-
-('5g7e9c1b-0daf-4ace-b953-6a0f1e3d9b5c', 'Grace', 'grace@gmail.com', 'Writer and cat lover'),
-('6h8f0a2c-1ebf-4bdf-ba64-7b1f2f4eac6d', 'Hank', 'hank@gmail.com', 'Into woodworking and DIY projects'),
-('7i9g1b3d-2fcg-4acf-bc75-8c2f3g5fbd7e', 'Ivy', 'ivy@gmail.com', 'Enjoys gardening and yoga'),
-('8j0h2c4e-3gdg-4bdf-bd86-9d3f4h6fce8e', 'Jack', 'jack@gmail.com', 'Musician and movie buff'),
-('9k1i3d5f-4hef-4cdf-be97-ad4f5i7gdf9f', 'Kate', 'kate@gmail.com', 'Outdoor adventurer and coffee enthusiast'),
-('10a1b2c3-d4e5-f6g7-h8i9-j0k1l2m3n4o5', 'Liam', 'liam@gmail.com', 'Tech enthusiast and avid gamer'),
-('11b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6', 'Emma', 'emma@gmail.com', 'Yoga instructor and dog lover'),
-('12c3d4e5-f6g7-h8i9-j0k1-l2m3n4o5p6q7', 'Noah', 'noah@gmail.com', 'Travel blogger and photographer'),
-('13d4e5f6-g7h8-i9j0-k1l2-m3n4o5p6q7r8', 'Olivia', 'olivia@gmail.com', 'Food critic and aspiring chef'),
-('14e5f6g7-h8i9-j0k1-l2m3-n4o5p6q7r8s9', 'Ethan', 'ethan@gmail.com', 'Fitness coach and outdoor explorer');
+('4f6d8b9a-9cbe-4fad-b842-5f9e0d2c8b4a', 'Frank', 'frank@gmail.com', 'Loves traveling and trying new foods', '[1, 2, 3, 2, 3, 2, 1, 2, 3, 4]'),
+('5g7e9c1b-0daf-4ace-b953-6a0f1e3d9b5c', 'Grace', 'grace@gmail.com', 'Writer and cat lover', '[1, 2, 3, 2, 1, 1, 2, 3, 2, 1]'),
+('6h8f0a2c-1ebf-4bdf-ba64-7b1f2f4eac6d', 'Hank', 'hank@gmail.com', 'Into woodworking and DIY projects', '[5, 4, 3, 3, 4, 3, 3, 5, 4, 3]'),
+('7i9g1b3d-2fcg-4acf-bc75-8c2f3g5fbd7e', 'Ivy', 'ivy@gmail.com', 'Enjoys gardening and yoga', '[1, 4, 3, 2, 4, 2, 4, 1, 2, 1]'),
+('8j0h2c4e-3gdg-4bdf-bd86-9d3f4h6fce8e', 'Jack', 'jack@gmail.com', 'Musician and movie buff', '[5, 4, 3, 4,3, 5, 5, 5, 1, 5]'),
+('9k1i3d5f-4hef-4cdf-be97-ad4f5i7gdf9f', 'Kate', 'kate@gmail.com', 'Outdoor adventurer and coffee enthusiast', '[1, 1, 2, 2, 1, 1, 4, 4, 2, 3]'),
+('10a1b2c3-d4e5-f6g7-h8i9-j0k1l2m3n4o5', 'Liam', 'liam@gmail.com', 'Tech enthusiast and avid gamer', '[5, 4, 5, 2, 5, 4, 5, 5, 5, 5]'),
+('11b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6', 'Emma', 'emma@gmail.com', 'Yoga instructor and dog lover', '[3, 4, 3, 2, 5, 4, 5, 1, 2, 5]'),
+('12c3d4e5-f6g7-h8i9-j0k1-l2m3n4o5p6q7', 'Noah', 'noah@gmail.com', 'Travel blogger and photographer', '[1, 2, 3, 1, 2, 1, 4, 5, 3, 4]'),
+('13d4e5f6-g7h8-i9j0-k1l2-m3n4o5p6q7r8', 'Olivia', 'olivia@gmail.com', 'Food critic and aspiring chef', '[1, 2, 1, 1, 4, 1, 2, 3, 1, 2]'),
+('14e5f6g7-h8i9-j0k1-l2m3-n4o5p6q7r8s9', 'Ethan', 'ethan@gmail.com', 'Fitness coach and outdoor explorer', '[5, 4, 5, 3, 4, 2, 4, 5, 3, 4]');
 
 
 
