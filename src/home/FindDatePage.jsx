@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import DropdownComponent from './DateSearchDropdown';
 import { dbGetRequest } from '../api/db';
 import { useAuth } from '../AuthContext';
+import defaultpfp from './defaultpfp.png'
 
 /**
  * Match component
@@ -22,23 +23,117 @@ import { useAuth } from '../AuthContext';
  *   @param {string} availability.end_time - Ending time of the availability in HH:MM:SS format.
  */
 function MatchOption({ match }) {
+    const [userProfile, setUserProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { isAuthenticated, getSupabaseClient } = useAuth();
+
+    async function FetchUserProfile(userId, isAuthenticated, getSupabaseClient) {
+        if (!userId) {
+            throw new Error("No userId provided");
+        }
+
+        let userDetails = null;
+        let error = null;
+
+        try {
+            await dbGetRequest(
+                `/users?id=${userId}`, // Endpoint
+                (data) => { userDetails = data; }, // Success callback
+                (err) => { error = err; }, // Error callback
+                isAuthenticated,
+                getSupabaseClient
+            );         
+            for (let i of userDetails) {
+                if (i["id"] === userId) {
+                    console.log("found the user: ", i);
+                    return i;
+                }
+            }
+
+            if (error) {
+                throw new Error(error);
+            }
+
+            return null;
+            
+        } catch (err) {
+            console.error("Error fetching user profile:", err);
+            throw err;
+        }
+    }
+
+    useEffect(() => {
+        async function getUserProfile() {
+            if (!isAuthenticated) {
+                setError("User is not authenticated");
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const profile = await FetchUserProfile(
+                    match.user2_id,
+                    isAuthenticated,
+                    getSupabaseClient
+                );
+                setUserProfile(profile);
+            } catch (err) {
+                console.error("Error fetching user profile:", err);
+                setError("Failed to load user profile");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        getUserProfile();
+    }, [match.user2_id, isAuthenticated, getSupabaseClient]);
+
     function scheduleDate() {
-        alert("not implemented yet!")
+        alert("Not implemented yet!");
     }
 
     return (
         <div className="bg-gray-100 border border-gray-300 rounded-lg p-8 max-w-lg mx-auto h-full flex flex-col">
             <div className="mb-auto">
-                <div className="aspect-square bg-gray-300 rounded-md mb-6 mx-auto" style={{ height: '300px', width: '300px' }}></div>
-                <h2 className="mt-4 text-lg font-semibold text-gray-700 text-center">User2 ID: {match.user2_id}</h2>
-                <p className="text-sm text-gray-500 text-center">Later we'll display user name and photo instead</p>
+                
+                {loading ? (
+                    <p className="text-gray-500 text-center">Loading profile...</p>
+                ) : error ? (
+                    <p className="text-red-500 text-center">{error}</p>
+                ) : (
+                    <div className="flex flex-col items-center">
+                        {/* Profile Picture */}
+                        <div className="h-[300px] w-[300px] rounded-md mb-6">
+                            <img
+                                src={userProfile["profile_picture"] || defaultpfp}
+                                alt={`${userProfile?.name || 'User'}'s profile`}
+                                className="h-full w-full object-cover rounded-md"
+                            />
+                        </div>
+
+                        {/* Name */}
+                        <h2 className="mt-4 text-lg font-semibold text-gray-700 text-center">
+                            {userProfile["name"] || 'Unknown User'}
+                        </h2>
+
+                        {/* Bio */}
+                        <h2 className="mt-4 text-lg text-gray-700 text-center">
+                            {userProfile["bio"] || 'Unknown Bio'}
+                        </h2>
+                    </div>
+                )}
             </div>
-            <button onClick={scheduleDate} className="mt-6 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-6 py-3 rounded w-full ">
+            <button
+                onClick={scheduleDate}
+                className="mt-6 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-6 py-3 rounded w-full"
+            >
                 Schedule
             </button>
         </div>
     );
 }
+
 
 
 
