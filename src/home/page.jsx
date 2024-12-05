@@ -288,9 +288,12 @@ export default function HomePage() {
         function setError(error) {
             console.error("Error occurred while fetching data", error);
         }
-
-        dbGetRequest('/dates', setDatesData, setError, isAuthenticated, getSupabaseClient);
-        dbGetRequest('/matches', setMatchesData, setError, isAuthenticated, getSupabaseClient);
+        const fetchData = async () => {
+            await dbGetRequest('/dates', setDatesData, setError, isAuthenticated, getSupabaseClient);
+            await dbGetRequest('/matches', setMatchesData, setError, isAuthenticated, getSupabaseClient);
+        };
+        fetchData();
+    
     }, [ isAuthenticated, getSupabaseClient ]);
 
     return (
