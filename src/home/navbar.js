@@ -17,24 +17,30 @@ function NavComponent({ link, children }) {
 }
 
 export default function Navbar() {
-    const { logout } = useAuth();
+    const { logout, isLoading, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await logout(); // Try to logout
-            navigate('/login'); // Redirect to login page after logging out
+            navigate('/welcome'); // Redirect to login page after logging out
         } catch (error) {
             console.error('Logout failed:', error);
             alert('An error occurred during logout. Please try again.');
         }
     };
 
+    const redirectHome = () => {
+        if(!isLoading) {
+            isAuthenticated ? navigate("/home") : navigate("/welcome");
+        };
+    };
+
     return (
         <nav className="bg-white text-blue-600 px-6 py-4 shadow-lg">
             <div className="flex justify-between items-center">
                 {/* Logo */}
-                <div className="text-xl font-extrabold text-blue-800">b-date</div>
+                <div className="text-xl font-extrabold text-blue-800 cursor-pointer" onClick={redirectHome}>b-date</div>
 
                 {/* Navigation Links */}
                 <ul className="flex space-x-4">
