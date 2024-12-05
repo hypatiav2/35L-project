@@ -18,6 +18,7 @@ export default function HomePage() {
     const [ view, setView ] = useState('find');
     const [ matches, setMatches ] = useState([]); // potential matches for the user
     const [ dates, setDates ] = useState([]);  // pending and confirmed dates
+    const [ currentUser, setCurrentUser ] = useState([]);  // pending and confirmed dates
     const { isAuthenticated, getSupabaseClient } = useAuth();
     
     // Load dates and matches data on page load
@@ -30,12 +31,16 @@ export default function HomePage() {
         function setMatchesData(data) {
             setMatches(data);
         }
+        function setUser(data) {
+            setCurrentUser(data);
+        }
         // BETTER ERROR RESPONSE LATER
         function setError(error) {
             console.error("Error occurred while fetching data", error);
         }
         const fetchData = async () => {
             await dbGetRequest('/dates', setDatesData, setError, isAuthenticated, getSupabaseClient);
+            await dbGetRequest('/users/me', setUser, setError, isAuthenticated, getSupabaseClient);
             await dbGetRequest('/matches', setMatchesData, setError, isAuthenticated, getSupabaseClient);
         };
         fetchData();
@@ -76,7 +81,7 @@ export default function HomePage() {
                     {view === 'find' ? (
                         <FindDatePage matches={matches} />
                     ) : (
-                        <PendingDatePage dates={dates} />
+                        <PendingDatePage dates={dates} user={ currentUser } />
                     )}
                 </div>
             </div>
