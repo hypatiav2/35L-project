@@ -57,38 +57,20 @@ func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Similarity,
 		}
 	}
 
-	// STEP 3. return a list of sorted matches
-
-	// var sortedMatches []Match
-	// for user2ID, score := range similarityScores {
-	// 	// Create a Match for each user, where User1ID is the current user and User2ID is the other user
-	// 	match := Match{
-	// 		User1ID:    userID,
-	// 		User2ID:    user2ID,
-	// 		Similarity: score,
-	// 	}
-	// 	sortedMatches = append(sortedMatches, match)
-	// }
-
-	// // Sort the vector based on similarity score in descending order
-	// sort.Slice(sortedMatches, func(i, j int) bool {
-	// 	return sortedMatches[i].Similarity > sortedMatches[j].Similarity
-	// })
-
 	return similarityScores, nil
 }
 
 // calculates similarity between two vectors (finds compatibility between two users) by summing the squares of the difference between each quiz answer
 func FindSimilarity(vec1, vec2 []int) float64 {
 	if len(vec1) != len(vec2) {
-        return -1
-    }
+		return -1
+	}
 
-    var squaredDifference float64
+	var squaredDifference float64
 
-    for i := 0; i < len(vec1); i++ {
-        squaredDifference += float64((vec1[i]-vec2[i])*(vec1[i]-vec2[i]))
-    }
+	for i := 0; i < len(vec1); i++ {
+		squaredDifference += float64((vec1[i] - vec2[i]) * (vec1[i] - vec2[i]))
+	}
 
-    return 1-(squaredDifference/160)
+	return 1 - (squaredDifference / 160)
 }

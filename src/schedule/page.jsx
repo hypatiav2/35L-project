@@ -4,16 +4,19 @@ import { useAuth } from '../AuthContext';
 import { dbGetRequest, dbPostRequest, dbDeleteRequest } from '../api/db';
 import { splitSlotIntoIntervals, generateTimeSlots, convertTo12HourFormat, slotComparator, collapseSlots } from './scheduleslots';
 import { Toast } from '../toast';
+import { useNavigate } from 'react-router-dom';
 
-export default function SchedulePage() {
+function SchedulePage() {
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const [selectedSlots, setSelectedSlots] = useState([]);
     const [dragging, setDragging] = useState(false);
     const [loading, setLoading] = useState(true);
     const [slotIds, setSlotIds] = useState([]);
     const [ toastMessage, setToastMessage ] = useState("");
+    const [ isSubmitted, setIsSubmitted ] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const { isAuthenticated, getSupabaseClient } = useAuth();
+    const navigate = useNavigate();
 
     const triggerToast = (message) => {
         setToastMessage(message);
@@ -56,6 +59,15 @@ export default function SchedulePage() {
         setDragging(false);
     };
 
+    const handleToggleSlots = () => {
+        if(selectedSlots?.length !== 0) {
+            console.log(selectedSlots)
+            setSelectedSlots([]);
+        } else {
+            setSelectedSlots(generateAllTimes());
+        }
+    }
+
     const toggleSlot = (day, time) => {
         const slotKey = `${day}-${time}`;
     
@@ -75,6 +87,7 @@ export default function SchedulePage() {
 
     async function submitAvailability()
     {
+        setIsSubmitted(true);
         const collapsedSlots = collapseSlots(selectedSlots);
         const formattedData = collapsedSlots.map(slot => {    
             return {
@@ -118,7 +131,37 @@ export default function SchedulePage() {
             <Navbar />
             <div className="p-6 space-y-6 flex flex-col items-center">
                 <h1 className="text-2xl font-bold text-center">Select Time Slots</h1>
-                <button className="btn btn-sm shadow-sm px-8 w-[50%] h-[40px] rounded-lg bg-blue-700 border-none text-white hover:bg-blue-300" onClick={submitAvailability}>Submit Availability</button>
+                {isSubmitted ? 
+                    <div className="flex space-x-4 w-[50%]">
+                        <button 
+                            className="flex-1 btn btn-sm shadow-sm px-8 h-[40px] rounded-lg bg-blue-700 border-none text-white hover:bg-blue-300" 
+                            onClick={() => navigate('/home')}
+                        >
+                                Return Home
+                        </button>
+                        <button 
+                            className="flex-2 btn btn-smshadow-sm px-8 h-[40px] rounded-lg bg-gray-200 border-none text-red-800 font-semibold hover:bg-gray-300" 
+                            onClick={() => setIsSubmitted(false)}
+                        >
+                                Edit
+                        </button>
+                    </div>
+                :
+                    <div className="flex space-x-4 w-[50%]">
+                        <button 
+                            className="flex-1 btn btn-sm shadow-sm px-8 h-[40px] rounded-lg bg-blue-700 border-none text-white hover:bg-blue-300" 
+                            onClick={submitAvailability}
+                        >
+                                Submit Availability
+                        </button>
+                        <button 
+                            className="flex-2 btn btn-smshadow-sm px-8 h-[40px] rounded-lg bg-gray-200 border-none text-red-800 font-semibold hover:bg-gray-300" 
+                            onClick={handleToggleSlots}
+                        >
+                                {selectedSlots?.length === 0 ? "Fill" : "Clear"}
+                        </button>
+                    </div>
+                }
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="text-gray-600 text-lg font-semibold">Loading availability...</div>
@@ -163,3 +206,25 @@ export default function SchedulePage() {
         </div>
     );
 }
+
+function generateAllTimes() {
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const startTime = 9 * 60; // 9:00 
+    const endTime = 22 * 60 + 30; // 22:30
+    const interval = 30; // 30 min
+
+    const times = [];
+
+    days.forEach(day => {
+        for (let minutes = startTime; minutes <= endTime; minutes += interval) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            const timeString = `${day}-${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+            times.push(timeString);
+        }
+    });
+
+    return times;
+}
+
+export default SchedulePage;

@@ -69,36 +69,41 @@ export default function QuizPage() {
             <Navbar />
             <div className="min-h-screen py-8 px-4">
             <h1 className="text-2xl font-bold text-center mb-6 text-gray-800 max-w-2xl mx-auto p-4">Compatibility Quiz</h1>
-            <h1 className="text-lg text-gray-600 mb-8 text-center max-w-3xl mx-auto">Our quiz has ten questions designed to assess your values and strengths. We use the results to match you with people whose results suggest a high compatibility score with you. </h1>
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((value) => (
-                    <Question key={`question${value}-${resetKey}`}  name={value} contents={contents[value]} onChange={handleScoreChange}/>
-                ))}
-                <div className="flex justify-center py-8">
-                    {isSubmitted ? 
-                    (<div className="flex space-x-4">
-                        <button
-                            className="text-blue-600 font-semibold border border-blue-600 px-4 py-2 hover:text-white hover:bg-blue-600 rounded transition"
-                            onClick={handleRedirect}
-                        >
-                            {redirectType === 'onboarding' ? "Continue" : "Go Home"}
-                        </button>
-                        <button
-                            className="text-gray-600 font-bold border border-white px-4 py-2 hover:text-red-700 hover:border-gray-500 rounded transition"
-                            onClick={handleReset}
-                        >
-                            Retake
-                        </button>
-                    </div>) : (
+            {!isSubmitted ? <div>
+                <h1 className="text-lg text-gray-600 mb-8 text-center max-w-3xl mx-auto">Our quiz has ten questions designed to assess your values and strengths. We use the results to match you with people whose results suggest a high compatibility score with you. </h1>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((value) => (
+                        <Question key={`question${value}-${resetKey}`}  name={value} contents={contents[value]} onChange={handleScoreChange}/>
+                    ))}
+                    <div className="flex justify-center py-4">
                         <button
                             type="submit"
+                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                             className="text-blue-600 font-semibold border border-blue-600 px-4 py-2 hover:text-white hover:bg-blue-600 rounded transition"
                         >
                             Submit
                         </button>
-                    )}
+                    </div>
+                </form>
                 </div>
-            </form>
+            : 
+            <div>
+                <h1 className="text-lg text-gray-600 mb-8 text-center max-w-3xl mx-auto">Thank you for taking our quiz! Your preferences have been uploaded.</h1>
+                <div className="flex justify-center py-8  space-x-4">
+                    <button
+                        className="text-blue-600 font-semibold border border-blue-600 px-4 py-2 hover:text-white hover:bg-blue-600 rounded transition"
+                        onClick={handleRedirect}
+                    >
+                        {redirectType === 'onboarding' ? "Continue" : "Go Home"}
+                    </button>
+                    <button
+                        className="text-gray-600 font-bold border border-white px-4 py-2 hover:text-red-700 hover:border-gray-500 rounded transition"
+                        onClick={handleReset}
+                    >
+                        Retake
+                    </button>
+                </div>
+            </div>}
             </div>
         </div>
     );

@@ -44,10 +44,10 @@ export default function Navbar() {
 
                 {/* Navigation Links */}
                 <ul className="flex space-x-4">
-                    <NavComponent link="/home">Home</NavComponent>
-                    <NavComponent link="/profile">Profile</NavComponent>
+                    <NavComponent link="/home">Home</NavComponent>                    
                     <NavComponent link="/schedule">Schedule</NavComponent>
                     <NavComponent link="/quiz?redirect=home">Quiz</NavComponent>
+                    <NavComponent link="/profile">Profile</NavComponent>
 
                     {/* Logout Button */}
                     <button
