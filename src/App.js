@@ -15,7 +15,6 @@ function App() {
     const { isLoading, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-
     return (
         <Routes>
             <Route path='/welcome' element={<WelcomePage />} />            
