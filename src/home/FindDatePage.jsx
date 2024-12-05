@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import DropdownComponent from './DateSearchDropdown';
+import { dbGetRequest } from '../api/db';
+import { useAuth } from '../AuthContext';
 
 /**
  * Match component
@@ -63,19 +65,21 @@ function MatchOption({ match }) {
  */
 
 function FindDatePage({ matches }) {
+    const { isAuthenticated, getSupabaseClient } = useAuth();
+    const [searchQuery, setSearchQuery] = useState(""); // user search
     const [filteredMatches, setFilteredMatches] = useState([]);
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [isDropdownVisible, setDropdownVisible] = useState(false);
 
-    // force rerender when supplied matches change
+    // force rerender when supplied matches change, or when searchQuery changes
     useEffect(() => {
         if (!matches) return;
         setFilteredMatches(matches);
         handleApplyClick();
-    }, [matches]);
+    }, [matches, searchQuery]);
 
-    // apply the current `selectedFilters` to filter out matches
-    const handleApplyClick = () => {
+    // apply the current `selectedFilters` to filter out matches, and filter by search as well
+    const handleApplyClick = async () => {
         if (!matches) return;
 
         let filtered = matches;
@@ -101,9 +105,37 @@ function FindDatePage({ matches }) {
             });
         }
 
-        setFilteredMatches(filtered);
+        // if there is a search string, filter by search
+        if(searchQuery !== "") {
+            const searchedMatches = await Promise.all(filtered.map(async (match) => {
+                let userName = "";
+                const setUser = (user) => {
+                    if (user) {
+                        console.log("got user", user.name);
+                        userName = user.name;
+                    }
+                };
+        
+                const handleError = (error) => {
+                    console.error("Failed to fetch user's info", error);
+                };
+        
+                await dbGetRequest(`/users/${match.user2_id}`, setUser, handleError, isAuthenticated, getSupabaseClient);
+                
+                console.log(userName.includes(searchQuery));
+                if (userName.toLowerCase().includes(searchQuery.toLowerCase())) {
+                    return match; // keep
+                } else {
+                    return null; // exclude if doesnt match
+                }
+            }));
+            setFilteredMatches(searchedMatches.filter(match => match !== null));
+        } else {
+            setFilteredMatches(filtered);
+        }
     };
 
+    // toggle a filter on or off
     const handleFilterToggle = (filter) => {
         setSelectedFilters((prevFilters) => {
             if (prevFilters.includes(filter)) {
@@ -114,6 +146,7 @@ function FindDatePage({ matches }) {
         });
     };
 
+    // open dropdown menu
     const handleFilterButtonClick = () => {
         setDropdownVisible(!isDropdownVisible);
     };
@@ -130,6 +163,18 @@ function FindDatePage({ matches }) {
                     </svg>
                     Filters
                 </button>
+                <input
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    type="text"
+                    placeholder="Search for somebody..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button 
+                    className="px-4 py-2 text-white bg-gray-500 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1" 
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear Search"
+                >✕</button>  
             </div>
 
             {isDropdownVisible && (

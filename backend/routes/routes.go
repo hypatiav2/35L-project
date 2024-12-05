@@ -16,6 +16,7 @@ func RegisterRoutes(r *mux.Router, db *sql.DB) {
 	// query users table
 	r.HandleFunc("/users", handlers.GetAllUsersHandler).Methods("GET")
 	r.HandleFunc("/users/me", handlers.GetCurrentUserHandler).Methods("GET")
+	r.HandleFunc("/users/{userId}", handlers.GetCurrentUserHandler).Methods("GET")
 	r.HandleFunc("/users", handlers.PostUserHandler).Methods("POST")
 	r.HandleFunc("/users", handlers.PatchUserHandler).Methods("PATCH")
 	r.HandleFunc("/users", handlers.DeleteUserHandler).Methods("DELETE")

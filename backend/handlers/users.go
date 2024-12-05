@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	_ "modernc.org/sqlite" // SQLite driver
 )
 
@@ -54,6 +55,24 @@ func GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch users from the database
 	user, err := models.GetUserByID(userId, db)
+	if err != nil {
+		log.Printf("Failed to retrieve current user: %v\n", err)
+		http.Error(w, "Error getting current user", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with user as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
+func GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
+	vars := mux.Vars(r)
+	userID := vars["userId"]
+
+	// Fetch users from the database
+	user, err := models.GetUserByID(userID, db)
 	if err != nil {
 		log.Printf("Failed to retrieve current user: %v\n", err)
 		http.Error(w, "Error getting current user", http.StatusInternalServerError)
