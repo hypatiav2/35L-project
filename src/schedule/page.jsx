@@ -28,7 +28,7 @@ export default function SchedulePage() {
         const handleError =  (error) => {
             console.error("Unable to fetch availability", error)
         }
-        dbGetRequest('/availability', setAvailability, handleError, isAuthenticated, getSupabaseClient);
+        dbGetRequest('/api/v1/availability', setAvailability, handleError, isAuthenticated, getSupabaseClient);
     }, [isAuthenticated, getSupabaseClient]);
 
     const handleMouseDown = (day, time) => {
