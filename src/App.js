@@ -10,14 +10,22 @@ import ProtectedRoute from './ProtectedRoute';
 import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
 import SchedulePage from './schedule/page';
+import SignUpForm from './welcome/SignupForm';
+import QuizForm from './welcome/QuizForm';
+import SchedulingForm from './welcome/SchedulingForm';
+import WelcomeForm from './welcome/WelcomeForm';
 
 function App() {
     const { isLoading, isAuthenticated } = useAuth();
-    const navigate = useNavigate();
 
     return (
         <Routes>
-            <Route path='/welcome' element={<WelcomePage />} />            
+            <Route path='/welcome' element={<WelcomePage />}>
+                <Route index element={<WelcomeForm />} />
+                <Route path="signup" element={<SignUpForm />} />
+                <Route path="quiz" element={<QuizForm />} />
+                <Route path="scheduling" element={<SchedulingForm />} />
+            </Route>    
             <Route path='/login' element={<LoginPage />} />
             <Route
                 path='/home'
