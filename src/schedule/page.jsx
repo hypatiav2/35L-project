@@ -95,6 +95,8 @@ export default function SchedulePage() {
         {
             dbGetRequest('/availability', (data) => setSlotIds(data.map((slot) => slot.id)), handleError, isAuthenticated, getSupabaseClient);
         }
+
+        console.log("availability submitted successfully")
     }
 
     return (

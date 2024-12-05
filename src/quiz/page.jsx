@@ -41,9 +41,9 @@ export default function QuizPage() {
       console.error("booo", error)
     }
 
-    dbPutRequest('/vector', { similarity_vector: scores }, handleResponse, handleError, isAuthenticated, getSupabaseClient);
+    await dbPutRequest('/vector', { similarity_vector: scores }, handleResponse, handleError, isAuthenticated, getSupabaseClient);
 
-    navigate('/home');
+    //navigate('/home');
   };
 
   return (
