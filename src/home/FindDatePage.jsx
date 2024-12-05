@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import DropdownComponent from './DateSearchDropdown';
 import { dbGetRequest } from '../api/db';
 import { useAuth } from '../AuthContext';
+import defaultpfp from './defaultpfp.png'
 
 /**
  * Match component
@@ -21,24 +22,173 @@ import { useAuth } from '../AuthContext';
  *   @param {string} availability.start_time - Starting time of the availability in HH:MM:SS format.
  *   @param {string} availability.end_time - Ending time of the availability in HH:MM:SS format.
  */
+
+function RingComponent({ N, size = 60 }) {
+    N = Math.round(N * 100);   
+    const percentage = Math.max(0, Math.min(100, N)); // Ensure percentage is between 0 and 100
+    const strokeWidth = size * 0.1; // Adjust stroke width relative to size
+    const radius = (size - strokeWidth) / 2; // Radius of the circle
+    const circumference = 2 * Math.PI * radius; // Circumference of the circle
+    const offset = circumference - (percentage / 100) * circumference; // Offset for the filled portion
+
+    // Color based on percentage (from green to yellow)
+    const color = `hsl(${60 + ( N / 100) * 60}, 60%, 50%)`;
+
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            className="mx-auto"
+        >
+            <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke="lightgray"
+                strokeWidth={strokeWidth}
+                fill="none"
+            />
+            <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke={color}
+                strokeWidth={strokeWidth}
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                strokeLinecap="round"
+                fill="none"
+            />
+            <text
+                x="50%"
+                y="50%"
+                textAnchor="middle"
+                dy="0.3em"
+                fontSize={`${size * 0.25}px`}
+                fill="black"
+            >
+                {N}%
+            </text>
+        </svg>
+    );
+}
+
 function MatchOption({ match }) {
+    const [userProfile, setUserProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { isAuthenticated, getSupabaseClient } = useAuth();
+
+    async function FetchUserProfile(userId, isAuthenticated, getSupabaseClient) {
+        if (!userId) {
+            throw new Error("No userId provided");
+        }
+
+        let userDetails = null;
+        let error = null;
+
+        try {
+            await dbGetRequest(
+                `/users?id=${userId}`,
+                (data) => { userDetails = data; },
+                (err) => { error = err; },
+                isAuthenticated,
+                getSupabaseClient
+            );
+            for (let i of userDetails) {
+                if (i["id"] === userId) {
+                    return i;
+                }
+            }
+
+            if (error) {
+                throw new Error(error);
+            }
+
+            return null;
+
+        } catch (err) {
+            console.error("Error fetching user profile:", err);
+            throw err;
+        }
+    }
+
+    useEffect(() => {
+        async function getUserProfile() {
+            if (!isAuthenticated) {
+                setError("User is not authenticated");
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const profile = await FetchUserProfile(
+                    match.user2_id,
+                    isAuthenticated,
+                    getSupabaseClient
+                );
+                setUserProfile(profile);
+            } catch (err) {
+                console.error("Error fetching user profile:", err);
+                setError("Failed to load user profile");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        getUserProfile();
+    }, [match.user2_id, isAuthenticated, getSupabaseClient]);
+
     function scheduleDate() {
-        alert("not implemented yet!")
+        alert("Not implemented yet!");
     }
 
     return (
-        <div className="bg-gray-100 border border-gray-300 rounded-lg p-8 max-w-lg mx-auto h-full flex flex-col">
-            <div className="mb-auto">
-                <div className="aspect-square bg-gray-300 rounded-md mb-6 mx-auto" style={{ height: '300px', width: '300px' }}></div>
-                <h2 className="mt-4 text-lg font-semibold text-gray-700 text-center">User2 ID: {match.user2_id}</h2>
-                <p className="text-sm text-gray-500 text-center">Later we'll display user name and photo instead</p>
+        <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 flex flex-col items-center justify-between w-[250px] h-[450px]">
+            <div className="flex flex-col items-center space-y-4 mb-auto">
+                {loading ? (
+                    <p className="text-gray-500 text-center">Loading profile...</p>
+                ) : error ? (
+                    <p className="text-red-500 text-center">{error}</p>
+                ) : (
+                    <>
+                        {/* Profile Picture */}
+                        <div className="h-40 w-40 rounded-md overflow-hidden">
+                            <img
+                                src={userProfile?.profile_picture || defaultpfp}
+                                alt={`${userProfile?.name || 'User'}'s profile`}
+                                className="h-full w-full object-cover"
+                            />
+                        </div>
+
+                        {/* Name */}
+                        <h2 className="text-lg font-semibold text-gray-700 text-center">
+                            {userProfile?.name || 'Unknown User'}
+                        </h2>
+
+                        {/* Bio */}
+                        <p className="text-sm text-gray-600 text-center break-words max-h-[80px] overflow-hidden">
+                            {userProfile?.bio || 'No bio available.'}
+                        </p>
+
+                        {/* Compatibility Ring */}
+                        <div className="w-16 h-16">
+                            <RingComponent N={match.similarity_score} />
+                        </div>
+                    </>
+                )}
             </div>
-            <button onClick={scheduleDate} className="mt-6 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-6 py-3 rounded w-full ">
+            <button
+                onClick={scheduleDate}
+                className="bg-blue-600 text-white hover:bg-blue-700 transition px-6 py-3 rounded w-full"
+            >
                 Schedule
             </button>
         </div>
     );
 }
+
 
 
 
