@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { dbPostRequest } from '../api/db';
@@ -6,8 +6,14 @@ import bruinpic from "./bruins.jpg"
 
 const WelcomePage = () => {
   const navigate = useNavigate();
+  const { isLoading, isAuthenticated } = useAuth();
   const [showSignUpForm, setShowSignUpForm] = useState(false);
   const [showQuizForm, setShowQuizForm] = useState(false);
+
+  // navigate to home if user is already authenticated
+  useEffect(() => {
+    if(!isLoading && isAuthenticated) navigate('/home');
+  }, [isLoading, isAuthenticated]);
 
   const handleLoginClick = () => {
     navigate('/login');
