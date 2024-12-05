@@ -1,9 +1,10 @@
 import React from 'react';
 import Navbar from '../home/navbar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { dbPutRequest } from '../api/db';
+import { dbGetRequest, dbPutRequest } from '../api/db';
+import { Toast } from '../toast';
 
 export default function QuizPage() {
     const { isAuthenticated, getSupabaseClient } = useAuth();
@@ -12,8 +13,8 @@ export default function QuizPage() {
     const [searchParams] = useSearchParams();
     const redirectType = searchParams.get('redirect'); // if directed from welcome, go to scheduling next. Else go home
     const [resetKey, setResetKey] = useState(0); // increment to force rerender when reset
-
-
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
     const contents=[
         ["How much do you talk?", "Mute", "Fluent in Yapanese"],
         ["How much do you like your alone time?", "Always with people", "Always alone"],
@@ -26,8 +27,30 @@ export default function QuizPage() {
         ["How fast is your response time?", "Several days", "Immediately"],
         ["What do you enjoy doing?", "Watching a movie in bed", "Adventuring in the Alps"]
     ]
-
     const [scores, setScores] = useState(Array(contents.length).fill(null))
+    const [user, setUser] = useState({
+        similarity_vector: Array(contents.length).fill(null)
+    })
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                await dbGetRequest('/vector', (data) => {
+                    setUser(data);
+                    setScores(data.similarity_vector || Array(contents.length).fill(null));
+                }, handleFetchError, isAuthenticated, getSupabaseClient);
+            } catch (error) {
+                console.error("Failed to fetch user information on page load:", error);
+            }
+        };
+        fetchUserData();
+    }, [isAuthenticated, getSupabaseClient]);
+    
+    
+
+    const handleFetchError = (error) => {
+        console.error("Failed to fetch user information on page load:", error);
+    };
 
     const handleScoreChange = (index, value) => {
         const updatedScores = [...scores];
@@ -48,6 +71,7 @@ export default function QuizPage() {
         }
 
         await dbPutRequest('/vector', { similarity_vector: scores }, handleResponse, handleError, isAuthenticated, getSupabaseClient);
+        triggerToast("Quiz submitted!")
     };
     
     const handleReset = () => {
@@ -56,13 +80,22 @@ export default function QuizPage() {
         setResetKey((prev) => prev + 1);
     }
 
-    const handleRedirect = () => {
+    const handleRedirect = async (e) => {
+        e.preventDefault();
         if(redirectType === 'onboarding') {
             navigate('/welcome/scheduling');
         } else {
             navigate('/home');
         }
     }
+
+    const triggerToast = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        setTimeout(() => {
+            setShowToast(false);
+        }, 3000);
+    };
 
     return (
         <div>
@@ -105,12 +138,17 @@ export default function QuizPage() {
                 </div>
             </div>}
             </div>
+            {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
         </div>
     );
 };
 
 function Question({ name, contents, initialSelected, onChange }) {
     const [selectedValue, setSelectedValue] = useState(initialSelected);
+
+    useEffect(() => {
+        setSelectedValue(initialSelected);
+    }, [initialSelected]);
 
     // update selected before updating parent
     const handleOptionChange = (name, value) => {

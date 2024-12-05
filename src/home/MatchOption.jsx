@@ -230,7 +230,7 @@ function MatchOption({ match, onSchedule }) {
     }
 
     return (
-        <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 flex flex-col items-center w-[250px] h-[550px]">
+        <div className="bg-white-100 border border-gray-300 rounded-lg p-6 flex flex-col items-center w-[250px] h-[550px]">
             <div className="flex flex-col items-center space-y-4 flex-grow">
                 {isLoading ? (
                     <p className="text-gray-500 text-center">Loading profile...</p>
@@ -239,15 +239,19 @@ function MatchOption({ match, onSchedule }) {
                 ) : (
                     <>
                         {/* Profile Picture */}
-                        {!showSchedules &&
-                            <div className="h-40 w-40 rounded-md overflow-hidden">
+                        {!showSchedules && (
+                            <div className="h-40 w-40 rounded-full overflow-hidden">
                                 <img
-                                    src={user?.profile_picture || defaultpfp}
+                                    src={
+                                        user?.profile_picture
+                                            ? `data:image/png;base64,${user.profile_picture}`
+                                            : defaultpfp
+                                    }
                                     alt={`${user?.name || 'User'}'s profile`}
                                     className="h-full w-full object-cover"
                                 />
                             </div>
-                        }
+                        )}
 
                         {/* Name */}
                         <h2 className="text-lg font-semibold text-gray-700 text-center">

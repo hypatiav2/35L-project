@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { dbGetRequest, dbPatchRequest } from "../api/db";
 import { useAuth } from "../AuthContext";
 import { Toast } from "../toast";
+import defaultpfp from './defaultpfp.png'
 
 function PendingDateCard({ date, onConfirm, type, currentUserID }) {
     const { date_start, date_end, status } = date;
@@ -38,17 +39,21 @@ function PendingDateCard({ date, onConfirm, type, currentUserID }) {
     return (
         <div className="border border-gray-300 rounded-lg p-4 mb-4 shadow-md">
             <div className="flex items-center gap-4 mb-4">
-                {user?.profile_picture ? (
-                    <img
-                        src={user?.profile_picture}
-                        alt={`${user?.name}'s profile`}
-                        className="w-12 h-12 rounded-full object-cover"
-                    />
-                ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold">
-                        {user?.name[0]}
-                    </div>
-                )}
+                
+
+                <img
+                    src={
+                        user?.profile_picture
+                            ? `data:image/png;base64,${user.profile_picture}`
+                            : defaultpfp
+                    }
+                    alt={`${user?.name || 'User'}'s profile`}
+                    className="w-12 h-12 rounded-full object-cover"
+                />
+
+
+
+
                 <div>
                     <h3 className="text-lg font-semibold">{user?.name}</h3>
                     <p className="text-sm text-gray-600">{user?.bio}</p>
