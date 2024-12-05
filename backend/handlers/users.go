@@ -104,7 +104,6 @@ Return:
 */
 func PostUserHandler(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value(contextkeys.DbContextKey).(*sql.DB)
-
 	// Decode the user from the request body
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -168,6 +167,17 @@ func PatchUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// userID must be the current user
 	user.ID = userID
+
+	// Decode profile picture from base64 (if provided)
+	if user.ProfilePicture != "" {
+		decodedPicture, err := base64.StdEncoding.DecodeString(user.ProfilePicture)
+		if err != nil {
+			log.Printf("Invalid profile picture encoding: %v\n", err)
+			http.Error(w, "Invalid profile picture encoding", http.StatusBadRequest)
+			return
+		}
+		user.ProfilePicture = string(decodedPicture)
+	}
 
 	// Call patchUser to update the user in the database
 	if err := models.PatchUser(user, db); err != nil {

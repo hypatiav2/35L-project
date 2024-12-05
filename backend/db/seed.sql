@@ -4,16 +4,17 @@
 INSERT INTO users (id, name, email, bio, vector) VALUES
 ('afd37871-3445-4162-9de0-8e3bfd144b98', 'Alice', 'admin@gmail.com', 'Loves hiking and reading', '[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]'),
 ('9e2d0dec-fec2-4cab-b742-bad2ea343490', 'Bob', 'admin1@gmail.com', 'Loves nothing', '[5, 2, 3, 2, 5, 5, 5, 4, 3, 3]');
+('721d4cbf-4283-40f3-89d8-e65f5d52fbbf', 'AJK', 'ajkim0630@gmail.com', 'Enjoys coding and coffee', '[2, 4, 3, 1, 2, 3, 5, 3, 4, 2]'),
+('0b0c0bac-6027-4174-a49a-d0c0dddcdce4', 'Bill', 'admin3@gmail.com', 'Loves everything', '[1, 2, 3, 2, 1, 1, 3, 5, 4, 5]'),
+('516a48e3-9838-4534-abd2-8dba40cf87c6', 'Gertrude', 'admin4@gmail.com', 'Loves 35l', '[5, 2, 3, 4, 5, 4, 3, 2, 4, 3]'),
+('1c3d5e7f-89ab-4ced-b610-2d4a8f9c6e2f', 'Charlie', 'charlie@gmail.com', 'Tech enthusiast and gamer', '[1, 2, 1, 3, 3, 2, 4, 3, 4, 5]'),
+('2f4b6d8c-7a9e-4fbd-aed3-3c6d9b8f7e3d', 'Diana', 'diana@gmail.com', 'Passionate about painting and photography', '[4, 5, 4, 3, 2, 1, 2, 3, 4, 5]'),
+('3e5c7f9b-8adb-4cef-b731-4e7d9c0f8a1b', 'Eve', 'eve@gmail.com', 'Avid runner and fitness coach', '[5, 4, 4, 4, 3, 4, 2, 3, 5, 4]'),
+('4f6d8b9a-9cbe-4fad-b842-5f9e0d2c8b4a', 'Frank', 'frank@gmail.com', 'Loves traveling and trying new foods', '[1, 2, 3, 2, 3, 2, 1, 2, 3, 4]');x
 
 -- Adding sample users with placeholder profile pictures
 INSERT INTO users (id, name, email, bio) VALUES
-('721d4cbf-4283-40f3-89d8-e65f5d52fbbf', 'AJK', 'ajkim0630@gmail.com', 'Enjoys coding and coffee'),
-('0b0c0bac-6027-4174-a49a-d0c0dddcdce4', 'Bill', 'admin3@gmail.com', 'Loves everything'),
-('516a48e3-9838-4534-abd2-8dba40cf87c6', 'Gertrude', 'admin4@gmail.com', 'Loves 35l'),
-('1c3d5e7f-89ab-4ced-b610-2d4a8f9c6e2f', 'Charlie', 'charlie@gmail.com', 'Tech enthusiast and gamer'),
-('2f4b6d8c-7a9e-4fbd-aed3-3c6d9b8f7e3d', 'Diana', 'diana@gmail.com', 'Passionate about painting and photography'),
-('3e5c7f9b-8adb-4cef-b731-4e7d9c0f8a1b', 'Eve', 'eve@gmail.com', 'Avid runner and fitness coach'),
-('4f6d8b9a-9cbe-4fad-b842-5f9e0d2c8b4a', 'Frank', 'frank@gmail.com', 'Loves traveling and trying new foods'),
+
 ('5g7e9c1b-0daf-4ace-b953-6a0f1e3d9b5c', 'Grace', 'grace@gmail.com', 'Writer and cat lover'),
 ('6h8f0a2c-1ebf-4bdf-ba64-7b1f2f4eac6d', 'Hank', 'hank@gmail.com', 'Into woodworking and DIY projects'),
 ('7i9g1b3d-2fcg-4acf-bc75-8c2f3g5fbd7e', 'Ivy', 'ivy@gmail.com', 'Enjoys gardening and yoga'),
