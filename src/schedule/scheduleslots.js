@@ -28,7 +28,7 @@ export function splitSlotIntoIntervals(slot) {
 export const generateTimeSlots = () => {
     const slots = [];
     const startHour = 9;
-    const endHour = 23;
+    const endHour = 22;
 
     for (let hour = startHour; hour <= endHour; hour++) {
         for (let minute = 0; minute < 60; minute += 30) {

@@ -166,6 +166,13 @@ func PutAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(availability.StartTime) == 5 { // "HH:MM" length
+		availability.StartTime += ":00"
+	}
+	if len(availability.EndTime) == 5 { // "HH:MM" length
+		availability.EndTime += ":00"
+	}
+
 	// Validate the timeslot data
 	if err := ValidateTimeslot(availability); err != nil {
 		log.Printf("Provided availability is not valid: %v\n", err)
