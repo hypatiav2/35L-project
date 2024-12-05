@@ -27,6 +27,7 @@ function MatchOption({ match }) {
     function scheduleDate() {
         alert("not implemented yet!")
     }
+    useEffect(() => console.log(match), [])
 
     return (
         <div className="bg-gray-100 border border-gray-300 rounded-lg p-8 max-w-lg mx-auto h-full flex flex-col">
@@ -65,12 +66,13 @@ function MatchOption({ match }) {
  */
 
 function FindDatePage({ matches }) {
-    const [filteredMatches, setFilteredMatches] = useState(matches);
+    const [filteredMatches, setFilteredMatches] = useState([]);
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [isDropdownVisible, setDropdownVisible] = useState(false);
 
     // force rerender when supplied matches change
     useEffect(() => {
+        if (!matches) return;
         setFilteredMatches(matches);
         handleApplyClick();
     }, [matches]);
