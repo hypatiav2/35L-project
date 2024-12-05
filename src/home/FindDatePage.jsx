@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import DropdownComponent from './DateSearchDropdown';
-import { dbGetRequest } from '../api/db';
+import { dbGetRequest, dbPostRequest } from '../api/db';
 import { useAuth } from '../AuthContext';
 import defaultpfp from './defaultpfp.png'
+import { Toast } from '../toast';
 
 /**
  * Match component
@@ -74,11 +75,126 @@ function RingComponent({ N, size = 60 }) {
     );
 }
 
-function MatchOption({ match }) {
+async function FetchUserProfile(userId, isAuthenticated, getSupabaseClient) {
+    if (!userId) {
+        throw new Error("No userId provided");
+    }
+
+    let userDetails = null;
+    let error = null;
+
+    try {
+        await dbGetRequest(
+            `/users?id=${userId}`,
+            (data) => { userDetails = data; },
+            (err) => { error = err; },
+            isAuthenticated,
+            getSupabaseClient
+        );
+        for (let i of userDetails) {
+            if (i["id"] === userId) {
+                return i;
+            }
+        }
+
+        if (error) {
+            throw new Error(error);
+        }
+
+        return null;
+
+    } catch (err) {
+        console.error("Error fetching user profile:", err);
+        throw err;
+    }
+}
+
+function convertTo12Hour(time24) {
+    const [hour24, minute] = time24.split(":").map(Number);
+    const ampm = hour24 >= 12 ? "pm" : "am";
+    const hour12 = hour24 % 12 || 12;
+    return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
+}
+
+function MatchOption({ match, onSchedule }) {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const { isLoading, isAuthenticated, getSupabaseClient } = useAuth();
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
+    const [scheduleButtons, setScheduleButtons] = useState([]);
 
+    const triggerToast = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+
+        // Automatically hide the toast after 3 seconds
+        setTimeout(() => {
+            setShowToast(false);
+        }, 3000);
+    };
+
+    useEffect(() => {
+        setScheduleButtons(generateScheduleButtons(match.availabilities || []))
+    }, [])
+
+    function getNextDate(dayOfWeek, time) {
+        const daysOfWeek = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+        ];
+        const now = new Date();
+        const today = now.getDay();
+        const targetDay = daysOfWeek.indexOf(dayOfWeek);
+
+        const daysUntilTarget = (targetDay - today + 7) % 7 || 7;
+        const targetDate = new Date(now);
+        targetDate.setDate(now.getDate() + daysUntilTarget);
+
+        const [hours, minutes] = time.split(":").map(Number);
+        targetDate.setHours(hours, minutes, 0, 0);
+
+        return targetDate.toISOString();
+    }
+
+    function generateScheduleButtons(availabilities) {
+        return availabilities.flatMap((availability) => {
+            const buttons = [];
+            const { day_of_week, start_time, end_time } = availability;
+
+            let [startHour, startMinute] = start_time.split(":").map(Number);
+            let [endHour, endMinute] = end_time.split(":").map(Number);
+
+            let startMinutes = startHour * 60 + startMinute;
+            const endMinutes = endHour * 60 + endMinute;
+
+            while (startMinutes < endMinutes) {
+                const hours = Math.floor(startMinutes / 60);
+                const minutes = startMinutes % 60;
+                const time = `${hours.toString().padStart(2, "0")}:${minutes
+                    .toString()
+                    .padStart(2, "0")}`;
+
+                buttons.push({
+                    time,
+                    day_of_week,
+                    startDate: getNextDate(day_of_week, time),
+                    endDate: getNextDate(day_of_week, `${hours}:${minutes + 30}`),
+                });
+
+                startMinutes += 30;
+            }
+
+            return buttons;
+        });
+    }
+
+    // Fetch user profile
     useEffect(() => {
         if (isLoading) return; // don't load while loading
         if (!isAuthenticated) {
@@ -100,13 +216,24 @@ function MatchOption({ match }) {
         getUserProfile();
     }, [match, isLoading, isAuthenticated, getSupabaseClient]);
 
-    function scheduleDate() {
-        alert("Not implemented yet!");
+    // Schedule a date
+    async function scheduleDate(startDate, endDate) {
+        function handleResponse(data)
+        {
+            console.log(data)
+        }
+        const requestBody = { user2_id: match.user2_id, date_start: startDate, date_end: endDate }
+        await dbPostRequest('/dates', requestBody, handleResponse, handleResponse, isAuthenticated, getSupabaseClient);
+        setScheduleButtons((buttons) =>
+            buttons.filter((btn) => btn.startDate !== startDate)
+        );
+        triggerToast('Date request sent!')
+        onSchedule()
     }
 
     return (
-        <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 flex flex-col items-center justify-between w-[250px] h-[450px]">
-            <div className="flex flex-col items-center space-y-4 mb-auto">
+        <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 flex flex-col items-center justify-between w-[250px] h-[550px]">
+            <div className="flex flex-col items-center space-y-4">
                 {isLoading ? (
                     <p className="text-gray-500 text-center">Loading profile...</p>
                 ) : error ? (
@@ -128,7 +255,7 @@ function MatchOption({ match }) {
                         </h2>
 
                         {/* Bio */}
-                        <p className="text-sm text-gray-600 text-center break-words max-h-[80px] overflow-hidden">
+                        <p className="text-sm text-gray-600 text-center break-words h-[50px] overflow-hidden">
                             {user?.bio || 'No bio available.'}
                         </p>
 
@@ -139,18 +266,21 @@ function MatchOption({ match }) {
                     </>
                 )}
             </div>
-            <button
-                onClick={scheduleDate}
-                className="bg-blue-600 text-white hover:bg-blue-700 transition px-6 py-3 rounded w-full"
-            >
-                Schedule
-            </button>
+            <div className="w-full space-y-2 overflow-auto h-max-[100px] mb-auto">
+                {scheduleButtons.map((button, index) => (
+                    <button
+                        key={index}
+                        onClick={() => scheduleDate(button.startDate, button.endDate)}
+                        className="bg-blue-600 text-white hover:bg-blue-700 transition px-4 py-2 rounded w-full text-sm"
+                    >
+                        {button.day_of_week} at {convertTo12Hour(button.time)}
+                    </button>
+                ))}
+            </div>
+            {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
         </div>
     );
 }
-
-
-
 
 /**
  * Find a Date page
@@ -174,7 +304,7 @@ function MatchOption({ match }) {
  *   @param {string} availability.end_time - Ending time of the availability in HH:MM:SS format.
  */
 
-function FindDatePage({ matches }) {
+function FindDatePage({ matches, reloadDates }) {
     const { isAuthenticated, getSupabaseClient } = useAuth();
     const [searchQuery, setSearchQuery] = useState(""); // user search
     const [filteredMatches, setFilteredMatches] = useState([]);
@@ -294,7 +424,7 @@ function FindDatePage({ matches }) {
                     {filteredMatches.length > 0 ? (
                         filteredMatches.map((match, index) => (
                             <div key={index} className="flex-shrink-0">
-                                <MatchOption match={match} />
+                                <MatchOption match={match} onSchedule={reloadDates} />
                             </div>
                         ))
                     ) : (

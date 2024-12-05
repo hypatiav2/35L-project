@@ -21,12 +21,19 @@ export default function HomePage() {
     const [ currentUser, setCurrentUser ] = useState([]);  // pending and confirmed dates
     const { isAuthenticated, getSupabaseClient } = useAuth();
     
+    function setDatesData(data) {
+        setDates(data);
+    }
+    // BETTER ERROR RESPONSE LATER
+    function setError(error) {
+        console.error("Error occurred while fetching data", error);
+    }
+    async function getDateData()
+    {        
+        await dbGetRequest('/dates', setDatesData, setError, isAuthenticated, getSupabaseClient);
+    }
     // Load dates and matches data on page load
     useEffect(() => {
-        // extracts dates data
-        function setDatesData(data) {
-            setDates(data);
-        }
         // extracts matches data
         function setMatchesData(data) {
             setMatches(data);
@@ -34,12 +41,8 @@ export default function HomePage() {
         function setUser(data) {
             setCurrentUser(data);
         }
-        // BETTER ERROR RESPONSE LATER
-        function setError(error) {
-            console.error("Error occurred while fetching data", error);
-        }
         const fetchData = async () => {
-            await dbGetRequest('/dates', setDatesData, setError, isAuthenticated, getSupabaseClient);
+            await getDateData();
             await dbGetRequest('/users/me', setUser, setError, isAuthenticated, getSupabaseClient);
             await dbGetRequest('/matches', setMatchesData, setError, isAuthenticated, getSupabaseClient);
         };
@@ -79,7 +82,7 @@ export default function HomePage() {
 
                 <div className="mt-4">
                     {view === 'find' ? (
-                        <FindDatePage matches={matches} />
+                        <FindDatePage matches={matches} reloadDates={getDateData} />
                     ) : (
                         <PendingDatePage dates={dates} user={ currentUser } />
                     )}

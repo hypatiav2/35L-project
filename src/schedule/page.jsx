@@ -3,6 +3,7 @@ import Navbar from '../home/navbar';
 import { useAuth } from '../AuthContext';
 import { dbGetRequest, dbPostRequest, dbDeleteRequest } from '../api/db';
 import { splitSlotIntoIntervals, generateTimeSlots, convertTo12HourFormat, slotComparator, collapseSlots } from './scheduleslots';
+import { Toast } from '../toast';
 
 export default function SchedulePage() {
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -10,7 +11,17 @@ export default function SchedulePage() {
     const [dragging, setDragging] = useState(false);
     const [loading, setLoading] = useState(true);
     const [slotIds, setSlotIds] = useState([]);
+    const [ toastMessage, setToastMessage ] = useState("");
+    const [showToast, setShowToast] = useState(false);
     const { isAuthenticated, getSupabaseClient } = useAuth();
+
+    const triggerToast = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        setTimeout(() => {
+            setShowToast(false);
+        }, 3000);
+    };
 
     const timeLabels = generateTimeSlots();
     
@@ -78,6 +89,7 @@ export default function SchedulePage() {
         }
         function handleError(error) {
             console.error("failed to retrieve availability", error)
+            triggerToast('Failed to update availability')
         }
         
         for (let i = 0; i < slotIds.length; i++) {
@@ -98,6 +110,7 @@ export default function SchedulePage() {
         }
 
         console.log("availability submitted successfully")
+        triggerToast('Availability updated!')
     }
 
     return (
@@ -146,6 +159,7 @@ export default function SchedulePage() {
                     </div>
                 )}
             </div>
+            {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
         </div>
     );
 }

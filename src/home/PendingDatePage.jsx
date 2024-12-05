@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { dbGetRequest, dbPatchRequest } from "../api/db";
 import { useAuth } from "../AuthContext";
+import { Toast } from "../toast";
 
 function PendingDateCard({ date, onConfirm, type, currentUserID }) {
     const { date_start, date_end, status } = date;
@@ -85,6 +86,10 @@ function PendingDateCard({ date, onConfirm, type, currentUserID }) {
                     </button>
                 </div>
             )}
+            {
+                type == 'sent' &&
+                <strong>Waiting for { user?.name } to respond...</strong>
+            }
         </div>
     );
 }
@@ -108,17 +113,46 @@ function PendingDateCard({ date, onConfirm, type, currentUserID }) {
  *   - `"rejected"`: The date was rejected by one of the users.
  */
 function PendingDatePage({ dates, user }) {
-    const confirmedDates = dates.filter((date) => date.status === "confirmed");
-    const pendingDates = dates.filter((date) => date.status === "pending" && date.user2_id == user?.id);
-    const sentDates = dates.filter((date) => date.status === "pending" && date.user1_id == user?.id);
+    const [ confirmedDates, setConfirmedDates ] = useState([]);
+    const [ pendingDates, setPendingDates ] = useState([]);
+    const [ sentDates, setSentDates ] = useState([]);
     const { isAuthenticated, getSupabaseClient } = useAuth();
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
+
+    const triggerToast = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        setTimeout(() => {
+            setShowToast(false);
+        }, 3000);
+    };
 
     function confirmDate(dateId, dateStatus)
     {
+        const date = dates.filter((date) => date.id == dateId)[0];
         const dateConfirmation = dateStatus ? 'confirmed' : 'rejected';
         const requestBody = { status: dateConfirmation, id: dateId }
         dbPatchRequest('/dates', requestBody, () => { }, () => { }, isAuthenticated, getSupabaseClient);
+        if (dateStatus)
+        {
+            setConfirmedDates((prevDates) => [ ...prevDates, date ]);
+            triggerToast('Date confirmed!')
+        }
+        else
+        {
+            triggerToast('Date rejected!')
+        }
+        setPendingDates((prevDates) =>
+            prevDates.filter((date) => date.id !== dateId)
+        );
     }
+
+    useState(() => {
+        setConfirmedDates(dates.filter((date) => date.status === "confirmed"))
+        setPendingDates(dates.filter((date) => date.status === "pending" && date.user2_id == user?.id))
+        setSentDates(dates.filter((date) => date.status === "pending" && date.user1_id == user?.id))
+    }, [])
 
     return (
         <div className="p-6 space-y-4">
@@ -158,6 +192,7 @@ function PendingDatePage({ dates, user }) {
                     No pending dates found.
                 </div>
             )}
+            {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
         </div>
     );
 }
