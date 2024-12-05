@@ -239,15 +239,19 @@ function MatchOption({ match, onSchedule }) {
                 ) : (
                     <>
                         {/* Profile Picture */}
-                        {!showSchedules &&
+                        {!showSchedules && (
                             <div className="h-40 w-40 rounded-md overflow-hidden">
                                 <img
-                                    src={user?.profile_picture || defaultpfp}
+                                    src={
+                                        user?.profile_picture
+                                            ? `data:image/png;base64,${user.profile_picture}`
+                                            : defaultpfp
+                                    }
                                     alt={`${user?.name || 'User'}'s profile`}
                                     className="h-full w-full object-cover"
                                 />
                             </div>
-                        }
+                        )}
 
                         {/* Name */}
                         <h2 className="text-lg font-semibold text-gray-700 text-center">
