@@ -40,9 +40,21 @@ export async function dbGetRequest(endpoint, setData, setError, isAuthenticated,
             return;
         }
 
-        const data = await response.json();
-        if (setData) setData(data); // Set the data after receiving the response
-        return data; // Return the data for further usage if needed
+        console.log("here")
+
+        const contentType = response.headers.get('content-type');
+        //check if response is json or not
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setData(data); // Set the data after receiving the response
+        }
+        else {
+            const data = await response.text();
+            setData(data); // Set the data after receiving the response
+        }
+
+        return;
+
     } catch (err) {
         console.error('Possible network error:', err);
         if (setError) setError('Network error. Please check your connection and try again.');
@@ -93,9 +105,19 @@ export async function dbPostRequest(endpoint, payload, setData, setError, isAuth
             return;
         }
 
-        const data = await response.json();
-        if (setData) setData(data);
-        return; // Return the data for further usage if needed
+        const contentType = response.headers.get('content-type');
+        //check if response is json or not
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setData(data); // Set the data after receiving the response
+        }
+        else {
+            const data = await response.text();
+            setData(data); // Set the data after receiving the response
+        }
+
+        return;
+
     } catch (err) {
         console.error('Network error:', err);
         if (setError) setError('Network error. Please check your connection and try again.');
@@ -148,6 +170,7 @@ export async function dbPutRequest(endpoint, payload, setData, setError, isAuthe
         }
 
         const contentType = response.headers.get('content-type');
+        //check if response is json or not
         if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
             setData(data); // Set the data after receiving the response
@@ -210,9 +233,19 @@ export async function dbPatchRequest(endpoint, payload, setData, setError, isAut
             return;
         }
 
-        const data = await response.json();
-        setData(data); // Set the data after receiving the response
+        const contentType = response.headers.get('content-type');
+        //check if response is json or not
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setData(data); // Set the data after receiving the response
+        }
+        else {
+            const data = await response.text();
+            setData(data); // Set the data after receiving the response
+        }
+
         return;
+
     } catch (err) {
         console.error('Network error:', err);
         if (setError) setError('Network error. Please check your connection and try again.');
@@ -264,9 +297,19 @@ export async function dbDeleteRequest(endpoint, payload, setData, setError, isAu
             return;
         }
 
-        const data = await response.json();
-        setData(data); // Set the data after receiving the response
-        return; // Return the data for further usage if needed
+        const contentType = response.headers.get('content-type');
+        //check if response is json or not
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setData(data); // Set the data after receiving the response
+        }
+        else {
+            const data = await response.text();
+            setData(data); // Set the data after receiving the response
+        }
+
+        return;
+
     } catch (err) {
         console.error('Network error:', err);
         if (setError) setError('Network error. Please check your connection and try again.');
