@@ -120,7 +120,7 @@ export async function dbPutRequest(endpoint, payload, setData, setError, isAuthe
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,
@@ -132,6 +132,7 @@ export async function dbPutRequest(endpoint, payload, setData, setError, isAuthe
         // check for failed request
         if (!response.ok) {
             let errorMessage = 'An error occurred while putting data.'; // Default error message
+            console.log("bad response")
 
             try {
                 const error = await response.json(); // Attempt to parse JSON error
@@ -146,10 +147,20 @@ export async function dbPutRequest(endpoint, payload, setData, setError, isAuthe
             return;
         }
 
-        const data = await response.json();
-        setData(data); // Set the data after receiving the response
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setData(data); // Set the data after receiving the response
+        }
+        else {
+            const data = await response.text();
+            setData(data); // Set the data after receiving the response
+        }
+
         return;
+
     } catch (err) {
+        console.log("other error")
         console.error('Network error:', err);
         if (setError) setError('Network error. Please check your connection and try again.');
         return;
@@ -227,7 +238,7 @@ export async function dbDeleteRequest(endpoint, payload, setData, setError, isAu
             return;
         }
 
-        const response = await fetch('http://localhost:8080' + endpoint, {
+        const response = await fetch('http://localhost:8080/api/v1' + endpoint, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${jwtToken}`,
