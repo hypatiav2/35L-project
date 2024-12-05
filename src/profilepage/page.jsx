@@ -92,7 +92,7 @@ export default function ProfilePage() {
                 newUser.bio = value;
                 break;
             case "profile-picture":
-                newUser.profilePicture = value;
+                newUser.profilePicture = value[0];
                 break;
             default:
                 console.error("Unexpected target for handleSetUser");
@@ -134,7 +134,7 @@ export default function ProfilePage() {
                                 type="file"
                                 id="profile-picture"
                                 accept="image/*"
-                                onChange={(e) => handleSetUser(e.target.value, "profile-picture")}
+                                onChange={(e) => handleSetUser(e.target.files, "profile-picture")}
                                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>

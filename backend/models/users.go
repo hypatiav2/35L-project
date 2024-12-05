@@ -106,7 +106,10 @@ func PatchUser(user User, db *sql.DB) error {
 		query += " bio = ?,"
 		args = append(args, user.Bio)
 	}
-
+	if user.ProfilePicture != "" {
+		query += " profile_picture = ?,"
+		args = append(args, user.ProfilePicture)
+	}
 	// If no fields were provided, error
 	if len(args) == 0 {
 		return errors.New("no valid fields to update")
