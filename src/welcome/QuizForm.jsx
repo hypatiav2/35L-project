@@ -9,7 +9,7 @@ const QuizForm = () => {
     }
   
     const handleSkip = (e) => {
-        navigate("/home");
+        navigate('/welcome/scheduling');
     }
   
     return (
