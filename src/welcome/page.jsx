@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import bruinpic from "./bruins.jpg"
 import { useAuth } from '../AuthContext';
 import { dbPostRequest } from '../api/db';
+import bruinpic from "./bruins.jpg"
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -117,21 +117,15 @@ const SignUpForm = ({ showQuizForm, setShowQuizForm }) => {
 
     function handleResponse(data)
     {
-        console.log(data);
+      setShowQuizForm(true)
+      console.log(data);
     }
     function handleError(error) {
-      console.error("uh oh", error);
-    }
-
-    try { 
-      const response = await dbPostRequest('/users', jsonPayload, handleResponse, handleError, true, getSupabaseClient);
-      if (response) setShowQuizForm(true); // Go to the quiz form only if the request succeeds
-      else alert("Please try a different username.");
-    }
-    catch (err) {
-      console.error('Error during sign-up:', err);
+      console.error('Error during sign-up:', error);
       alert('Failed to create user.');
     }
+
+    const response = await dbPostRequest('/users', jsonPayload, handleResponse, handleError, true, getSupabaseClient);
   };
 
   return (

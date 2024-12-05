@@ -177,7 +177,7 @@ function FindDatePage({ matches }) {
 function PendingDatePage({ dates }) {
     const confirmedDates = dates.filter((date) => date.status === "confirmed");
     const pendingDates = dates.filter((date) => date.status === "pending");
-    console.log(dates)
+
 
     return (
         <div className="p-6 space-y-4">

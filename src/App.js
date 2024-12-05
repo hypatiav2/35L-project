@@ -12,7 +12,7 @@ import { AuthProvider, useAuth } from './AuthContext';
 import SchedulePage from './schedule/page';
 
 function App() {
-    const { isAuthenticated } = useAuth();
+    const { isLoading, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
 
@@ -32,7 +32,7 @@ function App() {
             <Route path='/profile' element={<ProfilePage />} />
             <Route path='/quiz' element={<QuizPage />} />
             <Route path='/schedule' element={<SchedulePage />} />
-            <Route path="*" element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />} />
+            <Route path="*" element={<Navigate to={!isLoading && isAuthenticated ? '/home' : '/welcome'} replace />} />
         </Routes>
     );
 }
