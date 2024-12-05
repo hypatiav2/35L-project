@@ -61,11 +61,19 @@ Navigate to the backend directory:
 ```bash
 cd backend
 ```
+
+Ensure the Go module dependencies are set up:
+
+```bash
+go mod tidy
+```
+
 Run the database initialization script:
 
 ```bash
 go run init_db.go
 ```
+
 ### 2. Start the Backend Server
 Run the main Go application:
 ```bash
