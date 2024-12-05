@@ -127,7 +127,6 @@ export default function SchedulePage() {
                                     {timeLabels.map((time, index) => {
                                         const slotKey = `${day}-${time}`;
                                         const isSelected = selectedSlots.includes(slotKey);
-                                        let id;
                                         return (
                                             <div
                                                 key={index}
