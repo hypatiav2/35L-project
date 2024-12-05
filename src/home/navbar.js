@@ -47,7 +47,7 @@ export default function Navbar() {
                     <NavComponent link="/home">Home</NavComponent>
                     <NavComponent link="/profile">Profile</NavComponent>
                     <NavComponent link="/schedule">Schedule</NavComponent>
-                    <NavComponent link="/quiz">Quiz</NavComponent>
+                    <NavComponent link="/quiz?redirect=home">Quiz</NavComponent>
 
                     {/* Logout Button */}
                     <button

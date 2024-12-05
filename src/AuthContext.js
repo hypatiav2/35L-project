@@ -71,8 +71,6 @@ export function AuthProvider({ children }) {
             return false;
         } else {
             console.log('Login successful!')
-            // Try out a protected request to backend! (logging results to console)
-            const jwtToken = data.session.access_token;
             setIsAuthenticated(true);
             return true;
         }
