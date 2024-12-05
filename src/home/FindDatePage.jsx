@@ -75,70 +75,30 @@ function RingComponent({ N, size = 60 }) {
 }
 
 function MatchOption({ match }) {
-    const [userProfile, setUserProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
-    const { isAuthenticated, getSupabaseClient } = useAuth();
-
-    async function FetchUserProfile(userId, isAuthenticated, getSupabaseClient) {
-        if (!userId) {
-            throw new Error("No userId provided");
-        }
-
-        let userDetails = null;
-        let error = null;
-
-        try {
-            await dbGetRequest(
-                `/users?id=${userId}`,
-                (data) => { userDetails = data; },
-                (err) => { error = err; },
-                isAuthenticated,
-                getSupabaseClient
-            );
-            for (let i of userDetails) {
-                if (i["id"] === userId) {
-                    return i;
-                }
-            }
-
-            if (error) {
-                throw new Error(error);
-            }
-
-            return null;
-
-        } catch (err) {
-            console.error("Error fetching user profile:", err);
-            throw err;
-        }
-    }
+    const { isLoading, isAuthenticated, getSupabaseClient } = useAuth();
 
     useEffect(() => {
-        async function getUserProfile() {
-            if (!isAuthenticated) {
-                setError("User is not authenticated");
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const profile = await FetchUserProfile(
-                    match.user2_id,
-                    isAuthenticated,
-                    getSupabaseClient
-                );
-                setUserProfile(profile);
-            } catch (err) {
-                console.error("Error fetching user profile:", err);
-                setError("Failed to load user profile");
-            } finally {
-                setLoading(false);
-            }
+        if (isLoading) return; // don't load while loading
+        if (!isAuthenticated) {
+            setError("User is not authenticated");
+            return;
+        }
+        if(!match.user2_id) {
+            setError("User ID is missing");
+            return;
         }
 
+        const getUserProfile = async () => {
+            await dbGetRequest(
+                `/users/${match.user2_id}`, 
+                setUser, 
+                () => setError("Failed to load user profile"),
+                isAuthenticated, getSupabaseClient);
+        }
         getUserProfile();
-    }, [match.user2_id, isAuthenticated, getSupabaseClient]);
+    }, [match, isLoading, isAuthenticated, getSupabaseClient]);
 
     function scheduleDate() {
         alert("Not implemented yet!");
@@ -147,7 +107,7 @@ function MatchOption({ match }) {
     return (
         <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 flex flex-col items-center justify-between w-[250px] h-[450px]">
             <div className="flex flex-col items-center space-y-4 mb-auto">
-                {loading ? (
+                {isLoading ? (
                     <p className="text-gray-500 text-center">Loading profile...</p>
                 ) : error ? (
                     <p className="text-red-500 text-center">{error}</p>
@@ -156,20 +116,20 @@ function MatchOption({ match }) {
                         {/* Profile Picture */}
                         <div className="h-40 w-40 rounded-md overflow-hidden">
                             <img
-                                src={userProfile?.profile_picture || defaultpfp}
-                                alt={`${userProfile?.name || 'User'}'s profile`}
+                                src={user?.profile_picture || defaultpfp}
+                                alt={`${user?.name || 'User'}'s profile`}
                                 className="h-full w-full object-cover"
                             />
                         </div>
 
                         {/* Name */}
                         <h2 className="text-lg font-semibold text-gray-700 text-center">
-                            {userProfile?.name || 'Unknown User'}
+                            {user?.name || 'Unknown User'}
                         </h2>
 
                         {/* Bio */}
                         <p className="text-sm text-gray-600 text-center break-words max-h-[80px] overflow-hidden">
-                            {userProfile?.bio || 'No bio available.'}
+                            {user?.bio || 'No bio available.'}
                         </p>
 
                         {/* Compatibility Ring */}
@@ -261,7 +221,6 @@ function FindDatePage({ matches }) {
                 let userName = "";
                 const setUser = (user) => {
                     if (user) {
-                        console.log("got user", user.name);
                         userName = user.name;
                     }
                 };
@@ -272,7 +231,6 @@ function FindDatePage({ matches }) {
         
                 await dbGetRequest(`/users/${match.user2_id}`, setUser, handleError, isAuthenticated, getSupabaseClient);
                 
-                console.log(userName.includes(searchQuery));
                 if (userName.toLowerCase().includes(searchQuery.toLowerCase())) {
                     return match; // keep
                 } else {

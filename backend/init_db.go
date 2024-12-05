@@ -14,7 +14,7 @@ Script to initialize our sqlite database. Find a better way of initializing thro
 */
 func main() {
 	// Path to the SQLite database file
-	dbPath := "./bdate.db"
+	dbPath := "./bdatedata.db"
 
 	// Check if the database file already exists
 	if _, err := os.Stat(dbPath); err == nil {
@@ -41,6 +41,12 @@ func main() {
 	_, err = db.Exec(string(schema))
 	if err != nil {
 		log.Fatalf("Failed to execute schema: %w", err)
+	}
+
+	// Switch to Write-Ahead Logging to allow
+	_, err = db.Exec("PRAGMA journal_mode=WAL;")
+	if err != nil {
+		log.Fatalf("Failed to set WAL mode: %v", err)
 	}
 
 	// Execute seed data

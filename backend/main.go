@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// connection pool to db
-	db, err := sql.Open("sqlite", "./bdate.db")
+	db, err := sql.Open("sqlite", "./bdatedata.db")
 	if err != nil {
 		log.Fatalf("Failed to connect to SQLite: %w", err)
 	}
