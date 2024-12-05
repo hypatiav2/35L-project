@@ -28,10 +28,10 @@ const WelcomePage = () => {
 
       {/* Navigation bar */}
 
-      <nav className="flex justify-between px-8 py-4 border-b border-gray-300">
+      <nav className="bg-white text-blue-600 px-6 py-4 shadow-lg flex justify-between items-center">
         <div className="text-xl font-extrabold text-blue-800">b-date</div>
         <div
-          className="text-blue-600 cursor-pointer hover:underline"
+          className="text-gray-600 font-semibold px-4 py-2 hover:text-white hover:bg-blue-600 rounded transition cursor-pointer"
           onClick={handleLoginClick}
         >
           Log In
@@ -52,7 +52,7 @@ const WelcomePage = () => {
             ) : (
               <div className="flex-1 pr-8 ml-28 justify-center items-center">
                 <h1 className="text-4xl font-bold mb-4">b-date</h1>
-                <p className="text-lg text-gray-600 mb-8">Dating website for UCLA students</p>
+                <p className="text-lg text-gray-600 mb-8">A dating website for UCLA students</p>
                 <button
                   className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
                   onClick={handleSignUpClick}

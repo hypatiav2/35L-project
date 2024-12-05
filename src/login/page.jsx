@@ -48,10 +48,10 @@ export default function LoginPage()
 
             {/* Navigation bar */}
 
-            <nav className="flex justify-between px-8 py-4 border-b border-gray-300">
+            <nav className="bg-white text-blue-600 px-6 py-4 shadow-lg flex justify-between items-center0">
                 <div className="text-xl font-extrabold text-blue-800">b-date</div>
                 <div
-                    className="text-blue-600 cursor-pointer hover:underline"
+                    className="text-blue-600 font-semibold px-4 py-2 hover:text-white hover:bg-blue-600 rounded transition cursor-pointer"
                     onClick={handleSignupClick}
                 >
                 Sign Up
