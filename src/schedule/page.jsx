@@ -23,12 +23,13 @@ export default function SchedulePage() {
                 const intervals = data.flatMap(slot => splitSlotIntoIntervals(slot));
                 setSelectedSlots(intervals.sort(slotComparator))
             }
-            setLoading(false);
+            
         }
         const handleError = (error) => {
             console.error("Unable to fetch availability", error)
         }
         dbGetRequest('/availability', setAvailability, handleError, isAuthenticated, getSupabaseClient);
+        setLoading(false);
     }, [isAuthenticated, getSupabaseClient]);
 
     const handleMouseDown = (day, time) => {

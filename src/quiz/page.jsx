@@ -43,7 +43,7 @@ export default function QuizPage() {
 
     await dbPutRequest('/vector', { similarity_vector: scores }, handleResponse, handleError, isAuthenticated, getSupabaseClient);
 
-    //navigate('/home');
+    navigate('/home');
   };
 
   return (
