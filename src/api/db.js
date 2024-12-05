@@ -40,13 +40,11 @@ export async function dbGetRequest(endpoint, setData, setError, isAuthenticated,
             return;
         }
 
-        console.log("here")
-
         const contentType = response.headers.get('content-type');
         //check if response is json or not
         if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
-            setData(data); // Set the data after receiving the response
+            if (data) setData(data); // Set the data after receiving the response
         }
         else {
             const data = await response.text();
@@ -109,7 +107,7 @@ export async function dbPostRequest(endpoint, payload, setData, setError, isAuth
         //check if response is json or not
         if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
-            setData(data); // Set the data after receiving the response
+            if (data) setData(data); // Set the data after receiving the response
         }
         else {
             const data = await response.text();
@@ -173,7 +171,7 @@ export async function dbPutRequest(endpoint, payload, setData, setError, isAuthe
         //check if response is json or not
         if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
-            setData(data); // Set the data after receiving the response
+            if (data) setData(data); // Set the data after receiving the response
         }
         else {
             const data = await response.text();
@@ -237,7 +235,7 @@ export async function dbPatchRequest(endpoint, payload, setData, setError, isAut
         //check if response is json or not
         if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
-            setData(data); // Set the data after receiving the response
+            if (data) setData(data); // Set the data after receiving the response
         }
         else {
             const data = await response.text();
@@ -301,7 +299,7 @@ export async function dbDeleteRequest(endpoint, payload, setData, setError, isAu
         //check if response is json or not
         if (contentType && contentType.includes('application/json')) {
             const data = await response.json();
-            setData(data); // Set the data after receiving the response
+            if (data) setData(data); // Set the data after receiving the response
         }
         else {
             const data = await response.text();
