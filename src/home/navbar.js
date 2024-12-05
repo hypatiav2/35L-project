@@ -23,7 +23,7 @@ export default function Navbar() {
     const handleLogout = async () => {
         try {
             await logout(); // Try to logout
-            navigate('/welcome'); // Redirect to login page after logging out
+            navigate('/login'); // Redirect to login page after logging out
         } catch (error) {
             console.error('Logout failed:', error);
             alert('An error occurred during logout. Please try again.');

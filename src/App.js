@@ -13,31 +13,26 @@ import SchedulePage from './schedule/page';
 
 function App() {
     const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
 
     return (
         <Routes>
-            {/* Public Routes */}
-            <Route path="/welcome" element={<WelcomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-
-            {/* Protected Routes */}
-            {isAuthenticated && (
-                <>
-                    <Route path="/home" element={<HomePage />} />
-                    <Route path="/viewprofiles" element={<ViewProfilesPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/quiz" element={<QuizPage />} />
-                    <Route path="/schedule" element={<SchedulePage />} />
-                </>
-            )}
-
-            {/* Catch-All Route */}
+            <Route path='/welcome' element={<WelcomePage />} />            
+            <Route path='/login' element={<LoginPage />} />
             <Route
-                path="*"
+                path='/home'
                 element={
-                    <Navigate to={isAuthenticated ? "/home" : "/welcome"} replace />
+                    <ProtectedRoute>
+                        <HomePage />
+                    </ProtectedRoute>
                 }
             />
+            <Route path='/viewprofiles' element={<ViewProfilesPage />} />
+            <Route path='/profile' element={<ProfilePage />} />
+            <Route path='/quiz' element={<QuizPage />} />
+            <Route path='/schedule' element={<SchedulePage />} />
+            <Route path="*" element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />} />
         </Routes>
     );
 }
