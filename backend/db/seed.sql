@@ -1,9 +1,13 @@
 -- seed.sql
+
+-- Adding users with set vector values
+INSERT INTO users (id, name, email, bio, vector) VALUES
+('afd37871-3445-4162-9de0-8e3bfd144b98', 'Alice', 'admin@gmail.com', 'Loves hiking and reading', '[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]'),
+('9e2d0dec-fec2-4cab-b742-bad2ea343490', 'Bob', 'admin1@gmail.com', 'Loves nothing', '[5, 2, 3, 2, 5, 5, 5, 4, 3, 3]');
+
 -- Adding sample users with placeholder profile pictures
 INSERT INTO users (id, name, email, bio) VALUES
-('afd37871-3445-4162-9de0-8e3bfd144b98', 'Alice', 'admin@gmail.com', 'Loves hiking and reading'),
 ('721d4cbf-4283-40f3-89d8-e65f5d52fbbf', 'AJK', 'ajkim0630@gmail.com', 'Enjoys coding and coffee'),
-('9e2d0dec-fec2-4cab-b742-bad2ea343490', 'Bob', 'admin2@gmail.com', 'Loves nothing'),
 ('0b0c0bac-6027-4174-a49a-d0c0dddcdce4', 'Bill', 'admin3@gmail.com', 'Loves everything'),
 ('516a48e3-9838-4534-abd2-8dba40cf87c6', 'Gertrude', 'admin4@gmail.com', 'Loves 35l');
 

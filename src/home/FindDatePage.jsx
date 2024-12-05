@@ -22,6 +22,58 @@ import defaultpfp from './defaultpfp.png'
  *   @param {string} availability.start_time - Starting time of the availability in HH:MM:SS format.
  *   @param {string} availability.end_time - Ending time of the availability in HH:MM:SS format.
  */
+
+function RingComponent({ N, size = 60 }) {
+    N = Math.round(N * 100);   
+    const percentage = Math.max(0, Math.min(100, N)); // Ensure percentage is between 0 and 100
+    const strokeWidth = size * 0.1; // Adjust stroke width relative to size
+    const radius = (size - strokeWidth) / 2; // Radius of the circle
+    const circumference = 2 * Math.PI * radius; // Circumference of the circle
+    const offset = circumference - (percentage / 100) * circumference; // Offset for the filled portion
+
+    // Color based on percentage (from green to yellow)
+    const color = `hsl(${60 + ( N / 100) * 60}, 60%, 50%)`;
+
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            className="mx-auto"
+        >
+            <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke="lightgray"
+                strokeWidth={strokeWidth}
+                fill="none"
+            />
+            <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke={color}
+                strokeWidth={strokeWidth}
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                strokeLinecap="round"
+                fill="none"
+            />
+            <text
+                x="50%"
+                y="50%"
+                textAnchor="middle"
+                dy="0.3em"
+                fontSize={`${size * 0.25}px`}
+                fill="black"
+            >
+                {N}%
+            </text>
+        </svg>
+    );
+}
+
 function MatchOption({ match }) {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -38,15 +90,14 @@ function MatchOption({ match }) {
 
         try {
             await dbGetRequest(
-                `/users?id=${userId}`, // Endpoint
-                (data) => { userDetails = data; }, // Success callback
-                (err) => { error = err; }, // Error callback
+                `/users?id=${userId}`,
+                (data) => { userDetails = data; },
+                (err) => { error = err; },
                 isAuthenticated,
                 getSupabaseClient
-            );         
+            );
             for (let i of userDetails) {
                 if (i["id"] === userId) {
-                    console.log("found the user: ", i);
                     return i;
                 }
             }
@@ -56,7 +107,7 @@ function MatchOption({ match }) {
             }
 
             return null;
-            
+
         } catch (err) {
             console.error("Error fetching user profile:", err);
             throw err;
@@ -94,39 +145,43 @@ function MatchOption({ match }) {
     }
 
     return (
-        <div className="bg-gray-100 border border-gray-300 rounded-lg p-8 max-w-lg mx-auto h-full flex flex-col">
-            <div className="mb-auto">
-                
+        <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 flex flex-col items-center justify-between w-[250px] h-[450px]">
+            <div className="flex flex-col items-center space-y-4 mb-auto">
                 {loading ? (
                     <p className="text-gray-500 text-center">Loading profile...</p>
                 ) : error ? (
                     <p className="text-red-500 text-center">{error}</p>
                 ) : (
-                    <div className="flex flex-col items-center">
+                    <>
                         {/* Profile Picture */}
-                        <div className="h-[300px] w-[300px] rounded-md mb-6">
+                        <div className="h-40 w-40 rounded-md overflow-hidden">
                             <img
-                                src={userProfile["profile_picture"] || defaultpfp}
+                                src={userProfile?.profile_picture || defaultpfp}
                                 alt={`${userProfile?.name || 'User'}'s profile`}
-                                className="h-full w-full object-cover rounded-md"
+                                className="h-full w-full object-cover"
                             />
                         </div>
 
                         {/* Name */}
-                        <h2 className="mt-4 text-lg font-semibold text-gray-700 text-center">
-                            {userProfile["name"] || 'Unknown User'}
+                        <h2 className="text-lg font-semibold text-gray-700 text-center">
+                            {userProfile?.name || 'Unknown User'}
                         </h2>
 
                         {/* Bio */}
-                        <h2 className="mt-4 text-lg text-gray-700 text-center">
-                            {userProfile["bio"] || 'Unknown Bio'}
-                        </h2>
-                    </div>
+                        <p className="text-sm text-gray-600 text-center break-words max-h-[80px] overflow-hidden">
+                            {userProfile?.bio || 'No bio available.'}
+                        </p>
+
+                        {/* Compatibility Ring */}
+                        <div className="w-16 h-16">
+                            <RingComponent N={match.similarity_score} />
+                        </div>
+                    </>
                 )}
             </div>
             <button
                 onClick={scheduleDate}
-                className="mt-6 bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-100 px-6 py-3 rounded w-full"
+                className="bg-blue-600 text-white hover:bg-blue-700 transition px-6 py-3 rounded w-full"
             >
                 Schedule
             </button>
