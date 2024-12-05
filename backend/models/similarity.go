@@ -7,7 +7,6 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	"math"
 )
 
 type Similarity struct {
@@ -43,10 +42,10 @@ func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Similarity,
 
 	delete(vectors, userID) // If users also includes the current user
 
-	// STEP 2. calculate similarity for each user: CosineSimilarity
+	// STEP 2. calculate similarity for each user: FindSimilarity
 	var similarityScores []Similarity
 	for user2ID, vector := range vectors {
-		score := CosineSimilarity(currentUserVector, vector)
+		score := FindSimilarity(currentUserVector, vector)
 		if score == -1 {
 			// check for mismatched vectors
 			return nil, fmt.Errorf("found a vector of the wrong length: %d", len(vector))
@@ -79,23 +78,17 @@ func ComputeSimilarity(users []string, userID string, db *sql.DB) ([]Similarity,
 	return similarityScores, nil
 }
 
-// calculates cosine similarity between two vectors (finds compatibility between two users)
-func CosineSimilarity(vec1, vec2 []int) float64 {
+// calculates similarity between two vectors (finds compatibility between two users) by summing the squares of the difference between each quiz answer
+func FindSimilarity(vec1, vec2 []int) float64 {
 	if len(vec1) != len(vec2) {
-		return -1 // Error: mismatched vector lengths
-	}
+        return -1
+    }
 
-	var dotProduct, magnitudeA, magnitudeB float64
-	for i := 0; i < len(vec1); i++ {
-		dotProduct += float64(vec1[i] * vec2[i])
-		magnitudeA += float64(vec1[i] * vec1[i])
-		magnitudeB += float64(vec2[i] * vec2[i])
-	}
+    var squaredDifference float64
 
-	// Avoid division by zero
-	if magnitudeA == 0 || magnitudeB == 0 {
-		return 0
-	}
+    for i := 0; i < len(vec1); i++ {
+        squaredDifference += float64((vec1[i]-vec2[i])*(vec1[i]-vec2[i]))
+    }
 
-	return dotProduct / (math.Sqrt(magnitudeA) * math.Sqrt(magnitudeB))
+    return 1-(squaredDifference/160)
 }

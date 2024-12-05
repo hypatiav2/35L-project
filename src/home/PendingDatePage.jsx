@@ -68,6 +68,9 @@ function PendingDateCard({ date, onConfirm, type, currentUserID }) {
                 <p className="text-sm">
                     <span className="font-semibold">End:</span> {formatTime(date_end)}
                 </p>
+                <p className="text-sm">
+                    <span className="font-semibold">Location:</span> BPlate
+                </p>
             </div>
 
             {type === "pending" && (
