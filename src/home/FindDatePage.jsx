@@ -48,24 +48,34 @@ function FindDatePage({ matches, reloadDates }) {
 
         // check if each match contains at least one availability that matches any filter
         if (selectedFilters.length > 0) {
-            filtered = matches.filter((match) => {
-                return selectedFilters.some((filter) => {
-                    // filter specific days of the week
-                    if (["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].includes(filter.toLowerCase())) {
-                        return match.availabilities.some((availability) => {
-                            return availability.day_of_week.toLowerCase() === filter.toLowerCase();
-                        });
-                    }
-                    //  filter times of day
-                    if (["lunch", "dinner"].includes(filter.toLowerCase())) {
-                        return match.availabilities.some((availability) => {
-                            return isDuringTimeOfDay(availability.start_time, filter.toLowerCase());
-                        });
-                    }
-                    return false;
-                });
-            });
-        }
+            let count = 0
+            // filter by lunch
+            if(selectedFilters.includes("lunch")) {
+                count++;
+                filtered = matches.filter((match) => {
+                    return match.availabilities.some((availability) => {
+                        return isDuringTimeOfDay(availability.start_time, "lunch");
+            })})}
+            // filter by dinner
+            if(selectedFilters.includes("dinner")) {
+                count++;
+                filtered = matches.filter((match) => {
+                    return match.availabilities.some((availability) => {
+                        return isDuringTimeOfDay(availability.start_time, "dinner");
+            })})}
+            //filter by day of week
+            if(selectedFilters?.length > count) {
+                filtered = matches.filter((match) => {
+                    return selectedFilters.some((filter) => {
+                        // filter specific days of the week
+                        if (["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].includes(filter.toLowerCase())) {
+                            return match.availabilities.some((availability) => {
+                                return availability.day_of_week.toLowerCase() === filter.toLowerCase();
+                            });
+                        }
+                        return false;
+            })})}
+        };
 
         // if there is a search string, filter by search
         if(searchQuery !== "") {
