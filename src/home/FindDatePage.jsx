@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DropdownComponent from './DateSearchDropdown';
 import { dbGetRequest } from '../api/db';
 import { useAuth } from '../AuthContext';
@@ -32,6 +32,8 @@ function FindDatePage({ matches, reloadDates }) {
     const [filteredMatches, setFilteredMatches] = useState([]);
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [isDropdownVisible, setDropdownVisible] = useState(false);
+    const dropdownRef = useRef(null);
+    const buttonRef = useRef(null);
 
     // force rerender when supplied matches change, or when searchQuery changes
     useEffect(() => {
@@ -39,6 +41,25 @@ function FindDatePage({ matches, reloadDates }) {
         setFilteredMatches(matches);
         handleApplyClick();
     }, [matches, searchQuery]);
+
+    useEffect(() => {
+        // Close dropdown if clicking outside of it
+        const handleClickOutside = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target) &&
+                buttonRef.current &&
+                !buttonRef.current.contains(event.target)
+            ) {
+                setDropdownVisible(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // apply the current `selectedFilters` to filter out matches, and filter by search as well
     const handleApplyClick = async () => {
@@ -127,7 +148,7 @@ function FindDatePage({ matches, reloadDates }) {
                 <button onClick={handleApplyClick} className="bg-blue-600 text-white px-4 py-2 rounded">
                     Apply
                 </button>
-                <button onClick={handleFilterButtonClick} className="flex items-center border border-gray-300 px-4 py-2 rounded text-gray-700">
+                <button ref={buttonRef} onClick={handleFilterButtonClick} className="flex items-center border border-gray-300 px-4 py-2 rounded text-gray-700">
                     <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6h18M9 6v12M15 6v12" />
                     </svg>
@@ -148,7 +169,7 @@ function FindDatePage({ matches, reloadDates }) {
             </div>
 
             {isDropdownVisible && (
-                <DropdownComponent selectedFilters={selectedFilters} onFilterToggle={handleFilterToggle} />
+                <div ref={dropdownRef}><DropdownComponent selectedFilters={selectedFilters} onFilterToggle={handleFilterToggle} /></div>
             )}
 
             <div className="w-full overflow-x-auto">
