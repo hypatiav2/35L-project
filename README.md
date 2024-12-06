@@ -107,15 +107,21 @@ Open your browser and navigate to http://localhost:3000
 
 ## Frontend
 
-TBD
+### Testing
+
+Run 
+```bash
+npm i 
+```
+and 
+```bash 
+npm start
+```
+to get frontend running. Page mockups to implement can be found on Figma.
 
 ## Backend
 
-> ToDo:  
-> 1. Make init_db not another main function
-> 2. 
-> 3. Implement profile/availability endpoints (POST, DELETE, PUT)
-> 4. tie our user table to real user data, access with real user id
+See `backend/documentation.md` for more detailed documentation on the available API routes, responses, and parameters.
 
 ### Testing
 
@@ -194,18 +200,6 @@ Entry point to our go backend.
 
 Logic for accessing the **profile** table in our Supabase PostgreSQL database. Create handler functions that will be registered to our routes in `routes/routers.go`.  
 
-TBD BY MERYL
-
-**availability.go**  
-
-Logic for accessing the **availability** table in our db.  
-
-IDK
-
-**quiz.go**
-
-We can either have a separate controller file for our quiz logic, or we can put it all in prolile_controller since the reference vector for the quiz score will probably live in the profiles table. TBD BY TIFF
-
 ### Models
 
 Deal with actual data transfer to and from our Supabase SQL db. Use pgx to interact with the db.  
@@ -213,13 +207,12 @@ Deal with actual data transfer to and from our Supabase SQL db. Use pgx to inter
 **profile.go**  
 
 1. Define a `Profile` struct that corresponds to the form of our profiles table in SQL.
-2. `GetProfileByID` NOT IMPLEMENTED. Query our db for the profile corresponding to `userID`, and return a `Profile` struct or error if unsuccessful.  
-3. IMPLEMENT SETTERS  
+2. `GetProfileByID` NOT IMPLEMENTED. Query our db for the profile corresponding to `userID`, and return a `Profile` struct or error if unsuccessful.   
 
 **availability.go**  
 
 1. `GetAvailabilityForUserID` retrieves the availability time slots for a given user. Queries the availability table for a user by their userID and returns a list of time slots in the form of a Availability struct.  
-2. `InsertAvailability` TBD
+2. `PostAvailability` adds a new availability time slot for a given user. Inserts a new record into the availability table using the provided Availability struct. Returns an error if the operation fails.
 
 ## Database (SQLite)
 
