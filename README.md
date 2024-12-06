@@ -2,9 +2,17 @@
 
 ## Overview
 
-This guide provides all the steps you need to set up, initialize, and run the project. The app uses React for the frontend, Go for the backend, and SQLite for the database. 
+This guide provides all the steps you need to set up, initialize, and run BDate. The app uses React for the frontend, Go for the backend, and SQLite for the database. 
 
 Before you start, ensure you meet the **Prerequisites** listed below. You'll also need to create a Supabase account to obtain the required API keys and secrets.
+
+Team Info: Group #33 Tiffany Best Friends
+
+Alexis Kim - @alexisjkim
+Meryl Mathew - @hypatiav2
+Aarush Agte - apaphy
+Tiffany Chen - @t1ffanyc
+Daniel Chen - @dmychen
 
 ---
 
