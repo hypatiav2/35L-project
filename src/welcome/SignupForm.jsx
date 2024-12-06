@@ -2,10 +2,13 @@ import { useState } from "react";
 import { useAuth } from "../AuthContext";
 import { dbPostRequest } from '../api/db';
 import { useNavigate } from "react-router-dom";
+import { Toast } from "../toast";
 
 
 const SignUpForm = () => {
     const {signUp, getSupabaseClient } = useAuth();
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
       firstName: '',
@@ -25,16 +28,35 @@ const SignUpForm = () => {
     };
   
     // profile pic upload
-    const handleFileChange = (e) => {
+    const handleFileChange = async (e) => {
       const file = e.target.files[0];
+      let profile_pictureBase64 = '';
+      if (file) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        profile_pictureBase64 = await new Promise((resolve) => {
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+      })};
+      console.log(profile_pictureBase64);
       setFormData((prev) => ({
         ...prev,
-        profilePicture: file, // Store the selected file
+        profilePicture: profile_pictureBase64, // Store the selected file
       }));
     }; 
+
+    // trigger toast message
+    const triggerToast = (message) => {
+      setToastMessage(message);
+      setShowToast(true);
+
+      // Automatically hide the toast after 3 seconds
+      setTimeout(() => {
+          setShowToast(false);
+      }, 3000);
+    };
   
     // submit new user
-    const handleFormSubmit = async(e) => {
+    const handleFormSubmit = async (e) => {
       e.preventDefault();
   
       // Sign up the user
@@ -42,7 +64,7 @@ const SignUpForm = () => {
   
        // Display error if sign-up fails
       if (!success) {
-        alert(message);
+        triggerToast(message);
         return;
       }
       console.log(message);
@@ -52,7 +74,8 @@ const SignUpForm = () => {
         "id": userID, // retrieve JWT from signup
         "name": formData.firstName + " " + formData.lastName,
         "email": formData.email,
-        "bio": formData.bio
+        "bio": formData.bio,
+        "profile_picture": formData.profilePicture
       }
   
       // redirect to quiz welcome form after successful signup
@@ -134,10 +157,6 @@ const SignUpForm = () => {
               required
           />
   
-  
-  
-  
-  
           {/* Profile Picture Upload */}
           <div>
             <label className="block text-sm font-medium text-black-600 mb-2">
@@ -165,6 +184,7 @@ const SignUpForm = () => {
               Continue
           </button>
         </form>
+        {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
       </div>
     );
   };
