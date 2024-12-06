@@ -8,11 +8,11 @@ Before you start, ensure you meet the **Prerequisites** listed below. You'll als
 
 Team Info: Group #33 Tiffany Best Friends
 
-Alexis Kim - @alexisjkim
-Meryl Mathew - @hypatiav2
-Aarush Agte - apaphy
-Tiffany Chen - @t1ffanyc
-Daniel Chen - @dmychen
+Alexis Kim - @alexisjkim;
+Meryl Mathew - @hypatiav2;
+Aarush Agte - @apaphy;
+Tiffany Chen - @t1ffanyc;
+Daniel Chen - @dmychen;
 
 ---
 
